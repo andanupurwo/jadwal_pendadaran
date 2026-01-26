@@ -14,45 +14,13 @@ let MOCK_DATA = {
     },
     mahasiswa: [],
     libur: [],
-    slots: [
-        // Senin
-        { day: 'Senin', time: '08:30', room: '6.3.A', student: 'Ahmad Fauzi', examiners: ['Dr. Budi, M.Kom', 'Ir. Siti, M.T', 'Prof. Andi, Ph.D'] },
-        { day: 'Senin', time: '08:30', room: '6.3.B', student: 'Siti Nurhaliza', examiners: ['Prof. Andi, Ph.D', 'Dr. Dewi, M.Sc', 'Dr. Hadi, M.Kom'] },
-        { day: 'Senin', time: '10:00', room: '6.3.A', student: 'Budi Santoso', examiners: ['Dr. Agus, M.Kom', 'Drs. Hadi, M.M', 'Ir. Joko, M.Eng'] },
-        { day: 'Senin', time: '10:00', room: '6.3.C', student: 'Dewi Lestari', examiners: ['Dr. Rina, M.T', 'Ir. Joko, M.Eng', 'Dr. Siti, M.Kom'] },
-        { day: 'Senin', time: '11:30', room: '6.3.D', student: 'Eko Prasetyo', examiners: ['Prof. Sari, Ph.D', 'Dr. Tono, M.Kom', 'Dr. Wati, M.Sc'] },
-        { day: 'Senin', time: '13:30', room: '6.3.A', student: 'Fitri Handayani', examiners: ['Dr. Wati, M.Sc', 'Ir. Dedi, M.T', 'Prof. Lina, Ph.D'] },
-        { day: 'Senin', time: '13:30', room: '6.3.E', student: 'Gita Savitri', examiners: ['Dr. Yuni, M.Kom', 'Drs. Rudi, M.M', 'Dr. Ani, M.Sc'] },
-
-        // Selasa
-        { day: 'Selasa', time: '08:30', room: '6.3.B', student: 'Hendra Wijaya', examiners: ['Prof. Lina, Ph.D', 'Dr. Eko, M.T', 'Dr. Susi, M.Kom'] },
-        { day: 'Selasa', time: '08:30', room: '6.3.F', student: 'Indah Permata', examiners: ['Dr. Susi, M.Kom', 'Ir. Budi, M.Eng', 'Prof. Dewi, Ph.D'] },
-        { day: 'Selasa', time: '10:00', room: '6.3.C', student: 'Joko Susilo', examiners: ['Dr. Ani, M.Sc', 'Drs. Tono, M.M', 'Dr. Rina, M.T'] },
-        { day: 'Selasa', time: '11:30', room: '6.3.A', student: 'Kartika Sari', examiners: ['Prof. Dian, Ph.D', 'Dr. Hadi, M.Kom', 'Ir. Agus, M.Eng'] },
-        { day: 'Selasa', time: '11:30', room: '6.3.G', student: 'Lukman Hakim', examiners: ['Dr. Rina, M.T', 'Ir. Agus, M.Eng', 'Dr. Lina, M.T'] },
-
-        // Rabu
-        { day: 'Rabu', time: '08:30', room: '6.3.A', student: 'Maya Angelina', examiners: ['Dr. Siti, M.Kom', 'Drs. Budi, M.M', 'Prof. Andi, Ph.D'] },
-        { day: 'Rabu', time: '08:30', room: '6.3.H', student: 'Nanda Pratama', examiners: ['Prof. Dewi, Ph.D', 'Dr. Joko, M.Sc', 'Dr. Ani, M.Kom'] },
-        { day: 'Rabu', time: '10:00', room: '6.3.D', student: 'Oki Setiawan', examiners: ['Dr. Lina, M.T', 'Ir. Eko, M.Eng', 'Dr. Susi, M.Kom'] },
-        { day: 'Rabu', time: '11:30', room: '6.3.B', student: 'Putri Ayu', examiners: ['Dr. Ani, M.Kom', 'Drs. Hadi, M.M', 'Prof. Sari, Ph.D'] },
-        { day: 'Rabu', time: '13:30', room: '6.3.E', student: 'Ratna Sari', examiners: ['Dr. Dewi, M.Sc', 'Ir. Tono, M.Eng', 'Dr. Budi, M.Kom'] },
-
-        // Kamis
-        { day: 'Kamis', time: '08:30', room: '6.3.C', student: 'Qori Sandika', examiners: ['Prof. Rina, Ph.D', 'Dr. Agus, M.T', 'Ir. Joko, M.Eng'] },
-        { day: 'Kamis', time: '10:00', room: '6.3.A', student: 'Rina Melati', examiners: ['Dr. Susi, M.Kom', 'Ir. Tono, M.Eng', 'Prof. Lina, Ph.D'] },
-        { day: 'Kamis', time: '10:00', room: '6.3.E', student: 'Sandi Permana', examiners: ['Dr. Dian, M.Sc', 'Drs. Budi, M.M', 'Dr. Eko, M.T'] },
-        { day: 'Kamis', time: '11:30', room: '6.3.F', student: 'Tari Wulandari', examiners: ['Prof. Lina, Ph.D', 'Dr. Eko, M.Kom', 'Dr. Hadi, M.Kom'] },
-
-        // Jumat (tidak ada jam 11:30)
-        { day: 'Jumat', time: '08:30', room: '6.3.A', student: 'Umar Bakri', examiners: ['Dr. Ani, M.T', 'Ir. Joko, M.Eng', 'Prof. Siti, Ph.D'] },
-        { day: 'Jumat', time: '08:30', room: '6.3.D', student: 'Vina Panduwinata', examiners: ['Dr. Dewi, M.Kom', 'Drs. Agus, M.M', 'Dr. Rina, M.T'] },
-        { day: 'Jumat', time: '10:00', room: '6.3.B', student: 'Wawan Setiawan', examiners: ['Prof. Siti, Ph.D', 'Dr. Hadi, M.Sc', 'Ir. Budi, M.Eng'] },
-        { day: 'Jumat', time: '13:30', room: '6.3.C', student: 'Xavier Nugroho', examiners: ['Dr. Lina, M.T', 'Ir. Eko, M.Eng', 'Prof. Dewi, Ph.D'] }
-    ]
+    slots: []
 };
 
+// Hapus selectedWeek, kita gabungkan logicnya ke selectedDayComposite
 let currentView = 'home';
+// Format selectedDayComposite: "Minggu 1 - Senin"
+let selectedDayComposite = 'Minggu 1 - Senin';
 let currentDosenTab = 'sdm';
 let sortColumn = null;
 let sortDirection = 'asc';
@@ -452,12 +420,34 @@ window.handleImportFile = (event) => {
 
 const views = {
     home: () => {
-        const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
-        const allTimes = ['08:30', '10:00', '11:30', '13:30'];
+
         const rooms = ['6.3.A', '6.3.B', '6.3.C', '6.3.D', '6.3.E', '6.3.F', '6.3.G', '6.3.H'];
 
-        // State untuk hari yang dipilih (default: Senin)
-        const selectedDay = window.selectedScheduleDay || 'Senin';
+        // Daftar Hari Lengkap (2 Minggu Terakhir Februari 2026)
+        // Minggu 1: 16-20 Feb, Minggu 2: 23-27 Feb
+        const navigationDays = [
+            { label: 'Senin', dateDisplay: '16 Feb', week: 1, id: 'Minggu 1 - Senin' },
+            { label: 'Selasa', dateDisplay: '17 Feb', week: 1, id: 'Minggu 1 - Selasa' },
+            { label: 'Rabu', dateDisplay: '18 Feb', week: 1, id: 'Minggu 1 - Rabu' },
+            { label: 'Kamis', dateDisplay: '19 Feb', week: 1, id: 'Minggu 1 - Kamis' },
+            { label: 'Jumat', dateDisplay: '20 Feb', week: 1, id: 'Minggu 1 - Jumat' },
+
+            { label: 'Senin', dateDisplay: '23 Feb', week: 2, id: 'Minggu 2 - Senin' },
+            { label: 'Selasa', dateDisplay: '24 Feb', week: 2, id: 'Minggu 2 - Selasa' },
+            { label: 'Rabu', dateDisplay: '25 Feb', week: 2, id: 'Minggu 2 - Rabu' },
+            { label: 'Kamis', dateDisplay: '26 Feb', week: 2, id: 'Minggu 2 - Kamis' },
+            { label: 'Jumat', dateDisplay: '27 Feb', week: 2, id: 'Minggu 2 - Jumat' }
+        ];
+
+        // Current selection state
+        const currentComposite = window.selectedDayComposite || 'Minggu 1 - Senin';
+
+        // Parse current selection to get real day and week
+        // Format: "Minggu X - Hari"
+        const [weekStr, dayStr] = currentComposite.split(' - ');
+        const selectedDay = dayStr;
+        const currentWeek = parseInt(weekStr.replace('Minggu ', ''));
+        const allTimes = ['08:30', '10:00', '11:30', '13:30'];
 
         // Filter waktu: Jumat tidak ada jam 11:30
         const times = selectedDay === 'Jumat'
@@ -470,22 +460,34 @@ const views = {
                 <p class="subtitle">Visualisasi slot ruangan aktif berdasarkan jam dan hari.</p>
             </header>
             
-            <!-- Day Selector Tabs -->
-            <div class="tabs" style="margin-bottom: 1.5rem;">
-                ${days.map(day => `
-                    <div class="tab-item ${selectedDay === day ? 'active' : ''}" 
-                         onclick="window.selectScheduleDay('${day}')">
-                        ${day}
-                    </div>
-                `).join('')}
+            <!-- Combined Day Selector Tabs (Scrollable) -->
+            <div class="tabs-container" style="overflow-x: auto; margin-bottom: 1.5rem; padding-bottom: 5px;">
+                <div class="tabs" style="display: flex; flex-wrap: nowrap; width: max-content;">
+                    ${navigationDays.map(item => {
+            // Cek schedule existence
+            const hasSchedule = MOCK_DATA.slots.some(s =>
+                s.day === item.label && (s.week || 1) === item.week
+            );
+
+            // Tampilan Tab: Tanggal Besar, Hari Kecil
+            return `
+                        <div class="tab-item ${currentComposite === item.id ? 'active' : ''}" 
+                             onclick="window.selectScheduleDayComposite('${item.id}')"
+                             style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 80px; padding: 0.5rem 0.75rem; gap: 2px; height: 55px;">
+                            <span style="font-weight: 700; font-size: 0.95rem; line-height: 1;">${item.dateDisplay}</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); line-height: 1;">${item.label}</span>
+                            ${hasSchedule ? `<span style="position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; background-color: var(--success); border-radius: 50%;"></span>` : ''}
+                        </div>
+                    `}).join('')}
+                </div>
             </div>
 
             <div class="card">
                 <div class="schedule-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem; background: var(--bg); border-radius: 8px;">
                     <div>
-                        <strong>Hari: ${selectedDay}</strong>
+                        <strong>${navigationDays.find(d => d.id === currentComposite).dateDisplay} (${selectedDay})</strong>
                         <span style="margin-left: 1.5rem; color: var(--text-muted);">
-                            ${rooms.length} Ruangan × ${times.length} Sesi = ${rooms.length * times.length} Slot Total
+                            ${rooms.length} Ruangan × ${times.length} Sesi
                         </span>
                         ${selectedDay === 'Jumat' ? '<span style="margin-left: 1rem; color: #f59e0b; font-size: 0.85rem;">⚠️ Tidak ada sesi 11:30</span>' : ''}
                     </div>
@@ -511,40 +513,55 @@ const views = {
                             ${room}
                         </div>
                         ${times.map(time => {
-            const slot = MOCK_DATA.slots.find(s =>
-                s.day === selectedDay &&
-                s.time === time &&
-                s.room === room
-            );
+                const slot = MOCK_DATA.slots.find(s =>
+                    s.day === selectedDay &&
+                    s.time === time &&
+                    s.room === room &&
+                    (s.week || 1) === currentWeek
+                );
 
-            return `
+                return `
                                 <div class="room-slot ${slot ? 'slot-filled' : 'slot-empty'}" 
-                                     style="padding: 0.75rem; border-radius: 6px; min-height: 80px; 
-                                            background: ${slot ? 'var(--success-bg)' : 'var(--border-subtle)'};
-                                            border: 2px solid ${slot ? 'var(--success)' : 'transparent'};
-                                            transition: all 0.2s; cursor: ${slot ? 'pointer' : 'default'};"
+                                     style="padding: 0.6rem; border-radius: 8px; min-height: 100px; 
+                                            background: ${slot ? '#ffffff' : 'var(--card-bg)'};
+                                            border: 1px solid ${slot ? 'var(--border)' : 'transparent'};
+                                            ${slot ? 'box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid var(--success);' : 'background: var(--bg-subtle);'}
+                                            transition: all 0.2s; cursor: ${slot ? 'pointer' : 'default'}; position: relative;"
                                      ${slot ? `onclick="window.viewSlotDetails('${selectedDay}', '${time}', '${room}')"` : ''}
-                                     onmouseover="if(this.classList.contains('slot-filled')) this.style.transform='scale(1.02)'"
-                                     onmouseout="this.style.transform='scale(1)'">
+                                     onmouseover="if(this.classList.contains('slot-filled')) { this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)'; }"
+                                     onmouseout="if(this.classList.contains('slot-filled')) { this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.05)'; }">
                                     ${slot ? `
-                                        <div style="font-size: 0.8rem; font-weight: 700; color: var(--success); margin-bottom: 0.5rem; border-bottom: 1px solid var(--success); padding-bottom: 0.25rem;">
-                                            ${slot.student || 'Mahasiswa'}
-                                        </div>
-                                        <div style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.5;">
-                                            ${slot.examiners && slot.examiners.length >= 3 ? `
-                                                <div style="margin-bottom: 0.2rem;">Penguji 1: ${slot.examiners[0]}</div>
-                                                <div style="margin-bottom: 0.2rem;">Penguji 2: ${slot.examiners[1]}</div>
-                                                <div style="color: var(--primary); font-weight: 600;">Pembimbing: ${slot.examiners[2]}</div>
-                                            ` : 'Data penguji tidak lengkap'}
+                                        <div style="display: flex; flex-direction: column; height: 100%;">
+                                            <div style="margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed var(--border);">
+                                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-main); line-height: 1.3;">${slot.student || 'Mahasiswa'}</div>
+                                            </div>
+                                            
+                                            <div style="font-size: 0.75rem; flex-grow: 1; display: flex; flex-direction: column; gap: 3px;">
+                                                ${slot.examiners && slot.examiners.length >= 3 ? `
+                                                    <div style="display: flex; gap: 6px; align-items: baseline;">
+                                                        <span style="color: var(--text-muted); font-size: 0.65rem; font-weight: 600; min-width: 14px;">P1</span>
+                                                        <span style="color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.examiners[0]}</span>
+                                                    </div>
+                                                    <div style="display: flex; gap: 6px; align-items: baseline;">
+                                                        <span style="color: var(--text-muted); font-size: 0.65rem; font-weight: 600; min-width: 14px;">P2</span>
+                                                        <span style="color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.examiners[1]}</span>
+                                                    </div>
+                                                    <div style="margin-top: 2px; display: flex; gap: 6px; align-items: baseline; color: var(--primary);">
+                                                        <span style="font-size: 0.65rem; font-weight: 700; min-width: 14px;">Pb</span>
+                                                        <span style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.examiners[2]}</span>
+                                                    </div>
+                                                ` : '<div style="color: var(--text-muted); font-style: italic;">Data dosen tidak lengkap</div>'}
+                                            </div>
                                         </div>
                                     ` : `
-                                        <div style="text-align: center; color: var(--text-muted); font-size: 0.7rem; padding-top: 1.5rem;">
-                                            Tersedia
+                                        <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 2px dashed var(--border); border-radius: 6px; background: rgba(255,255,255,0.4); color: var(--text-muted); transition: all 0.2s;">
+                                            <span style="font-size: 1.2rem; opacity: 0.3;">+</span>
+                                            <span style="font-size: 0.75rem; font-weight: 500; opacity: 0.6;">Tersedia</span>
                                         </div>
                                     `}
                                 </div>
                             `;
-        }).join('')}
+            }).join('')}
                     `).join('')}
                 </div>
             </div>
@@ -574,14 +591,23 @@ const views = {
             const widthStyle = typeof h === 'object' && h.width ? `width: ${h.width};` : '';
             return `<th style="${cursorStyle} ${widthStyle}" ${clickAttr} title="${key ? 'Klik untuk urutkan' : ''}">${label} ${sortIcon}</th>`;
         }).join('')}
-                        </tr>
+        </tr>
                     </thead>
                     <tbody>
-                        ${rows.length > 0 ? rows.map(row => `
-                            <tr>
-                                ${row.map(cell => `<td>${cell}</td>`).join('')}
+                        ${rows.length > 0 ? rows.map(rowData => {
+            // Support for complex row with custom style
+            // Format: { content: [...], style: '...' } OR just [...]
+            const isComplex = !Array.isArray(rowData) && rowData.content;
+            const cells = isComplex ? rowData.content : rowData;
+            const rowStyle = isComplex && rowData.style ? `style="${rowData.style}"` : '';
+            const rowClass = isComplex && rowData.className ? `class="${rowData.className}"` : '';
+
+            return `
+                            <tr ${rowClass} ${rowStyle}>
+                                ${cells.map(cell => `<td>${cell}</td>`).join('')}
                             </tr>
-                        `).join('') : `<tr><td colspan="${headersDef.length}" style="text-align:center; color:var(--text-muted); padding:2rem;">Tidak ada data yang cocok</td></tr>`}
+                            `;
+        }).join('') : `<tr><td colspan="${headersDef.length}" style="text-align:center; color:var(--text-muted); padding:2rem;">Tidak ada data yang cocok</td></tr>`}
                     </tbody>
                 </table>
             </div>
@@ -647,22 +673,54 @@ const views = {
                         // }
                     }
 
-                    return [
+                    // Logic Toggle Jadwal
+                    // Default: include (exclude = false/undefined) -> Switch ON
+                    const isIncluded = !d.exclude;
+
+                    const toggleSwitch = `
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+                            <label style="position:relative; display:inline-block; width:36px; height:20px;">
+                                <input type="checkbox" ${isIncluded ? 'checked' : ''} 
+                                    onchange="window.toggleDosenScheduling('${faculty}', '${d.nik}')"
+                                    style="opacity:0; width:0; height:0;">
+                                <span style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:${isIncluded ? 'var(--success)' : '#e5e5ea'}; transition:.4s; border-radius:34px;">
+                                    <span style="position:absolute; content:''; height:16px; width:16px; left:${isIncluded ? '18px' : '2px'}; bottom:2px; background-color:white; transition:.4s; border-radius:50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2);"></span>
+                                </span>
+                            </label>
+                            <span style="font-size:0.7rem; color:${isIncluded ? 'var(--success)' : 'var(--text-muted)'}; font-weight:600;">
+                                ${isIncluded ? 'ON' : 'OFF'}
+                            </span>
+                        </div>
+                    `;
+
+                    const rowCells = [
                         // d.nomor removed
                         `<div>${d.nik}</div>`,
                         nameDisplay,
                         d.prodi,
-                        `<div>${statusBadge}</div>`
+                        `<div>${statusBadge}</div>`,
+                        toggleSwitch
                     ];
+
+                    // Jika OFF (isIncluded == false), beri class khusus
+                    if (!isIncluded) {
+                        return {
+                            content: rowCells,
+                            className: 'excluded-row'
+                        };
+                    }
+
+                    return rowCells;
                 });
 
                 const headers = [
                     // { label: 'No', key: 'nomor', width: '60px' },
 
                     { label: 'NIK', key: 'nik', width: '120px' },
-                    { label: 'Nama Dosen', key: 'nama', width: '35%' },
-                    { label: 'Prodi', key: 'prodi', width: '25%' },
-                    { label: 'Status Validasi', key: null, width: '150px' }
+                    { label: 'Nama Dosen', key: 'nama', width: '30%' },
+                    { label: 'Prodi', key: 'prodi', width: '20%' },
+                    { label: 'Status Validasi', key: null, width: '150px' },
+                    { label: 'Jadwalkan', width: '80px', key: null }
                 ];
 
                 content = `
@@ -703,36 +761,67 @@ const views = {
             </div>
         `;
     },
-    mahasiswa: () => `
-        <header>
-            <h1>Data Mahasiswa</h1>
-            <p class="subtitle">Pendaftar ujian pendadaran periode aktif.</p>
+    mahasiswa: () => {
+        // Sort by NIM ascending
+        const sortedMahasiswa = [...MOCK_DATA.mahasiswa].sort((a, b) => a.nim.localeCompare(b.nim));
+
+        return `
+        <header style="display: flex; justify-content: space-between; align-items: center; padding-left: 3.5rem;">
+            <div>
+                <h1>Data Mahasiswa</h1>
+                <p class="subtitle">Pendaftar ujian pendadaran periode aktif.</p>
+            </div>
+            <button onclick="window.toggleAddMahasiswaModal(true)">+ Tambah Mahasiswa</button>
         </header>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: center;">
+                <div class="stat-item">
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">Total Pendaftar</div>
+                    <div style="font-size: 1.5rem; font-weight: 700;">${sortedMahasiswa.length}</div>
+                </div>
+            </div>
+        </div>
+
         <div class="table-container">
-            ${MOCK_DATA.mahasiswa.length > 0 ? `
+            ${sortedMahasiswa.length > 0 ? `
             <table>
                 <thead>
                     <tr>
-                        <th>Nama</th>
-                        <th>NIM</th>
-                        <th>Judul Skripsi</th>
-                        <th>Aksi</th>
+                        <th style="width: 120px;">NIM</th>
+                        <th>Nama Lengkap</th>
+                        <th style="width: 200px;">Program Studi</th>
+                        <th>Dosen Pembimbing</th>
+                        <th style="width: 80px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${MOCK_DATA.mahasiswa.map(m => `
+                    ${sortedMahasiswa.map(m => `
                         <tr>
-                            <td><strong>${m.name}</strong></td>
-                            <td>${m.nim}</td>
-                            <td style="max-width: 300px; font-size: 0.875rem;">${m.judul}</td>
-                            <td><button style="background:none; border:none; cursor:pointer;">⚙️</button></td>
+                            <td class="text-truncate" style="font-family: monospace; font-size: 0.95rem;">${m.nim}</td>
+                            <td><div style="font-weight: 600;">${m.nama}</div></td>
+                            <td><span class="badge" style="background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary);">${m.prodi}</span></td>
+                            <td>${m.pembimbing || '<span style="color:var(--text-muted); font-style:italic;">-</span>'}</td>
+                            <td style="text-align: center;">
+                                <button onclick="window.deleteMahasiswa('${m.nim}')" style="background: none; border: none; padding: 4px; color: var(--text-muted); cursor: pointer;" title="Hapus">
+                                    🗑️
+                                </button>
+                            </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
-            ` : '<p style="text-align:center; color:var(--text-muted); padding:3rem;">Belum ada data mahasiswa</p>'}
+            ` : `
+            <div class="empty-state">
+                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">🎓</div>
+                <h3 style="margin-bottom: 0.5rem; color: var(--text-main);">Belum ada data mahasiswa</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Tambahkan data mahasiswa secara manual.</p>
+                <button onclick="window.toggleAddMahasiswaModal(true)" class="btn-secondary">Tambah Data</button>
+            </div>
+            `}
         </div>
-    `,
+        `;
+    },
     libur: () => `
         <header>
             <h1>Dosen Libur / Berhalangan</h1>
@@ -773,41 +862,46 @@ const views = {
         </header>
         <div class="grid-container">
             <div class="card">
-                <h3>Aturan Wajib (Hard Constraints)</h3>
+                <h3>Aturan Aktif (Hard Constraints)</h3>
                 <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
-                    Kriteria wajib yang tidak boleh dilanggar sama sekali.
+                    Algoritma saat ini memverifikasi aturan berikut secara ketat:
                 </p>
-                <div class="switch-container">
-                    <span>Dosen Tidak Bentrok</span>
-                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                </div>
-                <div class="switch-container">
-                    <span>Ketersediaan Ruangan</span>
-                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                </div>
-                <div class="switch-container">
-                    <span>Cek Jadwal Libur Dosen</span>
-                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge badge-success">WAJIB</span>
+                        <span><strong>Ruangan Kosong:</strong> Tidak ada jadwal ganda di ruangan & waktu yang sama.</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge badge-success">WAJIB</span>
+                        <span><strong>Dosen Available:</strong> Pembimbing & Penguji tidak sedang menguji di tempat lain.</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge badge-success">WAJIB</span>
+                        <span><strong>Status Dosen:</strong> Dosen yang di-set "OFF" (Jadwalkan: OFF) diabaikan sepenuhnya.</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge badge-success">WAJIB</span>
+                        <span><strong>Komposisi Tim:</strong> 1 Pembimbing + 2 Penguji Pendamping (unik, tidak boleh sama).</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge badge-success">WAJIB</span>
+                        <span><strong>Jam Operasional:</strong> 08:30, 10:00, 11:30, 13:30 (Jumat: skip 11:30).</span>
+                    </div>
                 </div>
             </div>
             
             <div class="card">
-                <h3>Aturan Pilihan (Soft Constraints)</h3>
-                <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
-                    Kriteria pilihan untuk meningkatkan kualitas jadwal.
+                <h3>Metode Algoritma</h3>
+                <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem;">
+                    <strong>Sequential Greedy Search</strong>
                 </p>
-                <div class="switch-container">
-                    <span>Minimalkan Jeda Hari</span>
-                    <label class="switch"><input type="checkbox"><span class="slider"></span></label>
-                </div>
-                <div class="switch-container">
-                    <span>Maksimal 3 Slot per Hari</span>
-                    <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
-                </div>
-                <div class="switch-container">
-                    <span>Prioritas Slot Pagi</span>
-                    <label class="switch"><input type="checkbox"><span class="slider"></span></label>
-                </div>
+                <p style="font-size: 0.9rem; line-height: 1.6;">
+                    Sistem melakukan iterasi pada setiap mahasiswa antrian, lalu melakukan <em>brute-force search</em> untuk mencari slot waktu & ruangan pertama yang memenuhi <strong>SEMUA</strong> aturan di samping.
+                </p>
+                <p style="font-size: 0.9rem; line-height: 1.6; margin-top: 10px;">
+                    Jika slot ditemukan, jadwal langsung dikunci (booked). Jika tidak, mahasiswa akan dilaporkan GAGAL dijadwalkan.
+                </p>
             </div>
 
             <div class="card stat-card" style="grid-column: span 2; background: linear-gradient(90deg, var(--card-bg), var(--primary-glow));">
@@ -816,10 +910,15 @@ const views = {
                 <p style="font-size: 0.875rem; margin-top: 1rem;">
                     Status: <span style="color: #4ade80;">Siap untuk optimasi</span>
                 </p>
-                <button style="margin-top: 1rem; padding: 0.75rem; border-radius: 8px; border: none; background: white; color: var(--bg); font-weight: 600; cursor: pointer;">GENERATE ULANG JADWAL</button>
+                <button onclick="window.generateSchedule()" style="margin-top: 1rem; padding: 0.75rem; border-radius: 8px; border: none; background: white; color: var(--bg); font-weight: 600; cursor: pointer; width: 100%;">GENERATE ULANG JADWAL</button>
+            </div>
+            
+            <div class="card" style="grid-column: span 2; display: none;" id="logCard">
+                <h3>Log Proses Algoritma</h3>
+                <div id="logicLog" style="margin-top: 0.5rem; padding: 1rem; background: #1e1e1e; color: #4ade80; font-family: 'JetBrains Mono', monospace; height: 300px; overflow-y: auto; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap;"></div>
             </div>
         </div>
-    `
+    `,
 };
 
 function navigate(page) {
@@ -898,12 +997,21 @@ window.handleSearchInput = (e) => {
 };
 
 // Schedule day selection
-window.selectScheduleDay = (day) => {
-    window.selectedScheduleDay = day;
+// Schedule composite selection (Week + Day)
+window.selectScheduleDayComposite = (compositeId) => {
+    window.selectedDayComposite = compositeId;
+    // We also update legacy simple states just in case
+    const [weekStr, dayStr] = compositeId.split(' - ');
+    window.selectedScheduleDay = dayStr;
+
     if (currentView === 'home') {
         mainContent.innerHTML = views.home();
     }
 };
+
+/* DEPRECATED: Old handlers, kept to avoid immediate breakage if clicked before refresh */
+window.selectScheduleDay = () => { };
+window.selectScheduleWeek = () => { };
 
 // View slot details
 window.viewSlotDetails = (day, time, room) => {
@@ -1165,6 +1273,136 @@ window.saveNewDosen = (e) => {
     // Show quick feedback
     alert(`Dosen ${newDosen.nama} berhasil ditambahkan!`);
 };
+
+// --- Fitur Data Mahasiswa ---
+
+window.toggleAddMahasiswaModal = (show) => {
+    const modalId = 'addMahasiswaModal';
+    let modal = document.getElementById(modalId);
+
+    if (show) {
+        if (modal) modal.remove();
+
+        const modalContainer = document.createElement('div');
+        modalContainer.id = modalId;
+        modalContainer.className = 'modal-overlay';
+
+        // Ambil daftar dosen dari semua fakultas untuk opsi pembimbing
+        const allDosen = [
+            ...(MOCK_DATA.facultyData.FIK || []),
+            ...(MOCK_DATA.facultyData.FES || []),
+            ...(MOCK_DATA.facultyData.FST || [])
+        ].sort((a, b) => a.nama.localeCompare(b.nama));
+
+        const dosenOptions = allDosen.map(d => `<option value="${d.nama}">${d.nama}</option>`).join('');
+
+        modalContainer.innerHTML = `
+            <div class="modal-content">
+                <h2 style="margin-bottom: 1rem;">Tambah Data Mahasiswa</h2>
+                <form onsubmit="window.saveNewMahasiswa(event)">
+                    <div class="form-group">
+                        <label class="form-label">NIM</label>
+                        <input type="text" name="nim" class="form-input" required placeholder="Contoh: 22.11.1234">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nama Mahasiswa</label>
+                        <input type="text" name="nama" class="form-input" required placeholder="Nama Lengkap">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Program Studi</label>
+                        <select name="prodi" class="form-input" required style="width:100%; padding: 0.75rem; border:1px solid var(--border); border-radius:10px;">
+                             <option value="" disabled selected>Pilih Prodi...</option>
+                             <option value="Informatika">Informatika</option>
+                             <option value="Sistem Informasi">Sistem Informasi</option>
+                             <option value="Teknologi Informasi">Teknologi Informasi</option>
+                             <option value="Ilmu Komunikasi">Ilmu Komunikasi</option>
+                             <option value="Geografi">Geografi</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dosen Pembimbing</label>
+                         <select name="pembimbing" class="form-input" style="width:100%; padding: 0.75rem; border:1px solid var(--border); border-radius:10px;">
+                             <option value="">-- Pilih Pembimbing (Opsional) --</option>
+                             ${dosenOptions}
+                        </select>
+                        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Pastikan data dosen sudah diinput di menu Data Dosen.</p>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="window.toggleAddMahasiswaModal(false)">Batal</button>
+                        <button type="submit">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(modalContainer);
+        setTimeout(() => modalContainer.classList.add('active'), 10);
+    } else {
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+    }
+};
+
+window.saveNewMahasiswa = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+
+    // Validasi NIM unik
+    const newNim = formData.get('nim');
+    if (MOCK_DATA.mahasiswa.some(m => m.nim === newNim)) {
+        alert('NIM sudah terdaftar!');
+        return;
+    }
+
+    const newMahasiswa = {
+        nim: newNim,
+        nama: formData.get('nama'),
+        prodi: formData.get('prodi'),
+        pembimbing: formData.get('pembimbing')
+    };
+
+    MOCK_DATA.mahasiswa.push(newMahasiswa);
+
+    // Refresh view
+    if (currentView === 'mahasiswa') {
+        mainContent.innerHTML = views.mahasiswa();
+    }
+
+    window.toggleAddMahasiswaModal(false);
+    // Optional: alert('Mahasiswa berhasil ditambahkan');
+};
+
+window.deleteMahasiswa = (nim) => {
+    if (confirm('Yakin ingin menghapus data mahasiswa ini?')) {
+        MOCK_DATA.mahasiswa = MOCK_DATA.mahasiswa.filter(m => m.nim !== nim);
+        if (currentView === 'mahasiswa') {
+            mainContent.innerHTML = views.mahasiswa();
+        }
+    }
+};
+
+window.toggleDosenScheduling = (faculty, nik) => {
+    const data = MOCK_DATA.facultyData[faculty];
+    if (!data) return;
+
+    const dosen = data.find(d => d.nik === nik);
+    if (dosen) {
+        // Toggle status exclude
+        // Jika exclude undefined/false -> jadi true (OFF)
+        // Jika exclude true -> jadi false (ON)
+        dosen.exclude = !dosen.exclude;
+
+        // Refresh view without full reload context
+        // Kita hanya perlu update tabel, tapi re-render full view paling aman
+        if (currentView === 'dosen') {
+            mainContent.innerHTML = views.dosen();
+        }
+    }
+};
+
 window.clearSearch = () => {
     searchTerm = '';
     if (currentView === 'dosen') {
@@ -1191,33 +1429,202 @@ window.switchModalMode = window.switchModalMode;
 window.handleSDMSearchInModal = window.handleSDMSearchInModal;
 window.addDosenFromSDM = window.addDosenFromSDM;
 
-// Toggle Sidebar Function
-window.toggleSidebar = () => {
-    const app = document.getElementById('app');
-    const isCollapsed = app.classList.contains('sidebar-collapsed');
 
-    if (isCollapsed) {
-        app.classList.remove('sidebar-collapsed');
-        localStorage.setItem('sidebarCollapsed', 'false');
-    } else {
-        app.classList.add('sidebar-collapsed');
-        localStorage.setItem('sidebarCollapsed', 'true');
+
+
+// --- LOGIKA PENJADWALAN OTOMATIS (ALGORITMA LOOPING KETAT) ---
+
+// Log helper
+function logToLogic(message) {
+    const logEl = document.getElementById('logicLog');
+    const card = document.getElementById('logCard');
+    if (logEl && card) {
+        card.style.display = 'block';
+        const time = new Date().toLocaleTimeString();
+        logEl.innerHTML += `[${time}] ${message}\n`;
+        logEl.scrollTop = logEl.scrollHeight;
     }
-};
+    console.log(message);
+}
 
-// Restore sidebar state from localStorage
-const restoreSidebarState = () => {
-    const app = document.getElementById('app');
-    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+window.generateSchedule = async () => {
+    // 1. Persiapan
+    const logEl = document.getElementById('logicLog');
+    if (logEl) logEl.innerHTML = ''; // Clear log
 
-    if (isCollapsed) {
-        app.classList.add('sidebar-collapsed');
+    logToLogic("🚀 MEMULAI PROSES PENJADWALAN OTOMATIS...");
+    logToLogic("----------------------------------------");
+
+    // Ambil data dan URUTKAN agar deterministik (A-Z / NIM)
+    // Sesuai request: "Utamakan pemenuhan a ke b ke c, jangan acak"
+    const mahasiswaList = [...MOCK_DATA.mahasiswa].sort((a, b) => a.nim.localeCompare(b.nim));
+
+    if (mahasiswaList.length === 0) {
+        logToLogic("❌ ERROR: Data mahasiswa kosong. Silakan input data mahasiswa terlebih dahulu.");
+        return;
     }
+
+    logToLogic(`📦 Ditemukan ${mahasiswaList.length} mahasiswa (Diurutkan NIM).`);
+
+    // Reset Slot
+    logToLogic("🧹 Membersihkan slot jadwal lama...");
+    MOCK_DATA.slots = [];
+
+    // Resource Constraint
+    const ROOMS = ['6.3.A', '6.3.B', '6.3.C', '6.3.D', '6.3.E', '6.3.F', '6.3.G', '6.3.H'];
+    const TIMES = ['08:30', '10:00', '11:30', '13:30'];
+    const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; // Asumsi 1 minggu dulu untuk tes
+
+    // Gabungan dosen dari semua fakultas
+    // Sort dosen by Nama agar pemilihan penguji juga urut A-Z (deterministik)
+    const allDosen = [
+        ...(MOCK_DATA.facultyData.FIK || []),
+        ...(MOCK_DATA.facultyData.FES || []),
+        ...(MOCK_DATA.facultyData.FST || [])
+    ].sort((a, b) => a.nama.localeCompare(b.nama));
+
+    logToLogic(`👥 Mengindeks ${allDosen.length} data dosen...`);
+
+    // Helper: Cek ketersediaan dosen
+    const isDosenAvailable = (namaDosen, day, time) => {
+        // 1. Cek Exclude Status
+        const dosenData = allDosen.find(d => d.nama === namaDosen);
+        if (dosenData && dosenData.exclude) {
+            return false;
+        }
+
+        // 2. Cek Bentrok Jadwal Lain
+        const bentrok = MOCK_DATA.slots.some(slot =>
+            slot.day === day &&
+            slot.time === time &&
+            slot.examiners.includes(namaDosen)
+        );
+
+        return !bentrok;
+    };
+
+    // Helper: Cari Penguji Pendamping (STRATEGI: SEQUENTIAL / FIRST-FIT)
+    const findExaminers = (pembimbing, day, time) => {
+        // Cari 2 penguji lain yang available
+        // KARENA allDosen SUDAH DISORTZ A-Z, maka filter ini akan menghasilkan kandidat urut A-Z.
+        // Kita ambil 2 pertama yang valid -> Pola "a ke b ke c" terpenuhi.
+
+        let candidates = [];
+
+        // Optimasi: Loop manual biar bisa break cepat setelah dapat 2
+        for (const d of allDosen) {
+            if (candidates.length >= 2) break;
+
+            if (d.nama !== pembimbing && !d.exclude) {
+                if (isDosenAvailable(d.nama, day, time)) {
+                    candidates.push(d.nama);
+                }
+            }
+        }
+
+        if (candidates.length < 2) return null;
+
+        return candidates; // [Penguji A, Penguji B] (Urut abjad)
+    };
+
+    // --- CORE LOOP (SLOT-CENTRIC APPROACH) ---
+    // Strategi: "Isi slot kosong dulu sampai penuh, jangan loncat"
+    // Kita iterasi SLOT-nya (Waktu & Ruang), lalu cari mahasiswa yang cocok.
+
+    // 1. Generate semua kemungkinan slot secara urut (Flattened)
+    const allPossibleSlots = [];
+    for (const day of DAYS) {
+        for (const time of TIMES) {
+            // CONSTRAINT KHUSUS: Jumat tidak ada 11:30
+            if (day === 'Jumat' && time === '11:30') continue;
+
+            for (const room of ROOMS) {
+                allPossibleSlots.push({ day, time, room });
+            }
+        }
+    }
+
+    logToLogic(`⚙️ Generate ${allPossibleSlots.length} slot potensial.`);
+
+    let successCount = 0;
+    const scheduledMahasiswaIds = new Set(); // Track NIM yang sudah dijadwal
+
+    // 2. Loop Slot Satu per Satu
+    slotLoop:
+    for (const slot of allPossibleSlots) {
+        const { day, time, room } = slot;
+
+        // Cek apakah mahasiswa semua sudah habis?
+        if (scheduledMahasiswaIds.size >= mahasiswaList.length) {
+            logToLogic("✅ Semua mahasiswa sudah dijadwalkan.");
+            break;
+        }
+
+        // Cari mahasiswa yang cocok untuk slot ini
+        // Prioritaskan urutan NIM/Nama yang sudah disort di awal
+        let candidateFound = null;
+        let finalExaminers = null;
+
+        for (const mhs of mahasiswaList) {
+            // Skip jika sudah dijadwalkan
+            if (scheduledMahasiswaIds.has(mhs.nim)) continue;
+
+            // Validasi: Apakah slot ini 'available' untuk mhs & tim dosennya?
+
+            // 1. Cek Pembimbing Available di (day, time)
+            if (!mhs.pembimbing) continue;
+            const pbData = allDosen.find(d => d.nama === mhs.pembimbing);
+            if (!pbData || pbData.exclude) continue; // Dosen OFF
+            if (!isDosenAvailable(mhs.pembimbing, day, time)) continue; // Dosen Sibuk
+
+            // 2. Cek Penguji Pendamping
+            const examiners = findExaminers(mhs.pembimbing, day, time);
+            if (!examiners) continue; // Tidak dapat penguji
+
+            // MATCH! Mahasiswa ini bisa masuk slot ini.
+            candidateFound = mhs;
+            finalExaminers = [...examiners, mhs.pembimbing];
+            break; // Ambil yang pertama cocok, langsung isi slot ini.
+        }
+
+        if (candidateFound) {
+            // Booking Slot
+            MOCK_DATA.slots.push({
+                week: 1,
+                day: day,
+                time: time,
+                room: room,
+                student: candidateFound.nama,
+                examiners: finalExaminers
+            });
+
+            scheduledMahasiswaIds.add(candidateFound.nim);
+            successCount++;
+
+            logToLogic(`   [${day} ${time} ${room}] ✅ Terisi oleh: ${candidateFound.nama}`);
+
+            // Simulasi delay visual
+            await new Promise(r => setTimeout(r, 20));
+        } else {
+            // Slot ini kosong karena tidak ada mahasiswa/dosen yang cocok
+            // logToLogic(`   [${day} ${time} ${room}] 💨 Kosong (Tidak ada match)`);
+        }
+    }
+
+    logToLogic("\n----------------------------------------");
+    const sisa = mahasiswaList.length - successCount;
+    if (sisa > 0) {
+        logToLogic(`⚠️ PERINGATAN: Ada ${sisa} mahasiswa yang TIDAK BISA dijadwalkan (Konflik/Kehabisan Slot).`);
+    }
+    logToLogic(`🏁 SELESAI. Berhasil menjadwalkan ${successCount} dari ${mahasiswaList.length} mahasiswa.`);
+
+    // Auto switch to Home after short delay
+    setTimeout(() => {
+        if (confirm("Penjadwalan Selesai (Metode Padat)! Lihat hasil di Beranda?")) {
+            navigate('home');
+        }
+    }, 1000);
 };
-
-// Call restore on load
-restoreSidebarState();
-
 
 // Call initializeApp (defined earlier at line 214)
 initializeApp();
