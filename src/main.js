@@ -12,19 +12,127 @@ let MOCK_DATA = {
         FES: [],
         FST: []
     },
-    mahasiswa: [],
-    libur: [],
-    slots: []
+    mahasiswa: [
+        { nim: '22.11.4501', nama: 'Andi Saputra', prodi: 'S1 Informatika', pembimbing: 'Arif Akbarul Huda, S.Si., M.Eng.' },
+        { nim: '22.11.4502', nama: 'Budi Santoso', prodi: 'S1 Informatika', pembimbing: 'Heri Sismoro, S.Kom., M.Kom.' },
+        { nim: '22.12.5601', nama: 'Citra Lestari', prodi: 'S1 Sistem Informasi', pembimbing: 'Acihmah Sidauruk, S.Kom., M.Kom.' },
+        { nim: '22.21.3401', nama: 'Dewi Sartika', prodi: 'S1 Akuntansi', pembimbing: 'Alfriadi Dwi Atmoko, S.E., Ak., M.Si.' },
+        { nim: '22.22.1201', nama: 'Eko Prasetyo', prodi: 'S1 Kewirausahaan', pembimbing: 'Laksmindra Saptyawati, S.E., M.B.A.' },
+        { nim: '22.11.4503', nama: 'Fajar Pratama', prodi: 'S1 Informatika', pembimbing: 'Arif Dwi Laksito, S.Kom., M.Kom.' },
+        { nim: '22.82.7801', nama: 'Gita Permata', prodi: 'S1 Teknik Komputer', pembimbing: 'Melwin Syafrizal, S.Kom., M.Eng., Ph.D.' },
+        { nim: '22.61.9001', nama: 'Heri Susanto', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Angga Intueri Mahendra Purbakusuma, S.Sos., M.I.Kom.' },
+        { nim: '22.51.2301', nama: 'Indah Sari', prodi: 'S1 Hubungan Internasional', pembimbing: 'Isti Nur Rahmahwati, S.IP., Ll.M., Ph.D.' },
+        { nim: '22.11.4504', nama: 'Joko Widodo', prodi: 'S1 Informatika', pembimbing: 'Prof. Arief Setyanto, S.Si., M.T., Ph.D.' },
+        { nim: '22.11.4505', nama: 'Kurniawan', prodi: 'S1 Informatika', pembimbing: 'Drs. Asro Nasiri, M.Kom.' },
+        { nim: '22.11.4506', nama: 'Lani Marlina', prodi: 'S1 Informatika', pembimbing: 'Sudarmawan, S.T., M.T.' },
+        { nim: '22.12.5602', nama: 'Mulyono', prodi: 'S1 Sistem Informasi', pembimbing: 'Krisnawati, S.Si., M.T.' },
+        { nim: '22.12.5603', nama: 'Nina Zatulini', prodi: 'S1 Sistem Informasi', pembimbing: 'Drs. Bambang Sudaryatno, M.M.' },
+        { nim: '22.61.9002', nama: 'Oky Pratama', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Erik Hadi Saputra, S.Kom., M.Eng.' },
+        { nim: '22.61.9003', nama: 'Putri Andriani', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Dr. Nurbayti, S.I.Kom., M.A.' },
+        { nim: '22.21.3402', nama: 'Qori Sandioriva', prodi: 'S1 Akuntansi', pembimbing: 'Edy Anan, S.E., M.Ak., Ak., CA' },
+        { nim: '22.82.7802', nama: 'Rahmat Hidayat', prodi: 'S1 Teknik Komputer', pembimbing: 'Joko Dwi Santoso, S.Kom., M.Kom.' },
+        { nim: '22.51.2302', nama: 'Siska Kohl', prodi: 'S1 Hubungan Internasional', pembimbing: 'Yoga Suharman, S.IP., M.A.' },
+        { nim: '22.11.4507', nama: 'Taufik Hidayat', prodi: 'S1 Informatika', pembimbing: 'Mardhiya Hayaty, S.T., M.Kom.' },
+        { nim: '22.11.4508', nama: 'Umar Bakri', prodi: 'S1 Informatika', pembimbing: 'Kusnawi, S.Kom., M.Eng.' },
+        { nim: '22.61.9004', nama: 'Vina Panduwinata', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Dwiyono Iriyanto, Drs., M.M.' },
+        { nim: '22.12.5604', nama: 'Wawan Wanisar', prodi: 'S1 Sistem Informasi', pembimbing: 'Wiwi Widayani, S.Kom., M.Kom.' },
+        { nim: '22.11.4509', nama: 'Xavi Hernandez', prodi: 'S1 Informatika', pembimbing: 'Mujiyanto, M.Kom.' },
+        { nim: '22.11.4510', nama: 'Yuni Shara', prodi: 'S1 Informatika', pembimbing: 'Sudarmawan, S.T., M.T.' },
+        // Tambahan 25 mahasiswa baru
+        { nim: '22.11.4511', nama: 'Zahra Amalia', prodi: 'S1 Informatika', pembimbing: 'Arif Akbarul Huda, S.Si., M.Eng.' },
+        { nim: '22.11.4512', nama: 'Ahmad Fauzi', prodi: 'S1 Informatika', pembimbing: 'Heri Sismoro, S.Kom., M.Kom.' },
+        { nim: '22.12.5605', nama: 'Bella Safira', prodi: 'S1 Sistem Informasi', pembimbing: 'Acihmah Sidauruk, S.Kom., M.Kom.' },
+        { nim: '22.21.3403', nama: 'Cahyo Nugroho', prodi: 'S1 Akuntansi', pembimbing: 'Alfriadi Dwi Atmoko, S.E., Ak., M.Si.' },
+        { nim: '22.22.1202', nama: 'Dina Mariana', prodi: 'S1 Kewirausahaan', pembimbing: 'Laksmindra Saptyawati, S.E., M.B.A.' },
+        { nim: '22.11.4513', nama: 'Eka Wijaya', prodi: 'S1 Informatika', pembimbing: 'Arif Dwi Laksito, S.Kom., M.Kom.' },
+        { nim: '22.82.7803', nama: 'Fitri Handayani', prodi: 'S1 Teknik Komputer', pembimbing: 'Melwin Syafrizal, S.Kom., M.Eng., Ph.D.' },
+        { nim: '22.61.9005', nama: 'Gilang Ramadhan', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Angga Intueri Mahendra Purbakusuma, S.Sos., M.I.Kom.' },
+        { nim: '22.51.2303', nama: 'Hana Pertiwi', prodi: 'S1 Hubungan Internasional', pembimbing: 'Isti Nur Rahmahwati, S.IP., Ll.M., Ph.D.' },
+        { nim: '22.11.4514', nama: 'Irfan Hakim', prodi: 'S1 Informatika', pembimbing: 'Prof. Arief Setyanto, S.Si., M.T., Ph.D.' },
+        { nim: '22.11.4515', nama: 'Julia Perez', prodi: 'S1 Informatika', pembimbing: 'Drs. Asro Nasiri, M.Kom.' },
+        { nim: '22.11.4516', nama: 'Kevin Aprilio', prodi: 'S1 Informatika', pembimbing: 'Sudarmawan, S.T., M.T.' },
+        { nim: '22.12.5606', nama: 'Linda Wijaya', prodi: 'S1 Sistem Informasi', pembimbing: 'Krisnawati, S.Si., M.T.' },
+        { nim: '22.12.5607', nama: 'Mira Lesmana', prodi: 'S1 Sistem Informasi', pembimbing: 'Drs. Bambang Sudaryatno, M.M.' },
+        { nim: '22.61.9006', nama: 'Nanda Arsyad', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Erik Hadi Saputra, S.Kom., M.Eng.' },
+        { nim: '22.61.9007', nama: 'Olivia Zalianty', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Dr. Nurbayti, S.I.Kom., M.A.' },
+        { nim: '22.21.3404', nama: 'Pandu Winata', prodi: 'S1 Akuntansi', pembimbing: 'Edy Anan, S.E., M.Ak., Ak., CA' },
+        { nim: '22.82.7804', nama: 'Qonita Azzahra', prodi: 'S1 Teknik Komputer', pembimbing: 'Joko Dwi Santoso, S.Kom., M.Kom.' },
+        { nim: '22.51.2304', nama: 'Reza Pahlevi', prodi: 'S1 Hubungan Internasional', pembimbing: 'Yoga Suharman, S.IP., M.A.' },
+        { nim: '22.11.4517', nama: 'Siti Nurhaliza', prodi: 'S1 Informatika', pembimbing: 'Mardhiya Hayaty, S.T., M.Kom.' },
+        { nim: '22.11.4518', nama: 'Tono Suratman', prodi: 'S1 Informatika', pembimbing: 'Kusnawi, S.Kom., M.Eng.' },
+        { nim: '22.61.9008', nama: 'Umi Kalsum', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Dwiyono Iriyanto, Drs., M.M.' },
+        { nim: '22.12.5608', nama: 'Vero Moda', prodi: 'S1 Sistem Informasi', pembimbing: 'Wiwi Widayani, S.Kom., M.Kom.' },
+        { nim: '22.11.4519', nama: 'Wahyu Hidayat', prodi: 'S1 Informatika', pembimbing: 'Mujiyanto, M.Kom.' },
+        { nim: '22.11.4520', nama: 'Yanto Basna', prodi: 'S1 Informatika', pembimbing: 'Sudarmawan, S.T., M.T.' }
+    ],
+    libur: [
+        { dosenId: '190302036', date: '2026-02-16', reason: 'Dinas Luar Kota' }, // NIK Prof Arief Setyanto - Senin Minggu 1
+        { dosenId: '190302112', date: '2026-02-17', reason: 'Sakit' }, // NIK Kusnawi - Selasa Minggu 1
+        { dosenId: '190302036', date: '2026-02-19', reason: 'Seminar Nasional' }, // NIK Prof Arief - Kamis Minggu 1
+        { dosenId: '190302045', date: '2026-02-24', reason: 'Cuti' }, // NIK Heri Sismoro - Selasa Minggu 2
+        { dosenId: '190302078', date: '2026-02-25', reason: 'Rapat Pimpinan' } // NIK Arif Dwi Laksito - Rabu Minggu 2
+    ],
+    slots: [],
+    clipboard: null
 };
 
-// Hapus selectedWeek, kita gabungkan logicnya ke selectedDayComposite
+// State Management
 let currentView = 'home';
-// Format selectedDayComposite: "Minggu 1 - Senin"
-let selectedDayComposite = 'Minggu 1 - Senin';
+let selectedDate = '2026-02-16'; // Fokus Tanggal
 let currentDosenTab = 'sdm';
 let sortColumn = null;
 let sortDirection = 'asc';
 let searchTerm = '';
+
+const ROOMS = ['6.3.A', '6.3.B', '6.3.C', '6.3.D', '6.3.E', '6.3.F', '6.3.G', '6.3.H'];
+const TIMES = ['08:30', '10:00', '11:30', '13:30'];
+const DATES = [
+    { value: '2026-02-16', label: 'Senin', display: '16 Feb' },
+    { value: '2026-02-17', label: 'Selasa', display: '17 Feb' },
+    { value: '2026-02-18', label: 'Rabu', display: '18 Feb' },
+    { value: '2026-02-19', label: 'Kamis', display: '19 Feb' },
+    { value: '2026-02-20', label: 'Jumat', display: '20 Feb' },
+    { value: '2026-02-23', label: 'Senin', display: '23 Feb' },
+    { value: '2026-02-24', label: 'Selasa', display: '24 Feb' },
+    { value: '2026-02-25', label: 'Rabu', display: '25 Feb' },
+    { value: '2026-02-26', label: 'Kamis', display: '26 Feb' },
+    { value: '2026-02-27', label: 'Jumat', display: '27 Feb' }
+];
+
+// Soft Constraint: Distribusi beban penguji merata
+const MAX_EXAMINER_ASSIGNMENTS = 5;
+
+// Helper: Ambil semua dosen dari MOCK_DATA
+function getAllDosen() {
+    return [
+        ...(MOCK_DATA.facultyData.FIK || []),
+        ...(MOCK_DATA.facultyData.FES || []),
+        ...(MOCK_DATA.facultyData.FST || [])
+    ].sort((a, b) => a.nama.localeCompare(b.nama));
+}
+
+// Helper: Cek ketersediaan dosen (Fokus pada Tanggal)
+function isDosenAvailable(namaDosen, date, time, excludeSlotStudent = null) {
+    const allDosen = getAllDosen();
+    const dosenData = allDosen.find(d => d.nama === namaDosen);
+
+    // 1. Cek Apakah Dosen di-OFF-kan
+    if (dosenData && dosenData.exclude) return false;
+
+    // 2. Cek Libur Dosen (Berdasarkan Tanggal Persis)
+    const isLibur = MOCK_DATA.libur.some(l => {
+        return l.dosenId === dosenData?.nik && l.date === date;
+    });
+    if (isLibur) return false;
+
+    // 3. Cek Bentrok di Slot Lain (Berdasarkan Tanggal)
+    const bentrok = MOCK_DATA.slots.some(slot => {
+        if (excludeSlotStudent && slot.student === excludeSlotStudent) return false;
+        return slot.date === date && slot.time === time && slot.examiners.includes(namaDosen);
+    });
+
+    return !bentrok;
+}
 
 // Helper: Persiapan data untuk pencocokan
 function normalizeName(name) {
@@ -217,6 +325,17 @@ async function initializeApp() {
         console.log(`   FIK: ${MOCK_DATA.facultyData.FIK.length} dosen (${verificationResults.FIK.matched} matched, ${verificationResults.FIK.unmatched} unmatched)`);
         console.log(`   FES: ${MOCK_DATA.facultyData.FES.length} dosen (${verificationResults.FES.matched} matched, ${verificationResults.FES.unmatched} unmatched)`);
         console.log(`   FST: ${MOCK_DATA.facultyData.FST.length} dosen (${verificationResults.FST.matched} matched, ${verificationResults.FST.unmatched} unmatched)`);
+
+        // --- SIMULASI: Set beberapa Dosen Senior ke status "OFF" (Tidak Dijadwalkan) ---
+        const lecturersToExclude = ['Prof. Dr. Mohammad Suyanto, M.M.', 'Prof. Dr. Ema Utami, S.Si., M.Kom.', 'Dr. Achmad Fauzi, S.E., M.M.'];
+        Object.keys(MOCK_DATA.facultyData).forEach(fak => {
+            MOCK_DATA.facultyData[fak].forEach(d => {
+                if (lecturersToExclude.includes(d.nama)) {
+                    d.exclude = true;
+                }
+            });
+        });
+        console.log('🚫 Simulasi: Beberapa dosen senior telah di-set status OFF (Constraint).');
 
         // Refresh view jika user sedang di tab dosen
         if (currentView === 'dosen') {
@@ -423,58 +542,45 @@ const views = {
 
         const rooms = ['6.3.A', '6.3.B', '6.3.C', '6.3.D', '6.3.E', '6.3.F', '6.3.G', '6.3.H'];
 
-        // Daftar Hari Lengkap (2 Minggu Terakhir Februari 2026)
-        // Minggu 1: 16-20 Feb, Minggu 2: 23-27 Feb
-        const navigationDays = [
-            { label: 'Senin', dateDisplay: '16 Feb', week: 1, id: 'Minggu 1 - Senin' },
-            { label: 'Selasa', dateDisplay: '17 Feb', week: 1, id: 'Minggu 1 - Selasa' },
-            { label: 'Rabu', dateDisplay: '18 Feb', week: 1, id: 'Minggu 1 - Rabu' },
-            { label: 'Kamis', dateDisplay: '19 Feb', week: 1, id: 'Minggu 1 - Kamis' },
-            { label: 'Jumat', dateDisplay: '20 Feb', week: 1, id: 'Minggu 1 - Jumat' },
-
-            { label: 'Senin', dateDisplay: '23 Feb', week: 2, id: 'Minggu 2 - Senin' },
-            { label: 'Selasa', dateDisplay: '24 Feb', week: 2, id: 'Minggu 2 - Selasa' },
-            { label: 'Rabu', dateDisplay: '25 Feb', week: 2, id: 'Minggu 2 - Rabu' },
-            { label: 'Kamis', dateDisplay: '26 Feb', week: 2, id: 'Minggu 2 - Kamis' },
-            { label: 'Jumat', dateDisplay: '27 Feb', week: 2, id: 'Minggu 2 - Jumat' }
-        ];
-
         // Current selection state
-        const currentComposite = window.selectedDayComposite || 'Minggu 1 - Senin';
-
-        // Parse current selection to get real day and week
-        // Format: "Minggu X - Hari"
-        const [weekStr, dayStr] = currentComposite.split(' - ');
-        const selectedDay = dayStr;
-        const currentWeek = parseInt(weekStr.replace('Minggu ', ''));
-        const allTimes = ['08:30', '10:00', '11:30', '13:30'];
+        const currentDate = selectedDate || '2026-02-16';
+        const dateObj = DATES.find(d => d.value === currentDate);
+        const selectedDay = dateObj.label;
 
         // Filter waktu: Jumat tidak ada jam 11:30
         const times = selectedDay === 'Jumat'
-            ? allTimes.filter(t => t !== '11:30')
-            : allTimes;
+            ? TIMES.filter(t => t !== '11:30')
+            : TIMES;
 
         return `
-            <header>
-                <h1>Slot Jadwal Pendadaran</h1>
-                <p class="subtitle">Visualisasi slot ruangan aktif berdasarkan jam dan hari.</p>
+            <header style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h1>Jadwal Sidang Pendadaran</h1>
+                    <p class="subtitle">Manajemen slot ruangan berdasarkan tanggal pelaksanaan.</p>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    ${MOCK_DATA.clipboard ? `
+                        <div class="card" style="margin: 0; padding: 0.5rem 1rem; background: var(--primary-subtle); border: 1px dashed var(--primary); display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 0.8rem; font-weight: 600; color: var(--primary);">📋 Clipboard: ${MOCK_DATA.clipboard.student}</span>
+                            <button onclick="window.moveSlotToClipboard(null)" style="padding: 2px 8px; font-size: 0.7rem; background: var(--danger);">Batal</button>
+                        </div>
+                    ` : ''}
+                    <button onclick="window.generateSchedule()" style="background: var(--secondary); border: none; padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 12px rgba(94, 92, 230, 0.3);">
+                        ⚡ Proses Jadwal Otomatis
+                    </button>
+                </div>
             </header>
             
-            <!-- Combined Day Selector Tabs (Scrollable) -->
+            <!-- Date Selector Tabs -->
             <div class="tabs-container" style="overflow-x: auto; margin-bottom: 1.5rem; padding-bottom: 5px;">
                 <div class="tabs" style="display: flex; flex-wrap: nowrap; width: max-content;">
-                    ${navigationDays.map(item => {
-            // Cek schedule existence
-            const hasSchedule = MOCK_DATA.slots.some(s =>
-                s.day === item.label && (s.week || 1) === item.week
-            );
-
-            // Tampilan Tab: Tanggal Besar, Hari Kecil
+                    ${DATES.map(item => {
+            const hasSchedule = MOCK_DATA.slots.some(s => s.date === item.value);
             return `
-                        <div class="tab-item ${currentComposite === item.id ? 'active' : ''}" 
-                             onclick="window.selectScheduleDayComposite('${item.id}')"
+                        <div class="tab-item ${currentDate === item.value ? 'active' : ''}" 
+                             onclick="window.selectScheduleDate('${item.value}')"
                              style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 80px; padding: 0.5rem 0.75rem; gap: 2px; height: 55px;">
-                            <span style="font-weight: 700; font-size: 0.95rem; line-height: 1;">${item.dateDisplay}</span>
+                            <span style="font-weight: 700; font-size: 0.95rem; line-height: 1;">${item.display}</span>
                             <span style="font-size: 0.75rem; color: var(--text-muted); line-height: 1;">${item.label}</span>
                             ${hasSchedule ? `<span style="position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; background-color: var(--success); border-radius: 50%;"></span>` : ''}
                         </div>
@@ -485,11 +591,10 @@ const views = {
             <div class="card">
                 <div class="schedule-info" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem; background: var(--bg); border-radius: 8px;">
                     <div>
-                        <strong>${navigationDays.find(d => d.id === currentComposite).dateDisplay} (${selectedDay})</strong>
+                        <strong>${dateObj.display} (${selectedDay})</strong>
                         <span style="margin-left: 1.5rem; color: var(--text-muted);">
-                            ${rooms.length} Ruangan × ${times.length} Sesi
+                            ${ROOMS.length} Ruangan × ${times.length} Sesi
                         </span>
-                        ${selectedDay === 'Jumat' ? '<span style="margin-left: 1rem; color: #f59e0b; font-size: 0.85rem;">⚠️ Tidak ada sesi 11:30</span>' : ''}
                     </div>
                     <div style="font-size: 0.85rem; color: var(--text-muted);">
                         <span style="display: inline-block; width: 12px; height: 12px; background: var(--success); border-radius: 2px; margin-right: 4px;"></span> Terisi
@@ -514,24 +619,36 @@ const views = {
                         </div>
                         ${times.map(time => {
                 const slot = MOCK_DATA.slots.find(s =>
-                    s.day === selectedDay &&
+                    s.date === currentDate &&
                     s.time === time &&
-                    s.room === room &&
-                    (s.week || 1) === currentWeek
+                    s.room === room
                 );
 
                 return `
                                 <div class="room-slot ${slot ? 'slot-filled' : 'slot-empty'}" 
+                                     draggable="${slot ? 'true' : 'false'}"
+                                     ondragstart="window.onDragStart(event, '${slot?.student || ''}', '${currentDate}', '${time}', '${room}')"
+                                     ondragover="window.onDragOver(event)"
+                                     ondragleave="window.onDragLeave(event)"
+                                     ondrop="window.onDrop(event, '${currentDate}', '${time}', '${room}')"
                                      style="padding: 0.6rem; border-radius: 8px; min-height: 100px; 
                                             background: ${slot ? '#ffffff' : 'var(--card-bg)'};
                                             border: 1px solid ${slot ? 'var(--border)' : 'transparent'};
                                             ${slot ? 'box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid var(--success);' : 'background: var(--bg-subtle);'}
                                             transition: all 0.2s; cursor: ${slot ? 'pointer' : 'default'}; position: relative;"
-                                     ${slot ? `onclick="window.viewSlotDetails('${selectedDay}', '${time}', '${room}')"` : ''}
+                                     ${slot ? `onclick="window.viewSlotDetails('${currentDate}', '${time}', '${room}')"` : ''}
                                      onmouseover="if(this.classList.contains('slot-filled')) { this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)'; }"
                                      onmouseout="if(this.classList.contains('slot-filled')) { this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.05)'; }">
                                     ${slot ? `
                                         <div style="display: flex; flex-direction: column; height: 100%;">
+                                            <div style="position: absolute; top: 4px; right: 4px; display: flex; gap: 4px; z-index: 10;">
+                                                <button onclick="event.stopPropagation(); window.moveSlotToClipboard('${slot.student}')" 
+                                                        style="background: rgba(0,113,227,0.1); border: none; width: 18px; height: 18px; border-radius: 50%; color: var(--primary); font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;"
+                                                        class="delete-slot-btn" title="Pindah Jadwal (Antar Hari)">📍</button>
+                                                <button onclick="event.stopPropagation(); window.deleteSlot('${currentDate}', '${time}', '${room}')" 
+                                                        style="background: rgba(255,59,48,0.1); border: none; width: 18px; height: 18px; border-radius: 50%; color: var(--danger); font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s;"
+                                                        class="delete-slot-btn" title="Hapus Jadwal">✕</button>
+                                            </div>
                                             <div style="margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed var(--border);">
                                                 <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-main); line-height: 1.3;">${slot.student || 'Mahasiswa'}</div>
                                             </div>
@@ -554,9 +671,10 @@ const views = {
                                             </div>
                                         </div>
                                     ` : `
-                                        <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 2px dashed var(--border); border-radius: 6px; background: rgba(255,255,255,0.4); color: var(--text-muted); transition: all 0.2s;">
-                                            <span style="font-size: 1.2rem; opacity: 0.3;">+</span>
-                                            <span style="font-size: 0.75rem; font-weight: 500; opacity: 0.6;">Tersedia</span>
+                                        <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 2px dashed ${MOCK_DATA.clipboard ? 'var(--primary)' : 'var(--border)'}; border-radius: 6px; background: ${MOCK_DATA.clipboard ? 'var(--primary-subtle)' : 'rgba(255,255,255,0.4)'}; color: ${MOCK_DATA.clipboard ? 'var(--primary)' : 'var(--text-muted)'}; transition: all 0.2s; cursor: ${MOCK_DATA.clipboard ? 'pointer' : 'default'};"
+                                             ${MOCK_DATA.clipboard ? `onclick="window.pasteSlotFromClipboard('${currentDate}', '${time}', '${room}')"` : ''}>
+                                             <span style="font-size: 1.2rem; opacity: 0.8;">${MOCK_DATA.clipboard ? '📋' : '+'}</span>
+                                             <span style="font-size: 0.75rem; font-weight: 500; opacity: 1;">${MOCK_DATA.clipboard ? 'Tempel Di Sini' : 'Tersedia'}</span>
                                         </div>
                                     `}
                                 </div>
@@ -771,7 +889,10 @@ const views = {
                 <h1>Data Mahasiswa</h1>
                 <p class="subtitle">Pendaftar ujian pendadaran periode aktif.</p>
             </div>
-            <button onclick="window.toggleAddMahasiswaModal(true)">+ Tambah Mahasiswa</button>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="window.generateSchedule()" style="background: var(--secondary); white-space: nowrap;">⚡ Proses Jadwal</button>
+                <button onclick="window.toggleAddMahasiswaModal(true)" style="white-space: nowrap;">+ Tambah Mahasiswa</button>
+            </div>
         </header>
 
         <div class="card" style="margin-bottom: 2rem;">
@@ -792,23 +913,55 @@ const views = {
                         <th>Nama Lengkap</th>
                         <th style="width: 200px;">Program Studi</th>
                         <th>Dosen Pembimbing</th>
+                        <th style="width: 150px;">Status Penjadwalan</th>
                         <th style="width: 80px; text-align: center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${sortedMahasiswa.map(m => `
+                    ${sortedMahasiswa.map(m => {
+            const schedule = MOCK_DATA.slots.find(s => s.student === m.nama);
+            return `
                         <tr>
                             <td class="text-truncate" style="font-family: monospace; font-size: 0.95rem;">${m.nim}</td>
                             <td><div style="font-weight: 600;">${m.nama}</div></td>
-                            <td><span class="badge" style="background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary);">${m.prodi}</span></td>
+                            <td><span class="badge text-truncate" style="background: var(--bg); border: 1px solid var(--border); color: var(--text-secondary); max-width: 180px; display: inline-block; vertical-align: middle;" title="${m.prodi}">${m.prodi}</span></td>
                             <td>${m.pembimbing || '<span style="color:var(--text-muted); font-style:italic;">-</span>'}</td>
+                            <td>
+                                ${schedule ? `
+                                    <div onclick="window.viewAndHighlightSchedule('${m.nama}')" 
+                                         style="cursor: pointer; padding: 0.5rem; border-radius: 6px; background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.05)); border: 1px solid rgba(34, 197, 94, 0.3); transition: all 0.2s;"
+                                         onmouseover="this.style.background='linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 197, 94, 0.1))'; this.style.borderColor='rgba(34, 197, 94, 0.5)';"
+                                         onmouseout="this.style.background='linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.05))'; this.style.borderColor='rgba(34, 197, 94, 0.3)';">
+                                        <div style="font-weight: 600; font-size: 0.85rem; color: var(--success); display: flex; align-items: center; gap: 4px;">
+                                            📅 ${DATES.find(d => d.value === schedule.date)?.display || schedule.date} (${DATES.find(d => d.value === schedule.date)?.label || '-'})
+                                        </div>
+                                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">
+                                            ⏰ ${schedule.time} • 🏢 ${schedule.room}
+                                        </div>
+                                        <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            👥 ${schedule.examiners?.slice(0, 2).join(', ')}${schedule.examiners?.length > 2 ? '...' : ''}
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
+                                        <span class="badge badge-warning" style="opacity: 0.7;">Belum Terjadwal</span>
+                                        <button onclick="window.scheduleIndividualStudent('${m.nim}')" 
+                                                style="padding: 4px 10px; font-size: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;"
+                                                onmouseover="this.style.background='var(--primary-dark)'; this.style.transform='translateY(-1px)';"
+                                                onmouseout="this.style.background='var(--primary)'; this.style.transform='translateY(0)';"
+                                                title="Jadwalkan mahasiswa ini secara otomatis">
+                                            ⚡ Jadwalkan Otomatis
+                                        </button>
+                                    </div>
+                                `}
+                            </td>
                             <td style="text-align: center;">
                                 <button onclick="window.deleteMahasiswa('${m.nim}')" style="background: none; border: none; padding: 4px; color: var(--text-muted); cursor: pointer;" title="Hapus">
                                     🗑️
                                 </button>
                             </td>
                         </tr>
-                    `).join('')}
+                    `}).join('')}
                 </tbody>
             </table>
             ` : `
@@ -888,6 +1041,10 @@ const views = {
                         <span class="badge badge-success">WAJIB</span>
                         <span><strong>Jam Operasional:</strong> 08:30, 10:00, 11:30, 13:30 (Jumat: skip 11:30).</span>
                     </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge badge-warning">OPSIONAL</span>
+                        <span><strong>Distribusi Merata:</strong> Maksimal ${MAX_EXAMINER_ASSIGNMENTS} tugas per dosen (kecuali pembimbing wajib).</span>
+                    </div>
                 </div>
             </div>
             
@@ -910,7 +1067,7 @@ const views = {
                 <p style="font-size: 0.875rem; margin-top: 1rem;">
                     Status: <span style="color: #4ade80;">Siap untuk optimasi</span>
                 </p>
-                <button onclick="window.generateSchedule()" style="margin-top: 1rem; padding: 0.75rem; border-radius: 8px; border: none; background: white; color: var(--bg); font-weight: 600; cursor: pointer; width: 100%;">GENERATE ULANG JADWAL</button>
+                <button onclick="window.generateSchedule()" style="margin-top: 1rem; padding: 0.75rem; border-radius: 8px; border: none; background: var(--secondary); color: white; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 4px 12px rgba(94, 92, 230, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(94, 92, 230, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(94, 92, 230, 0.3)';">GENERATE ULANG JADWAL</button>
             </div>
             
             <div class="card" style="grid-column: span 2; display: none;" id="logCard">
@@ -998,12 +1155,9 @@ window.handleSearchInput = (e) => {
 
 // Schedule day selection
 // Schedule composite selection (Week + Day)
-window.selectScheduleDayComposite = (compositeId) => {
-    window.selectedDayComposite = compositeId;
-    // We also update legacy simple states just in case
-    const [weekStr, dayStr] = compositeId.split(' - ');
-    window.selectedScheduleDay = dayStr;
-
+// Schedule date selection
+window.selectScheduleDate = (date) => {
+    selectedDate = date;
     if (currentView === 'home') {
         mainContent.innerHTML = views.home();
     }
@@ -1410,6 +1564,275 @@ window.clearSearch = () => {
     }
 };
 
+window.deleteSlot = (date, time, room) => {
+    if (confirm('Hapus jadwal ini?')) {
+        MOCK_DATA.slots = MOCK_DATA.slots.filter(s =>
+            !(s.date === date && s.time === time && s.room === room)
+        );
+        if (currentView === 'home') {
+            mainContent.innerHTML = views.home();
+        }
+    }
+};
+
+window.viewAndHighlightSchedule = (studentName) => {
+    const slot = MOCK_DATA.slots.find(s => s.student === studentName);
+    if (!slot) {
+        alert('Jadwal belum tersedia untuk mahasiswa ini.');
+        return;
+    }
+
+    // Navigate to the date
+    selectedDate = slot.date;
+    navigate('home');
+
+    // Wait for render, then highlight the specific slot
+    setTimeout(() => {
+        // Find all room slots
+        const allSlots = document.querySelectorAll('.room-slot');
+
+        allSlots.forEach(slotEl => {
+            // Check if this is the matching slot by examining the onclick attribute
+            const onclickAttr = slotEl.getAttribute('onclick');
+            if (onclickAttr &&
+                onclickAttr.includes(slot.date) &&
+                onclickAttr.includes(slot.time) &&
+                onclickAttr.includes(slot.room)) {
+
+                // Add highlight animation
+                slotEl.classList.add('highlight-blink');
+
+                // Scroll into view
+                slotEl.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                    inline: 'center'
+                });
+
+                // Remove highlight after animation completes
+                setTimeout(() => {
+                    slotEl.classList.remove('highlight-blink');
+                }, 3000);
+            }
+        });
+    }, 400);
+};
+
+window.moveSlotToClipboard = (studentName) => {
+    if (!studentName) {
+        MOCK_DATA.clipboard = null;
+    } else {
+        const slot = MOCK_DATA.slots.find(s => s.student === studentName);
+        if (slot) {
+            MOCK_DATA.clipboard = { ...slot };
+            // Jangan hapus rujukan lama dulu, hapus saat paste berhasil atau biarkan jika ingin 'copy'
+            // Tapi untuk 'move', kita hapus yang lama
+            MOCK_DATA.slots = MOCK_DATA.slots.filter(s => s.student !== studentName);
+        }
+    }
+    mainContent.innerHTML = views.home();
+};
+
+// Individual Student Scheduling Function
+window.scheduleIndividualStudent = async (nim) => {
+    const mahasiswa = MOCK_DATA.mahasiswa.find(m => m.nim === nim);
+    if (!mahasiswa) {
+        alert('Data mahasiswa tidak ditemukan!');
+        return;
+    }
+
+    // Check if already scheduled
+    if (MOCK_DATA.slots.some(s => s.student === mahasiswa.nama)) {
+        alert(`${mahasiswa.nama} sudah memiliki jadwal!`);
+        return;
+    }
+
+    // Use the same scheduling logic
+    const allDosen = getAllDosen();
+    const examinerCounts = {}; // Fresh counter for this individual
+
+    // Count existing assignments
+    MOCK_DATA.slots.forEach(slot => {
+        slot.examiners.forEach(examiner => {
+            examinerCounts[examiner] = (examinerCounts[examiner] || 0) + 1;
+        });
+    });
+
+    // Helper function to find examiners
+    const findExaminers = (pembimbing, date, time) => {
+        let candidates = [];
+        for (const d of allDosen) {
+            if (candidates.length >= 2) break;
+            if (d.nama !== pembimbing) {
+                if (!isDosenAvailable(d.nama, date, time)) continue;
+                const currentCount = examinerCounts[d.nama] || 0;
+                if (currentCount >= MAX_EXAMINER_ASSIGNMENTS) continue;
+                candidates.push(d.nama);
+            }
+        }
+        return candidates.length < 2 ? null : candidates;
+    };
+
+    // Try to find a suitable slot
+    for (const dateObj of DATES) {
+        const date = dateObj.value;
+        const day = dateObj.label;
+
+        for (const time of TIMES) {
+            if (day === 'Jumat' && time === '11:30') continue;
+
+            for (const room of ROOMS) {
+                // Check if slot is occupied
+                if (MOCK_DATA.slots.some(s => s.date === date && s.time === time && s.room === room)) {
+                    continue;
+                }
+
+                // Check pembimbing availability
+                if (!mahasiswa.pembimbing) continue;
+                const pbData = allDosen.find(d => d.nama === mahasiswa.pembimbing);
+                if (!pbData || pbData.exclude) continue;
+                if (!isDosenAvailable(mahasiswa.pembimbing, date, time)) continue;
+
+                // Find examiners
+                const examiners = findExaminers(mahasiswa.pembimbing, date, time);
+                if (!examiners) continue;
+
+                // SUCCESS! Book the slot
+                const finalExaminers = [...examiners, mahasiswa.pembimbing];
+                MOCK_DATA.slots.push({
+                    date: date,
+                    time: time,
+                    room: room,
+                    student: mahasiswa.nama,
+                    examiners: finalExaminers
+                });
+
+                alert(`✅ Berhasil!\n\n${mahasiswa.nama} dijadwalkan di:\n📅 ${dateObj.display} (${day})\n⏰ ${time}\n🏢 ${room}`);
+
+                // Refresh view
+                if (currentView === 'mahasiswa') {
+                    mainContent.innerHTML = views.mahasiswa();
+                }
+                return;
+            }
+        }
+    }
+
+    // Failed to schedule
+    alert(`❌ Gagal menjadwalkan ${mahasiswa.nama}\n\nTidak ada slot yang tersedia atau bentrok jadwal dosen.`);
+};
+
+
+window.pasteSlotFromClipboard = (toDate, toTime, toRoom) => {
+    if (!MOCK_DATA.clipboard) return;
+
+    const studentName = MOCK_DATA.clipboard.student;
+    const oldSlot = MOCK_DATA.clipboard;
+
+    // VALIDASI
+    const conflicts = [];
+    oldSlot.examiners.forEach(dosen => {
+        if (!isDosenAvailable(dosen, toDate, toTime)) {
+            conflicts.push(dosen);
+        }
+    });
+
+    if (conflicts.length > 0) {
+        alert(`Gagal Tempel: Bentrok Jadwal!\n\nDosen berikut tidak tersedia di slot ini:\n- ${conflicts.join('\n- ')}`);
+        return;
+    }
+
+    // Eksekusi
+    MOCK_DATA.slots.push({
+        ...oldSlot,
+        date: toDate,
+        time: toTime,
+        room: toRoom
+    });
+
+    MOCK_DATA.clipboard = null;
+    logToLogic(`📋 Clipboard Paste: ${studentName} dipindah ke [${toDate} ${toTime} ${toRoom}]`);
+    mainContent.innerHTML = views.home();
+};
+
+// --- DRAG AND DROP HANDLERS ---
+window.onDragStart = (e, studentName, fromDate, fromTime, fromRoom) => {
+    e.dataTransfer.setData('studentName', studentName);
+    e.dataTransfer.setData('fromDate', fromDate);
+    e.dataTransfer.setData('fromTime', fromTime);
+    e.dataTransfer.setData('fromRoom', fromRoom);
+    e.target.style.opacity = '0.5';
+};
+
+window.onDragOver = (e) => {
+    e.preventDefault();
+    const target = e.currentTarget;
+    if (target.classList.contains('slot-empty')) {
+        target.style.background = 'var(--primary-subtle)';
+        target.style.border = '2px dashed var(--primary)';
+    }
+};
+
+window.onDragLeave = (e) => {
+    const target = e.currentTarget;
+    if (target.classList.contains('slot-empty')) {
+        target.style.background = 'var(--bg-subtle)';
+        target.style.border = '2px dashed var(--border)';
+    }
+};
+
+window.onDrop = (e, toDate, toTime, toRoom) => {
+    e.preventDefault();
+    const studentName = e.dataTransfer.getData('studentName');
+    const fromDate = e.dataTransfer.getData('fromDate');
+    const fromTime = e.dataTransfer.getData('fromTime');
+    const fromRoom = e.dataTransfer.getData('fromRoom');
+
+    // 1. Cari data slot lama
+    const oldSlotIndex = MOCK_DATA.slots.findIndex(s =>
+        s.student === studentName && s.date === fromDate && s.time === fromTime && s.room === fromRoom
+    );
+
+    if (oldSlotIndex === -1) return;
+    const oldSlot = MOCK_DATA.slots[oldSlotIndex];
+
+    // 2. VALIDASI ATURAN
+    // A. Cek apakah target sudah terisi
+    const targetOccupied = MOCK_DATA.slots.some(s =>
+        s.date === toDate && s.time === toTime && s.room === toRoom
+    );
+    if (targetOccupied) {
+        alert('Gagal: Slot tujuan sudah terisi mahasiswa lain!');
+        navigate('home');
+        return;
+    }
+
+    // B. Cek ketersediaan semua tim (Pb + Penguji) di slot baru
+    const conflicts = [];
+    oldSlot.examiners.forEach(dosen => {
+        if (!isDosenAvailable(dosen, toDate, toTime, studentName)) {
+            conflicts.push(dosen);
+        }
+    });
+
+    if (conflicts.length > 0) {
+        alert(`Gagal: Bentrok Jadwal!\n\nDosen berikut tidak tersedia di slot baru:\n- ${conflicts.join('\n- ')}`);
+        navigate('home');
+        return;
+    }
+
+    // 3. Eksekusi Perpindahan
+    MOCK_DATA.slots[oldSlotIndex] = {
+        ...oldSlot,
+        date: toDate,
+        time: toTime,
+        room: toRoom
+    };
+
+    logToLogic(`📍 Manual Move: ${studentName} pindah ke [${toDate} ${toTime} ${toRoom}]`);
+    navigate('home');
+};
+
 // Event Listeners
 navItems.forEach(item => {
     item.addEventListener('click', (e) => {
@@ -1456,7 +1879,6 @@ window.generateSchedule = async () => {
     logToLogic("----------------------------------------");
 
     // Ambil data dan URUTKAN agar deterministik (A-Z / NIM)
-    // Sesuai request: "Utamakan pemenuhan a ke b ke c, jangan acak"
     const mahasiswaList = [...MOCK_DATA.mahasiswa].sort((a, b) => a.nim.localeCompare(b.nim));
 
     if (mahasiswaList.length === 0) {
@@ -1471,75 +1893,48 @@ window.generateSchedule = async () => {
     MOCK_DATA.slots = [];
 
     // Resource Constraint
-    const ROOMS = ['6.3.A', '6.3.B', '6.3.C', '6.3.D', '6.3.E', '6.3.F', '6.3.G', '6.3.H'];
-    const TIMES = ['08:30', '10:00', '11:30', '13:30'];
-    const DAYS = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']; // Asumsi 1 minggu dulu untuk tes
-
-    // Gabungan dosen dari semua fakultas
-    // Sort dosen by Nama agar pemilihan penguji juga urut A-Z (deterministik)
-    const allDosen = [
-        ...(MOCK_DATA.facultyData.FIK || []),
-        ...(MOCK_DATA.facultyData.FES || []),
-        ...(MOCK_DATA.facultyData.FST || [])
-    ].sort((a, b) => a.nama.localeCompare(b.nama));
-
+    const allDosen = getAllDosen();
     logToLogic(`👥 Mengindeks ${allDosen.length} data dosen...`);
 
-    // Helper: Cek ketersediaan dosen
-    const isDosenAvailable = (namaDosen, day, time) => {
-        // 1. Cek Exclude Status
-        const dosenData = allDosen.find(d => d.nama === namaDosen);
-        if (dosenData && dosenData.exclude) {
-            return false;
-        }
+    // Tracking beban penguji untuk distribusi merata
+    const examinerCounts = {};
+    logToLogic(`⚖️ Soft Constraint Aktif: Maksimal ${MAX_EXAMINER_ASSIGNMENTS} tugas per dosen (kecuali pembimbing wajib).`);
 
-        // 2. Cek Bentrok Jadwal Lain
-        const bentrok = MOCK_DATA.slots.some(slot =>
-            slot.day === day &&
-            slot.time === time &&
-            slot.examiners.includes(namaDosen)
-        );
-
-        return !bentrok;
-    };
-
-    // Helper: Cari Penguji Pendamping (STRATEGI: SEQUENTIAL / FIRST-FIT)
-    const findExaminers = (pembimbing, day, time) => {
-        // Cari 2 penguji lain yang available
-        // KARENA allDosen SUDAH DISORTZ A-Z, maka filter ini akan menghasilkan kandidat urut A-Z.
-        // Kita ambil 2 pertama yang valid -> Pola "a ke b ke c" terpenuhi.
-
+    // Helper: Cari Penguji Pendamping (STRATEGI: SEQUENTIAL / FIRST-FIT + LOAD BALANCING)
+    const findExaminers = (pembimbing, date, time) => {
         let candidates = [];
-
-        // Optimasi: Loop manual biar bisa break cepat setelah dapat 2
         for (const d of allDosen) {
             if (candidates.length >= 2) break;
+            if (d.nama !== pembimbing) {
+                // Check availability
+                if (!isDosenAvailable(d.nama, date, time)) continue;
 
-            if (d.nama !== pembimbing && !d.exclude) {
-                if (isDosenAvailable(d.nama, day, time)) {
-                    candidates.push(d.nama);
-                }
+                // Check assignment limit (soft constraint)
+                const currentCount = examinerCounts[d.nama] || 0;
+                if (currentCount >= MAX_EXAMINER_ASSIGNMENTS) continue;
+
+                candidates.push(d.nama);
             }
         }
-
         if (candidates.length < 2) return null;
-
-        return candidates; // [Penguji A, Penguji B] (Urut abjad)
+        return candidates;
     };
 
     // --- CORE LOOP (SLOT-CENTRIC APPROACH) ---
     // Strategi: "Isi slot kosong dulu sampai penuh, jangan loncat"
-    // Kita iterasi SLOT-nya (Waktu & Ruang), lalu cari mahasiswa yang cocok.
 
-    // 1. Generate semua kemungkinan slot secara urut (Flattened)
+    // 1. Generate semua kemungkinan slot secara urut (Flattened berdasarkan TANGGAL)
     const allPossibleSlots = [];
-    for (const day of DAYS) {
+    for (const dateObj of DATES) {
+        const date = dateObj.value;
+        const day = dateObj.label;
+
         for (const time of TIMES) {
             // CONSTRAINT KHUSUS: Jumat tidak ada 11:30
             if (day === 'Jumat' && time === '11:30') continue;
 
             for (const room of ROOMS) {
-                allPossibleSlots.push({ day, time, room });
+                allPossibleSlots.push({ date, day, time, room });
             }
         }
     }
@@ -1552,7 +1947,7 @@ window.generateSchedule = async () => {
     // 2. Loop Slot Satu per Satu
     slotLoop:
     for (const slot of allPossibleSlots) {
-        const { day, time, room } = slot;
+        const { date, day, time, room } = slot;
 
         // Cek apakah mahasiswa semua sudah habis?
         if (scheduledMahasiswaIds.size >= mahasiswaList.length) {
@@ -1561,7 +1956,6 @@ window.generateSchedule = async () => {
         }
 
         // Cari mahasiswa yang cocok untuk slot ini
-        // Prioritaskan urutan NIM/Nama yang sudah disort di awal
         let candidateFound = null;
         let finalExaminers = null;
 
@@ -1569,29 +1963,25 @@ window.generateSchedule = async () => {
             // Skip jika sudah dijadwalkan
             if (scheduledMahasiswaIds.has(mhs.nim)) continue;
 
-            // Validasi: Apakah slot ini 'available' untuk mhs & tim dosennya?
-
-            // 1. Cek Pembimbing Available di (day, time)
+            // 1. Cek Pembimbing Available di (date, time)
             if (!mhs.pembimbing) continue;
             const pbData = allDosen.find(d => d.nama === mhs.pembimbing);
             if (!pbData || pbData.exclude) continue; // Dosen OFF
-            if (!isDosenAvailable(mhs.pembimbing, day, time)) continue; // Dosen Sibuk
+            if (!isDosenAvailable(mhs.pembimbing, date, time)) continue; // Dosen Sibuk
 
             // 2. Cek Penguji Pendamping
-            const examiners = findExaminers(mhs.pembimbing, day, time);
+            const examiners = findExaminers(mhs.pembimbing, date, time);
             if (!examiners) continue; // Tidak dapat penguji
 
-            // MATCH! Mahasiswa ini bisa masuk slot ini.
             candidateFound = mhs;
             finalExaminers = [...examiners, mhs.pembimbing];
-            break; // Ambil yang pertama cocok, langsung isi slot ini.
+            break;
         }
 
         if (candidateFound) {
             // Booking Slot
             MOCK_DATA.slots.push({
-                week: 1,
-                day: day,
+                date: date,
                 time: time,
                 room: room,
                 student: candidateFound.nama,
@@ -1601,29 +1991,43 @@ window.generateSchedule = async () => {
             scheduledMahasiswaIds.add(candidateFound.nim);
             successCount++;
 
-            logToLogic(`   [${day} ${time} ${room}] ✅ Terisi oleh: ${candidateFound.nama}`);
+            // Update examiner counts untuk load balancing
+            finalExaminers.forEach(examiner => {
+                examinerCounts[examiner] = (examinerCounts[examiner] || 0) + 1;
+            });
+
+            logToLogic(`   [${date} ${time} ${room}] ✅ Terisi: ${candidateFound.nama}`);
 
             // Simulasi delay visual
-            await new Promise(r => setTimeout(r, 20));
-        } else {
-            // Slot ini kosong karena tidak ada mahasiswa/dosen yang cocok
-            // logToLogic(`   [${day} ${time} ${room}] 💨 Kosong (Tidak ada match)`);
+            await new Promise(r => setTimeout(r, 10));
         }
     }
 
     logToLogic("\n----------------------------------------");
+
+    // Log distribusi beban penguji
+    logToLogic("📊 DISTRIBUSI BEBAN PENGUJI:");
+    const sortedExaminers = Object.entries(examinerCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10); // Top 10
+
+    sortedExaminers.forEach(([name, count]) => {
+        const warning = count > MAX_EXAMINER_ASSIGNMENTS ? ' ⚠️ (Melebihi limit - kemungkinan pembimbing)' : '';
+        logToLogic(`   ${name}: ${count} tugas${warning}`);
+    });
+
     const sisa = mahasiswaList.length - successCount;
     if (sisa > 0) {
-        logToLogic(`⚠️ PERINGATAN: Ada ${sisa} mahasiswa yang TIDAK BISA dijadwalkan (Konflik/Kehabisan Slot).`);
+        logToLogic(`\n⚠️ PERINGATAN: Ada ${sisa} mahasiswa yang TIDAK BISA dijadwalkan (Konflik/Kehabisan Slot).`);
     }
     logToLogic(`🏁 SELESAI. Berhasil menjadwalkan ${successCount} dari ${mahasiswaList.length} mahasiswa.`);
 
     // Auto switch to Home after short delay
     setTimeout(() => {
-        if (confirm("Penjadwalan Selesai (Metode Padat)! Lihat hasil di Beranda?")) {
+        if (confirm("Penjadwalan Selesai! Lihat hasil di Beranda?")) {
             navigate('home');
         }
-    }, 1000);
+    }, 500);
 };
 
 // Call initializeApp (defined earlier at line 214)
