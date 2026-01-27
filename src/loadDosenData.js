@@ -1,7 +1,7 @@
 // Script untuk memuat data dosen dari CSV dengan parsing yang akurat
 export async function loadDosenData() {
     try {
-        const response = await fetch('/file/Data pegawai - DAAK.csv');
+        const response = await fetch('/src/assets/data/Data pegawai - DAAK.csv');
         const csvText = await response.text();
 
         // Parse CSV dengan library sederhana tapi akurat

@@ -2,403 +2,53 @@ import './style.css'
 import { loadDosenData } from './loadDosenData.js'
 import { loadFacultyData } from './loadFacultyData.js'
 
+// Import from new modular structure
+import {
+    MOCK_DATA,
+    appState,
+    ROOMS,
+    TIMES,
+    DATES,
+    MAX_EXAMINER_ASSIGNMENTS,
+    saveExcludedDosenToStorage,
+    loadExcludedDosenFromStorage,
+    saveLiburToStorage,
+    loadLiburFromStorage,
+    saveMahasiswaToStorage,
+    loadMahasiswaFromStorage,
+    saveFacultyDataToStorage,
+    loadFacultyDataFromStorage
+} from './data/store.js'
+
+import {
+    getAllDosen,
+    sortData,
+    filterData,
+    normalizeName,
+    getSimilarity
+} from './utils/helpers.js'
+
+import { processMatching } from './logic/matching.js'
+import { isDosenAvailable } from './logic/availability.js'
+
 const mainContent = document.getElementById('main-content');
 const navItems = document.querySelectorAll('.nav-item');
 
-let MOCK_DATA = {
-    masterDosen: [],
-    facultyData: {
-        FIK: [],
-        FES: [],
-        FST: []
-    },
-    mahasiswa: [
-        { nim: '22.11.4501', nama: 'Andi Saputra', prodi: 'S1 Informatika', pembimbing: 'Arif Akbarul Huda, S.Si., M.Eng.' },
-        { nim: '22.11.4502', nama: 'Budi Santoso', prodi: 'S1 Informatika', pembimbing: 'Heri Sismoro, S.Kom., M.Kom.' },
-        { nim: '22.12.5601', nama: 'Citra Lestari', prodi: 'S1 Sistem Informasi', pembimbing: 'Acihmah Sidauruk, S.Kom., M.Kom.' },
-        { nim: '22.21.3401', nama: 'Dewi Sartika', prodi: 'S1 Akuntansi', pembimbing: 'Alfriadi Dwi Atmoko, S.E., Ak., M.Si.' },
-        { nim: '22.22.1201', nama: 'Eko Prasetyo', prodi: 'S1 Kewirausahaan', pembimbing: 'Laksmindra Saptyawati, S.E., M.B.A.' },
-        { nim: '22.11.4503', nama: 'Fajar Pratama', prodi: 'S1 Informatika', pembimbing: 'Arif Dwi Laksito, S.Kom., M.Kom.' },
-        { nim: '22.82.7801', nama: 'Gita Permata', prodi: 'S1 Teknik Komputer', pembimbing: 'Melwin Syafrizal, S.Kom., M.Eng., Ph.D.' },
-        { nim: '22.61.9001', nama: 'Heri Susanto', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Angga Intueri Mahendra Purbakusuma, S.Sos., M.I.Kom.' },
-        { nim: '22.51.2301', nama: 'Indah Sari', prodi: 'S1 Hubungan Internasional', pembimbing: 'Isti Nur Rahmahwati, S.IP., Ll.M., Ph.D.' },
-        { nim: '22.11.4504', nama: 'Joko Widodo', prodi: 'S1 Informatika', pembimbing: 'Prof. Arief Setyanto, S.Si., M.T., Ph.D.' },
-        { nim: '22.11.4505', nama: 'Kurniawan', prodi: 'S1 Informatika', pembimbing: 'Drs. Asro Nasiri, M.Kom.' },
-        { nim: '22.11.4506', nama: 'Lani Marlina', prodi: 'S1 Informatika', pembimbing: 'Sudarmawan, S.T., M.T.' },
-        { nim: '22.12.5602', nama: 'Mulyono', prodi: 'S1 Sistem Informasi', pembimbing: 'Krisnawati, S.Si., M.T.' },
-        { nim: '22.12.5603', nama: 'Nina Zatulini', prodi: 'S1 Sistem Informasi', pembimbing: 'Drs. Bambang Sudaryatno, M.M.' },
-        { nim: '22.61.9002', nama: 'Oky Pratama', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Erik Hadi Saputra, S.Kom., M.Eng.' },
-        { nim: '22.61.9003', nama: 'Putri Andriani', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Dr. Nurbayti, S.I.Kom., M.A.' },
-        { nim: '22.21.3402', nama: 'Qori Sandioriva', prodi: 'S1 Akuntansi', pembimbing: 'Edy Anan, S.E., M.Ak., Ak., CA' },
-        { nim: '22.82.7802', nama: 'Rahmat Hidayat', prodi: 'S1 Teknik Komputer', pembimbing: 'Joko Dwi Santoso, S.Kom., M.Kom.' },
-        { nim: '22.51.2302', nama: 'Siska Kohl', prodi: 'S1 Hubungan Internasional', pembimbing: 'Yoga Suharman, S.IP., M.A.' },
-        { nim: '22.11.4507', nama: 'Taufik Hidayat', prodi: 'S1 Informatika', pembimbing: 'Mardhiya Hayaty, S.T., M.Kom.' },
-        { nim: '22.11.4508', nama: 'Umar Bakri', prodi: 'S1 Informatika', pembimbing: 'Kusnawi, S.Kom., M.Eng.' },
-        { nim: '22.61.9004', nama: 'Vina Panduwinata', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Dwiyono Iriyanto, Drs., M.M.' },
-        { nim: '22.12.5604', nama: 'Wawan Wanisar', prodi: 'S1 Sistem Informasi', pembimbing: 'Wiwi Widayani, S.Kom., M.Kom.' },
-        { nim: '22.11.4509', nama: 'Xavi Hernandez', prodi: 'S1 Informatika', pembimbing: 'Mujiyanto, M.Kom.' },
-        { nim: '22.11.4510', nama: 'Yuni Shara', prodi: 'S1 Informatika', pembimbing: 'Sudarmawan, S.T., M.T.' },
-        // Tambahan 25 mahasiswa baru
-        { nim: '22.11.4511', nama: 'Zahra Amalia', prodi: 'S1 Informatika', pembimbing: 'Arif Akbarul Huda, S.Si., M.Eng.' },
-        { nim: '22.11.4512', nama: 'Ahmad Fauzi', prodi: 'S1 Informatika', pembimbing: 'Heri Sismoro, S.Kom., M.Kom.' },
-        { nim: '22.12.5605', nama: 'Bella Safira', prodi: 'S1 Sistem Informasi', pembimbing: 'Acihmah Sidauruk, S.Kom., M.Kom.' },
-        { nim: '22.21.3403', nama: 'Cahyo Nugroho', prodi: 'S1 Akuntansi', pembimbing: 'Alfriadi Dwi Atmoko, S.E., Ak., M.Si.' },
-        { nim: '22.22.1202', nama: 'Dina Mariana', prodi: 'S1 Kewirausahaan', pembimbing: 'Laksmindra Saptyawati, S.E., M.B.A.' },
-        { nim: '22.11.4513', nama: 'Eka Wijaya', prodi: 'S1 Informatika', pembimbing: 'Arif Dwi Laksito, S.Kom., M.Kom.' },
-        { nim: '22.82.7803', nama: 'Fitri Handayani', prodi: 'S1 Teknik Komputer', pembimbing: 'Melwin Syafrizal, S.Kom., M.Eng., Ph.D.' },
-        { nim: '22.61.9005', nama: 'Gilang Ramadhan', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Angga Intueri Mahendra Purbakusuma, S.Sos., M.I.Kom.' },
-        { nim: '22.51.2303', nama: 'Hana Pertiwi', prodi: 'S1 Hubungan Internasional', pembimbing: 'Isti Nur Rahmahwati, S.IP., Ll.M., Ph.D.' },
-        { nim: '22.11.4514', nama: 'Irfan Hakim', prodi: 'S1 Informatika', pembimbing: 'Prof. Arief Setyanto, S.Si., M.T., Ph.D.' },
-        { nim: '22.11.4515', nama: 'Julia Perez', prodi: 'S1 Informatika', pembimbing: 'Drs. Asro Nasiri, M.Kom.' },
-        { nim: '22.11.4516', nama: 'Kevin Aprilio', prodi: 'S1 Informatika', pembimbing: 'Sudarmawan, S.T., M.T.' },
-        { nim: '22.12.5606', nama: 'Linda Wijaya', prodi: 'S1 Sistem Informasi', pembimbing: 'Krisnawati, S.Si., M.T.' },
-        { nim: '22.12.5607', nama: 'Mira Lesmana', prodi: 'S1 Sistem Informasi', pembimbing: 'Drs. Bambang Sudaryatno, M.M.' },
-        { nim: '22.61.9006', nama: 'Nanda Arsyad', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Erik Hadi Saputra, S.Kom., M.Eng.' },
-        { nim: '22.61.9007', nama: 'Olivia Zalianty', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Dr. Nurbayti, S.I.Kom., M.A.' },
-        { nim: '22.21.3404', nama: 'Pandu Winata', prodi: 'S1 Akuntansi', pembimbing: 'Edy Anan, S.E., M.Ak., Ak., CA' },
-        { nim: '22.82.7804', nama: 'Qonita Azzahra', prodi: 'S1 Teknik Komputer', pembimbing: 'Joko Dwi Santoso, S.Kom., M.Kom.' },
-        { nim: '22.51.2304', nama: 'Reza Pahlevi', prodi: 'S1 Hubungan Internasional', pembimbing: 'Yoga Suharman, S.IP., M.A.' },
-        { nim: '22.11.4517', nama: 'Siti Nurhaliza', prodi: 'S1 Informatika', pembimbing: 'Mardhiya Hayaty, S.T., M.Kom.' },
-        { nim: '22.11.4518', nama: 'Tono Suratman', prodi: 'S1 Informatika', pembimbing: 'Kusnawi, S.Kom., M.Eng.' },
-        { nim: '22.61.9008', nama: 'Umi Kalsum', prodi: 'S1 Ilmu Komunikasi', pembimbing: 'Dwiyono Iriyanto, Drs., M.M.' },
-        { nim: '22.12.5608', nama: 'Vero Moda', prodi: 'S1 Sistem Informasi', pembimbing: 'Wiwi Widayani, S.Kom., M.Kom.' },
-        { nim: '22.11.4519', nama: 'Wahyu Hidayat', prodi: 'S1 Informatika', pembimbing: 'Mujiyanto, M.Kom.' },
-        { nim: '22.11.4520', nama: 'Yanto Basna', prodi: 'S1 Informatika', pembimbing: 'Sudarmawan, S.T., M.T.' }
-    ],
-    libur: [
-        { dosenId: '190302036', date: '2026-02-16', reason: 'Dinas Luar Kota' }, // NIK Prof Arief Setyanto - Senin Minggu 1
-        { dosenId: '190302112', date: '2026-02-17', reason: 'Sakit' }, // NIK Kusnawi - Selasa Minggu 1
-        { dosenId: '190302036', date: '2026-02-19', reason: 'Seminar Nasional' }, // NIK Prof Arief - Kamis Minggu 1
-        { dosenId: '190302045', date: '2026-02-24', reason: 'Cuti' }, // NIK Heri Sismoro - Selasa Minggu 2
-        { dosenId: '190302078', date: '2026-02-25', reason: 'Rapat Pimpinan' } // NIK Arif Dwi Laksito - Rabu Minggu 2
-    ],
-    slots: [],
-    clipboard: null
-};
+// Create aliases for backward compatibility
+let currentView = appState.currentView;
+let selectedDate = appState.selectedDate;
+let currentDosenTab = appState.currentDosenTab;
+let sortColumn = appState.sortColumn;
+let sortDirection = appState.sortDirection;
+let searchTerm = appState.searchTerm;
+let selectedProdiFilter = appState.selectedProdiFilter;
 
-// State Management
-let currentView = 'home';
-let selectedDate = '2026-02-16'; // Fokus Tanggal
-let currentDosenTab = 'sdm';
-let sortColumn = null;
-let sortDirection = 'asc';
-let searchTerm = '';
+// Note: MOCK_DATA, appState, ROOMS, TIMES, DATES, MAX_EXAMINER_ASSIGNMENTS
+// and helper functions are now imported from modules above
 
-const ROOMS = ['6.3.A', '6.3.B', '6.3.C', '6.3.D', '6.3.E', '6.3.F', '6.3.G', '6.3.H'];
-const TIMES = ['08:30', '10:00', '11:30', '13:30'];
-const DATES = [
-    { value: '2026-02-16', label: 'Senin', display: '16 Feb' },
-    { value: '2026-02-17', label: 'Selasa', display: '17 Feb' },
-    { value: '2026-02-18', label: 'Rabu', display: '18 Feb' },
-    { value: '2026-02-19', label: 'Kamis', display: '19 Feb' },
-    { value: '2026-02-20', label: 'Jumat', display: '20 Feb' },
-    { value: '2026-02-23', label: 'Senin', display: '23 Feb' },
-    { value: '2026-02-24', label: 'Selasa', display: '24 Feb' },
-    { value: '2026-02-25', label: 'Rabu', display: '25 Feb' },
-    { value: '2026-02-26', label: 'Kamis', display: '26 Feb' },
-    { value: '2026-02-27', label: 'Jumat', display: '27 Feb' }
-];
+// All helper functions (isDosenAvailable, normalizeName, getSimilarity, 
+// processMatching, sortData, filterData) are now imported from modules
 
-// Soft Constraint: Distribusi beban penguji merata
-const MAX_EXAMINER_ASSIGNMENTS = 5;
-
-// Helper: Ambil semua dosen dari MOCK_DATA
-function getAllDosen() {
-    return [
-        ...(MOCK_DATA.facultyData.FIK || []),
-        ...(MOCK_DATA.facultyData.FES || []),
-        ...(MOCK_DATA.facultyData.FST || [])
-    ].sort((a, b) => a.nama.localeCompare(b.nama));
-}
-
-// Helper: Cek ketersediaan dosen (Fokus pada Tanggal)
-function isDosenAvailable(namaDosen, date, time, excludeSlotStudent = null) {
-    const allDosen = getAllDosen();
-    const dosenData = allDosen.find(d => d.nama === namaDosen);
-
-    // 1. Cek Apakah Dosen di-OFF-kan
-    if (dosenData && dosenData.exclude) return false;
-
-    // 2. Cek Libur Dosen (Berdasarkan Tanggal Persis)
-    const isLibur = MOCK_DATA.libur.some(l => {
-        return l.dosenId === dosenData?.nik && l.date === date;
-    });
-    if (isLibur) return false;
-
-    // 3. Cek Bentrok di Slot Lain (Berdasarkan Tanggal)
-    const bentrok = MOCK_DATA.slots.some(slot => {
-        if (excludeSlotStudent && slot.student === excludeSlotStudent) return false;
-        return slot.date === date && slot.time === time && slot.examiners.includes(namaDosen);
-    });
-
-    return !bentrok;
-}
-
-// Helper: Persiapan data untuk pencocokan
-function normalizeName(name) {
-    if (!name) return '';
-    return name
-        .toLowerCase()
-        // Ganti tanda baca dengan spasi agar tidak menggabungkan kata (misal Dr.,S.Si -> Dr S Si)
-        .replace(/[,.'"]/g, ' ')
-        // Hapus gelar umum & sebutan akademik
-        .replace(/\b(dr|prof|ir|drs|dra|h|hj|s\.?\w*|m\.?\w*|a\.?md\.?\w*|ph\.?d\.?|kom|sos|si|t|se|mm|ma|ba|sc|ak|ca)\b/gi, '')
-        .replace(/\s+/g, ' ') // Spasi ganda jadi satu
-        .trim();
-}
-
-// Helper: Hitung kemiripan string (Levenshtein Distance-based)
-function getSimilarity(s1, s2) {
-    const longer = s1.length > s2.length ? s1 : s2;
-    const shorter = s1.length > s2.length ? s2 : s1;
-    if (longer.length === 0) return 1.0;
-
-    // Optimasi: jika salah satu string kosong
-    if (!s1 || !s2) return 0;
-
-    // Hitung jarak Levenshtein
-    const costs = [];
-    for (let i = 0; i <= longer.length; i++) {
-        let lastValue = i;
-        for (let j = 0; j <= shorter.length; j++) {
-            if (i === 0) {
-                costs[j] = j;
-            } else if (j > 0) {
-                let newValue = costs[j - 1];
-                if (longer.charAt(i - 1) !== shorter.charAt(j - 1)) {
-                    newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-                }
-                costs[j - 1] = lastValue;
-                lastValue = newValue;
-            }
-        }
-        if (i > 0) costs[shorter.length] = lastValue;
-    }
-
-    return (longer.length - costs[shorter.length]) / longer.length;
-}
-
-// Fungsi Utama: Pencocokan Data
-function processMatching() {
-    console.log('Memulai proses pencocokan data...');
-    const sdmData = MOCK_DATA.masterDosen;
-    if (!sdmData || sdmData.length === 0) return;
-
-    // Manual Overrides (Raw Name Lowercase -> SDM No)
-    // Kunci dictionary adalah nama asli dari CSV (lowercased)
-    const manualOverrides = {
-        'angga intueri mahendra p., s.sos, m.i.kom': '191',
-        'laksmindra saptyawati, se, mba': '188',
-        'nurhayanto, s.e., m.b.a.': '382',
-        'arief setyanto, dr.,s.si, mt': '16',
-        'fauzia anis sekar ningrum, s.t., m.t.': '458',
-        'nimah mahnunah, s.t., m.t': '224'
-    };
-
-    ['FIK', 'FES', 'FST'].forEach(fakultas => {
-        const facultyRows = MOCK_DATA.facultyData[fakultas];
-        if (!facultyRows) return;
-
-        facultyRows.forEach(dosen => {
-            let bestMatch = null;
-            let matchType = 'none'; // 'nik', 'name_exact', 'name_fuzzy', 'manual'
-            let score = 0;
-
-            // Nama raw lowercased untuk cek manual override
-            const rawNameLower = dosen.nama ? dosen.nama.toLowerCase().trim() : '';
-            const normName = normalizeName(dosen.nama);
-
-            // 1. Cek Manual Override (Prioritas Tertinggi)
-            if (manualOverrides[rawNameLower]) {
-                const targetNo = manualOverrides[rawNameLower];
-                // Cari data SDM berdasarkan 'no' (bukan 'No')
-                const manualMatch = sdmData.find(s => s.no == targetNo);
-                if (manualMatch) {
-                    bestMatch = manualMatch;
-                    matchType = 'manual';
-                    score = 100;
-                }
-            }
-
-            // 2. Cek NIK (Jika belum match via manual)
-            if (!bestMatch) {
-                const cleanNik = dosen.nik ? dosen.nik.replace(/\D/g, '') : '';
-                if (cleanNik && cleanNik !== '0' && cleanNik.length > 3) {
-                    const nikMatch = sdmData.find(s => s.nik && s.nik.replace(/\D/g, '') === cleanNik);
-                    if (nikMatch) {
-                        bestMatch = nikMatch;
-                        matchType = 'nik';
-                        score = 100;
-                    }
-                }
-            }
-
-            // 3. Cek Nama (Exact & Fuzzy) untuk sisa yang belum match
-            if (!bestMatch) {
-                let bestNameScore = 0;
-                let bestNameMatch = null;
-
-                sdmData.forEach(sdm => {
-                    const normSdm = normalizeName(sdm.nama);
-
-                    if (normName === normSdm) {
-                        // Exact match after normalization
-                        if (bestNameScore < 100) {
-                            bestNameScore = 100;
-                            bestNameMatch = sdm;
-                        }
-                    } else {
-                        // Fuzzy match
-                        const sim = getSimilarity(normName, normSdm);
-                        if (sim > bestNameScore) {
-                            bestNameScore = sim;
-                            bestNameMatch = sdm;
-                        }
-                    }
-                });
-
-                // Threshold 0.65
-                if (bestNameScore >= 0.65) {
-                    bestMatch = bestNameMatch;
-                    score = Math.round(bestNameScore * 100);
-                    matchType = score === 100 ? 'name_exact' : 'name_fuzzy';
-                }
-            }
-
-            // Simpan hasil pencocokan
-            dosen.matchResult = {
-                matched: !!bestMatch,
-                type: matchType,
-                score: score,
-                sdm: bestMatch
-            };
-
-            // ACTION: Rename/Update data sesuai Master SDM jika match
-            if (bestMatch) {
-                if (!dosen.originalNama) dosen.originalNama = dosen.nama;
-                if (!dosen.originalNik) dosen.originalNik = dosen.nik;
-                dosen.nama = bestMatch.nama;
-                dosen.nik = bestMatch.nik;
-            }
-        });
-    });
-    console.log('Pencocokan dan standardisasi selesai.');
-}
-
-// Load data saat aplikasi dimulai
-// Load data saat aplikasi dimulai
-async function initializeApp() {
-    console.log('🚀 Initializing application...');
-
-    try {
-        // Reveal app content nicely (Anti-FOUC)
-        requestAnimationFrame(() => {
-            document.body.style.opacity = '1';
-            document.body.style.pointerEvents = 'auto';
-        });
-
-        // Render halaman pertama
-        navigate('home');
-
-        // Load SDM master data
-        console.log('📥 Loading SDM master data...');
-        MOCK_DATA.masterDosen = await loadDosenData();
-        console.log(`✅ Loaded ${MOCK_DATA.masterDosen.length} SDM records`);
-
-        // Load faculty data from new CSV (Dosen Prodi.csv)
-        console.log('📥 Loading faculty data from Dosen Prodi.csv...');
-        const facultyDataRaw = await loadFacultyData();
-
-        // Verify faculty data against SDM
-        console.log('🔍 Verifying faculty data against SDM...');
-        const { verifyFacultyData } = await import('./loadFacultyData.js');
-        const verificationResults = verifyFacultyData(facultyDataRaw, MOCK_DATA.masterDosen);
-
-        // Update MOCK_DATA with verified data
-        MOCK_DATA.facultyData = {
-            FIK: verificationResults.FIK.details,
-            FES: verificationResults.FES.details,
-            FST: verificationResults.FST.details
-        };
-
-        console.log('✅ Faculty data loaded and verified:');
-        console.log(`   FIK: ${MOCK_DATA.facultyData.FIK.length} dosen (${verificationResults.FIK.matched} matched, ${verificationResults.FIK.unmatched} unmatched)`);
-        console.log(`   FES: ${MOCK_DATA.facultyData.FES.length} dosen (${verificationResults.FES.matched} matched, ${verificationResults.FES.unmatched} unmatched)`);
-        console.log(`   FST: ${MOCK_DATA.facultyData.FST.length} dosen (${verificationResults.FST.matched} matched, ${verificationResults.FST.unmatched} unmatched)`);
-
-        // --- SIMULASI: Set beberapa Dosen Senior ke status "OFF" (Tidak Dijadwalkan) ---
-        const lecturersToExclude = ['Prof. Dr. Mohammad Suyanto, M.M.', 'Prof. Dr. Ema Utami, S.Si., M.Kom.', 'Dr. Achmad Fauzi, S.E., M.M.'];
-        Object.keys(MOCK_DATA.facultyData).forEach(fak => {
-            MOCK_DATA.facultyData[fak].forEach(d => {
-                if (lecturersToExclude.includes(d.nama)) {
-                    d.exclude = true;
-                }
-            });
-        });
-        console.log('🚫 Simulasi: Beberapa dosen senior telah di-set status OFF (Constraint).');
-
-        // Refresh view jika user sedang di tab dosen
-        if (currentView === 'dosen') {
-            mainContent.innerHTML = views.dosen();
-        }
-
-        console.log('✅ Application initialized successfully!');
-
-    } catch (error) {
-        console.error('❌ Error initializing app:', error);
-        // Still show the UI even if data loading fails
-        document.body.style.opacity = '1';
-        document.body.style.pointerEvents = 'auto';
-    }
-}
-
-
-// Fungsi sorting
-function sortData(data, column) {
-    const sorted = [...data].sort((a, b) => {
-        let valA = a[column];
-        let valB = b[column];
-
-        // Convert to string for comparison if needed
-        if (typeof valA === 'string') valA = valA.toLowerCase();
-        if (typeof valB === 'string') valB = valB.toLowerCase();
-
-        // Handle numbers
-        if (!isNaN(valA) && !isNaN(valB)) {
-            valA = Number(valA);
-            valB = Number(valB);
-        }
-
-        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    return sorted;
-}
-
-// Fungsi filtering/search
-function filterData(data, term) {
-    if (!term || term.trim() === '') {
-        return data;
-    }
-
-    const lowerTerm = term.toLowerCase().trim();
-
-    return data.filter(item => {
-        // Search di semua kolom
-        return (
-            (item.no && item.no.toString().toLowerCase().includes(lowerTerm)) ||
-            (item.nomor && item.nomor.toString().toLowerCase().includes(lowerTerm)) ||
-            (item.nama && item.nama.toLowerCase().includes(lowerTerm)) ||
-            (item.nik && item.nik.toLowerCase().includes(lowerTerm)) ||
-            (item.nidn && item.nidn.toLowerCase().includes(lowerTerm)) ||
-            (item.status && item.status.toLowerCase().includes(lowerTerm)) ||
-            (item.kategori && item.kategori.toLowerCase().includes(lowerTerm)) ||
-            (item.prodi && item.prodi.toLowerCase().includes(lowerTerm))
-        );
-    });
-}
 
 // Helper parsing CSV sederhana (dengan dukungan quotes)
 function parseCSVLine(line) {
@@ -526,6 +176,85 @@ function importFaculty(text, fakultas) {
         });
     }
     return result;
+}
+
+// Application initialization
+async function initializeApp() {
+    console.log('🚀 Initializing application...');
+
+    try {
+        // Reveal app content nicely (Anti-FOUC)
+        requestAnimationFrame(() => {
+            document.body.style.opacity = '1';
+            document.body.style.pointerEvents = 'auto';
+        });
+
+        // Render halaman pertama
+        navigate('home');
+
+        // Load SDM master data
+        console.log('📥 Loading SDM master data...');
+        MOCK_DATA.masterDosen = await loadDosenData();
+        console.log(`✅ Loaded ${MOCK_DATA.masterDosen.length} SDM records`);
+
+        // Load faculty data
+        // Priority: LocalStorage -> CSV
+        if (typeof loadFacultyDataFromStorage === 'function' && localStorage.getItem('faculty_data_v1')) {
+            loadFacultyDataFromStorage();
+        } else {
+            // Load faculty data from new CSV (Dosen Prodi.csv)
+            console.log('📥 Loading faculty data from Dosen Prodi.csv...');
+            const facultyDataRaw = await loadFacultyData();
+
+            // Verify faculty data against SDM
+            console.log('🔍 Verifying faculty data against SDM...');
+            const { verifyFacultyData } = await import('./loadFacultyData.js');
+            const verificationResults = verifyFacultyData(facultyDataRaw, MOCK_DATA.masterDosen);
+
+            // Update MOCK_DATA with verified data
+            MOCK_DATA.facultyData = {
+                FIK: verificationResults.FIK.details,
+                FES: verificationResults.FES.details,
+                FST: verificationResults.FST.details
+            };
+
+            console.log('✅ Faculty data loaded from CSV and verified.');
+            // Save initial CSV state to storage
+            if (typeof saveFacultyDataToStorage === 'function') saveFacultyDataToStorage();
+        }
+
+        // Load Mahasiswa Data
+        if (typeof loadMahasiswaFromStorage === 'function') {
+            loadMahasiswaFromStorage();
+        }
+        // Save default mahasiswa if storage empty
+        else if (typeof saveMahasiswaToStorage === 'function') {
+            saveMahasiswaToStorage();
+        }
+
+        // Load persistensi status Dosen (OFF/ON) dari LocalStorage
+        if (typeof loadExcludedDosenFromStorage === 'function') {
+            loadExcludedDosenFromStorage();
+        }
+
+        // Load persistensi data Dosen Libur dari LocalStorage
+        if (typeof loadLiburFromStorage === 'function') {
+            loadLiburFromStorage();
+        }
+
+        // Refresh view jika user sedang di tab dosen
+        if (currentView === 'dosen') {
+            mainContent.innerHTML = views.dosen();
+        }
+
+        console.log('✅ Application initialized successfully!');
+
+    } catch (error) {
+        console.error('❌ Error initializing app:', error);
+        // Still show the UI even if data loading fails
+        document.body.style.opacity = '1';
+        document.body.style.pointerEvents = 'auto';
+    }
 }
 
 // triggerImport and handleImportFile legacy
@@ -772,9 +501,15 @@ const views = {
             }
         } else {
             const faculty = currentDosenTab.toUpperCase();
-            const data = MOCK_DATA.facultyData[faculty] || [];
+            const allFacultyData = MOCK_DATA.facultyData[faculty] || [];
 
-            if (data.length > 0) {
+            if (allFacultyData.length > 0) {
+                // Filter by selected Prodi
+                let data = allFacultyData;
+                if (selectedProdiFilter) {
+                    data = data.filter(d => d.prodi === selectedProdiFilter);
+                }
+
                 const filtered = filterData(data, searchTerm);
                 const sorted = sortData(filtered, sortColumn || 'nomor');
 
@@ -817,7 +552,10 @@ const views = {
                         nameDisplay,
                         d.prodi,
                         `<div>${statusBadge}</div>`,
-                        toggleSwitch
+                        toggleSwitch,
+                        `<div style="text-align:center;">
+                            <button onclick="window.deleteDosen('${faculty}', '${d.nik}')" style="background:none; border:none; cursor:pointer; font-size:1rem;" title="Hapus Dosen">🗑️</button>
+                         </div>`
                     ];
 
                     // Jika OFF (isIncluded == false), beri class khusus
@@ -838,19 +576,31 @@ const views = {
                     { label: 'Nama Dosen', key: 'nama', width: '30%' },
                     { label: 'Prodi', key: 'prodi', width: '20%' },
                     { label: 'Status Validasi', key: null, width: '150px' },
-                    { label: 'Jadwalkan', width: '80px', key: null }
+                    { label: 'Jadwalkan', width: '80px', key: 'exclude' },
+                    { label: 'Aksi', width: '60px', key: null, align: 'center' }
                 ];
+
+                // Get unique Prodis for selector
+                const prodis = [...new Set(allFacultyData.map(d => d.prodi).filter(p => p && p !== '-'))].sort();
 
                 content = `
                     <div class="controls-area" style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
-                        <input type="text" id="searchInput" class="search-input" placeholder="Cari dosen ${faculty}..." value="${searchTerm}" oninput="window.handleSearchInput(event)" style="width: 300px;">
+                        <div style="display: flex; gap: 8px;">
+                             <select onchange="window.handleProdiFilterChange(event)" style="padding: 6px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 0.9rem;">
+                                 <option value="">Semua Prodi</option>
+                                 ${prodis.map(p => `<option value="${p}" ${selectedProdiFilter === p ? 'selected' : ''}>${p}</option>`).join('')}
+                             </select>
+                             <input type="text" id="searchInput" class="search-input" placeholder="Cari dosen ${faculty}..." value="${searchTerm}" oninput="window.handleSearchInput(event)" style="width: 250px;">
+                        </div>
                         <div style="font-size:0.8rem; color:var(--text-muted);">
                            <button onclick="window.toggleAddDosenModal(true)" style="margin-left:10px; padding: 4px 10px; font-size: 0.75rem; cursor:pointer; background: var(--secondary); margin-right: 5px;">+ Tambah Dosen</button>
                            <button onclick="processMatching(); window.switchDosenTab('${currentDosenTab}')" style="margin-left:5px; padding: 4px 10px; font-size: 0.75rem; cursor:pointer;">🔄 Force Re-Match</button>
                            Total: <strong>${filtered.length}</strong> dosen
                         </div>
                     </div>
-                    ${renderTable(headers, rows)}
+                    <div style="min-height: 400px;">
+                        ${renderTable(headers, rows)}
+                    </div>
                 `;
             } else {
                 content = `
@@ -869,10 +619,11 @@ const views = {
                 <p class="subtitle">Manajemen data dosen per fakultas dan master data SDM.</p>
             </header>
             <div class="tabs">
-                ${renderTab('sdm', 'Data SDM (Acuan)')}
                 ${renderTab('fik', 'Dosen FIK')}
                 ${renderTab('fes', 'Dosen FES')}
                 ${renderTab('fst', 'Dosen FST')}
+                <div style="width: 1px; background-color: var(--border); margin: 0 10px;"></div>
+                ${renderTab('sdm', 'Data SDM')}
             </div>
             <div class="content-area">
                 ${content}
@@ -880,8 +631,12 @@ const views = {
         `;
     },
     mahasiswa: () => {
-        // Sort by NIM ascending
-        const sortedMahasiswa = [...MOCK_DATA.mahasiswa].sort((a, b) => a.nim.localeCompare(b.nim));
+        // Filter & Sort
+        let data = MOCK_DATA.mahasiswa;
+        if (searchTerm) {
+            data = filterData(data, searchTerm);
+        }
+        const sortedMahasiswa = [...data].sort((a, b) => a.nim.localeCompare(b.nim));
 
         return `
         <header style="display: flex; justify-content: space-between; align-items: center; padding-left: 3.5rem;">
@@ -896,10 +651,17 @@ const views = {
         </header>
 
         <div class="card" style="margin-bottom: 2rem;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div class="stat-item">
                     <div style="font-size: 0.9rem; color: var(--text-muted);">Total Pendaftar</div>
                     <div style="font-size: 1.5rem; font-weight: 700;">${sortedMahasiswa.length}</div>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" 
+                        placeholder="Cari (NIM, Nama, Prodi, Dospem)..." 
+                        value="${searchTerm}" 
+                        oninput="window.handleSearchInput(event)"
+                        style="width: 300px; padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem;">
                 </div>
             </div>
         </div>
@@ -965,49 +727,120 @@ const views = {
                 </tbody>
             </table>
             ` : `
-            <div class="empty-state">
-                <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">🎓</div>
-                <h3 style="margin-bottom: 0.5rem; color: var(--text-main);">Belum ada data mahasiswa</h3>
-                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Tambahkan data mahasiswa secara manual.</p>
-                <button onclick="window.toggleAddMahasiswaModal(true)" class="btn-secondary">Tambah Data</button>
+            <div class="empty-state" style="padding: 4rem 2rem; text-align: center;">
+                <div style="font-size: 5rem; margin-bottom: 1.5rem; opacity: 0.15; filter: grayscale(100%);">
+                    🎓
+                </div>
+                <h3 style="margin-bottom: 0.75rem; color: var(--text-main); font-size: 1.5rem; font-weight: 700;">
+                    Belum Ada Data Mahasiswa
+                </h3>
+                <p style="color: var(--text-muted); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.6; font-size: 0.95rem;">
+                    Tambahkan data mahasiswa yang akan mengikuti ujian pendadaran.<br>
+                    Anda dapat menambahkan data secara manual satu per satu.
+                </p>
+                <button onclick="window.toggleAddMahasiswaModal(true)" 
+                        style="padding: 0.875rem 2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 16px rgba(94, 92, 230, 0.3); transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;"
+                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(94, 92, 230, 0.4)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(94, 92, 230, 0.3)';">
+                    <span style="font-size: 1.2rem;">+</span>
+                    <span>Tambah Mahasiswa Pertama</span>
+                </button>
             </div>
             `}
         </div>
         `;
     },
-    libur: () => `
-        <header>
-            <h1>Dosen Libur / Berhalangan</h1>
-            <p class="subtitle">Input tanggal ketidakhadiran dosen untuk kendala (constraint) penjadwalan.</p>
-        </header>
-        <div class="table-container">
-            ${MOCK_DATA.libur.length > 0 ? `
-            <table>
-                <thead>
-                    <tr>
-                        <th>Dosen</th>
-                        <th>Tanggal</th>
-                        <th>Keterangan</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${MOCK_DATA.libur.map(l => {
-        const d = MOCK_DATA.masterDosen.find(ds => ds.nik === l.dosenId);
+    libur: () => {
+        // Helper to format constraint description
+        const renderConstraint = (l) => {
+            if (!l.type || l.type === 'date') {
+                const dObj = DATES.find(d => d.value === l.date);
+                return `<span class="badge badge-warning">Tanggal</span> ${dObj ? dObj.display : l.date}`;
+            }
+            if (l.type === 'range') {
+                const sObj = DATES.find(d => d.value === l.start);
+                const eObj = DATES.find(d => d.value === l.end);
+                return `<span class="badge badge-danger">Rentang</span> ${sObj?.display || l.start} s/d ${eObj?.display || l.end}`;
+            }
+            if (l.type === 'recurring') {
+                const daysStr = l.days ? l.days.join(', ') : 'Semua Hari';
+                const timesStr = l.times && l.times.length > 0 ? l.times.join(', ') : '<b>FULL DAY</b>';
+                return `<span class="badge badge-primary">Rutin</span> Hari <b>${daysStr}</b> jam ${timesStr}`;
+            }
+            return '-';
+        };
+
         return `
-                            <tr>
-                                <td><strong>${d ? d.nama : 'Tidak Diketahui'}</strong></td>
-                                <td>${l.date}</td>
-                                <td>${l.reason}</td>
-                                <td>❌</td>
-                            </tr>
-                        `;
-    }).join('')}
-                </tbody>
-            </table>
-            ` : '<p style="text-align:center; color:var(--text-muted); padding:3rem;">Belum ada jadwal libur dosen</p>'}
+        <header style="display: flex; justify-content: space-between; align-items: center; padding-left: 3.5rem;">
+            <div>
+                <h1>Manajemen Ketersediaan Dosen</h1>
+                <p class="subtitle">Atur jadwal kapan dosen <b>TIDAK BISA</b> menguji (Cuti, Mengajar, dll).</p>
+            </div>
+            <button onclick="window.toggleAddLiburModal(true)">+ Tambah Aturan Baru</button>
+        </header>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="background: var(--bg-subtle); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                <strong>ℹ️ Tips:</strong><br>
+                - Gunakan <b>Rentang Tanggal</b> untuk cuti panjang.<br>
+                - Gunakan <b>Aturan Rutin</b> untuk dosen yang hanya bisa menguji di hari tertentu (misal: "Blokir Senin & Kamis").<br>
+                - Jika dosen "Hanya Bisa Selasa", maka buat aturan Rutin untuk memblokir Senin, Rabu, Kamis, Jumat.
+            </div>
+
+            <div class="table-container">
+            ${MOCK_DATA.libur.length > 0 ? `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Dosen</th>
+                            <th>Jenis Aturan</th>
+                            <th>Keterangan / Alasan</th>
+                            <th style="text-align:center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${MOCK_DATA.libur.map((l, index) => {
+            const dosen = getAllDosen().find(d => d.nik === l.dosenId);
+            const namaDosen = dosen ? `<strong>${dosen.nama}</strong><br><span style="font-size:0.8rem; color:var(--text-muted);">${dosen.prodi}</span>` : `<span style="color:red;">Dosen Hapus (${l.dosenId})</span>`;
+
+            return `
+                                <tr>
+                                    <td>${namaDosen}</td>
+                                    <td>${renderConstraint(l)}</td>
+                                    <td>${l.reason}</td>
+                                    <td style="text-align: center;">
+                                        <button onclick="window.deleteLibur(${index})" style="color: var(--danger); background: none; border: none; cursor: pointer;" title="Hapus Aturan">🗑️</button>
+                                    </td>
+                                </tr>
+                            `;
+        }).join('')}
+                    </tbody>
+                </table>
+            ` : `
+                <div class="empty-state" style="padding: 4rem 2rem; text-align: center;">
+                    <div style="font-size: 5rem; margin-bottom: 1.5rem; opacity: 0.15; filter: grayscale(100%);">
+                        📅
+                    </div>
+                    <h3 style="margin-bottom: 0.75rem; color: var(--text-main); font-size: 1.5rem; font-weight: 700;">
+                        Belum Ada Aturan Ketersediaan
+                    </h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem; max-width: 550px; margin-left: auto; margin-right: auto; line-height: 1.6; font-size: 0.95rem;">
+                        Semua dosen dianggap <strong style="color: var(--success);">TERSEDIA</strong> setiap saat kecuali jika ada jadwal bentrok.<br>
+                        Tambahkan aturan ketersediaan untuk mengatur waktu libur atau ketidaktersediaan dosen.
+                    </p>
+                    <button onclick="window.toggleAddLiburModal(true)" 
+                            style="padding: 0.875rem 2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 16px rgba(94, 92, 230, 0.3); transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;"
+                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(94, 92, 230, 0.4)';"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(94, 92, 230, 0.3)';">
+                        <span style="font-size: 1.2rem;">+</span>
+                        <span>Tambah Aturan Pertama</span>
+                    </button>
+                </div>
+            `}
+            </div>
         </div>
-    `,
+        `;
+    },
     logic: () => `
         <header>
             <h1>Eksplorasi Logika</h1>
@@ -1149,6 +982,8 @@ window.handleSearchInput = (e) => {
     window.searchTimeout = setTimeout(() => {
         if (currentView === 'dosen') {
             mainContent.innerHTML = views.dosen();
+        } else if (currentView === 'mahasiswa') {
+            mainContent.innerHTML = views.mahasiswa();
         }
     }, 300); // Wait 300ms after user stops typing
 };
@@ -1302,7 +1137,9 @@ window.addDosenFromSDM = (nik) => {
     window.toggleAddDosenModal(false);
 
     // Show feedback
-    alert(`Dosen ${newDosen.nama} berhasil ditambahkan ke ${currentFaculty}!`);
+    // Show feedback
+    // alert(`Dosen ${newDosen.nama} berhasil ditambahkan ke ${currentFaculty}!`);
+    saveFacultyDataToStorage(); // Save persistence
 };
 
 window.toggleAddDosenModal = (show) => {
@@ -1425,7 +1262,22 @@ window.saveNewDosen = (e) => {
     window.toggleAddDosenModal(false);
 
     // Show quick feedback
-    alert(`Dosen ${newDosen.nama} berhasil ditambahkan!`);
+    // alert(`Dosen ${newDosen.nama} berhasil ditambahkan!`);
+
+    saveFacultyDataToStorage(); // Save persistence
+};
+
+window.deleteDosen = (faculty, nik) => {
+    // if (confirm('Yakin ingin menghapus dosen ini?')) { // Remove confirm for faster action or keep if desired
+    MOCK_DATA.facultyData[faculty] = MOCK_DATA.facultyData[faculty].filter(d => d.nik !== nik);
+
+    // Refresh view
+    if (currentView === 'dosen') {
+        mainContent.innerHTML = views.dosen();
+    }
+
+    saveFacultyDataToStorage(); // Save persistence
+    // }
 };
 
 // --- Fitur Data Mahasiswa ---
@@ -1527,15 +1379,17 @@ window.saveNewMahasiswa = (e) => {
 
     window.toggleAddMahasiswaModal(false);
     // Optional: alert('Mahasiswa berhasil ditambahkan');
+    saveMahasiswaToStorage();
 };
 
 window.deleteMahasiswa = (nim) => {
-    if (confirm('Yakin ingin menghapus data mahasiswa ini?')) {
-        MOCK_DATA.mahasiswa = MOCK_DATA.mahasiswa.filter(m => m.nim !== nim);
-        if (currentView === 'mahasiswa') {
-            mainContent.innerHTML = views.mahasiswa();
-        }
+    // if (confirm('Yakin ingin menghapus data mahasiswa ini?')) { // Remove confirm
+    MOCK_DATA.mahasiswa = MOCK_DATA.mahasiswa.filter(m => m.nim !== nim);
+    if (currentView === 'mahasiswa') {
+        mainContent.innerHTML = views.mahasiswa();
     }
+    saveMahasiswaToStorage();
+    // }
 };
 
 window.toggleDosenScheduling = (faculty, nik) => {
@@ -1548,6 +1402,11 @@ window.toggleDosenScheduling = (faculty, nik) => {
         // Jika exclude undefined/false -> jadi true (OFF)
         // Jika exclude true -> jadi false (ON)
         dosen.exclude = !dosen.exclude;
+
+        // Save persistence
+        if (typeof saveExcludedDosenToStorage === 'function') {
+            saveExcludedDosenToStorage();
+        }
 
         // Refresh view without full reload context
         // Kita hanya perlu update tabel, tapi re-render full view paling aman
@@ -1694,7 +1553,7 @@ window.scheduleIndividualStudent = async (nim) => {
                 if (!isDosenAvailable(mahasiswa.pembimbing, date, time)) continue;
 
                 // Find examiners
-                const examiners = findExaminers(mahasiswa.pembimbing, date, time);
+                const examiners = findExaminers(mahasiswa.pembimbing, date, time, mahasiswa.prodi);
                 if (!examiners) continue;
 
                 // SUCCESS! Book the slot
@@ -1855,6 +1714,180 @@ window.addDosenFromSDM = window.addDosenFromSDM;
 
 
 
+// --- Fitur Dosen Libur ---
+
+window.toggleAddLiburModal = (show) => {
+    const modalId = 'addLiburModal';
+    let modal = document.getElementById(modalId);
+
+    if (show) {
+        if (modal) modal.remove();
+
+        const modalContainer = document.createElement('div');
+        modalContainer.id = modalId;
+        modalContainer.className = 'modal-overlay';
+
+        const allDosen = getAllDosen();
+        // Remove duplicates based on NIK
+        const uniqueDosen = [];
+        const map = new Map();
+        for (const item of allDosen) {
+            if (!map.has(item.nik)) {
+                map.set(item.nik, true);
+                uniqueDosen.push(item);
+            }
+        }
+
+        const dosenOptions = uniqueDosen.map(d => `<option value="${d.nik}">${d.nama}</option>`).join('');
+
+        // Date Options (Use DATES constant)
+        const dateOptions = DATES.map(d => `<option value="${d.value}">${d.display} (${d.label})</option>`).join('');
+
+        modalContainer.innerHTML = `
+            <div class="modal-content" style="max-width: 550px;">
+                <h2 style="margin-bottom: 1rem;">Tambah Aturan Ketersediaan</h2>
+                <form onsubmit="window.saveNewLibur(event)">
+                    <div class="form-group">
+                        <label class="form-label">Dosen</label>
+                        <select name="dosenId" class="form-input" required>
+                             <option value="" disabled selected>Pilih Dosen...</option>
+                             ${dosenOptions}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tipe Aturan</label>
+                        <select id="ruleType" name="type" class="form-input" onchange="window.handleRuleTypeChange(this.value)">
+                             <option value="date" selected>📅 Tanggal Spesifik (Cuti Sehari)</option>
+                             <option value="range">📆 Rentang Tanggal (Cuti Panjang)</option>
+                             <option value="recurring">🔄 Aturan Rutin (Hari/Jam Tertentu)</option>
+                        </select>
+                    </div>
+
+                    <!-- Input: Single Date -->
+                    <div id="inputDate" class="form-group rule-input">
+                        <label class="form-label">Pilih Tanggal</label>
+                        <select name="date" class="form-input">
+                             ${dateOptions}
+                        </select>
+                    </div>
+
+                    <!-- Input: Date Range -->
+                    <div id="inputRange" class="form-group rule-input" style="display:none; gap: 10px;">
+                        <div style="flex:1;">
+                            <label class="form-label">Dari Tanggal</label>
+                            <select name="start" class="form-input">${dateOptions}</select>
+                        </div>
+                        <div style="flex:1;">
+                            <label class="form-label">Sampai Tanggal</label>
+                            <select name="end" class="form-input">${dateOptions}</select>
+                        </div>
+                    </div>
+
+                    <!-- Input: Recurring -->
+                    <div id="inputRecurring" class="form-group rule-input" style="display:none;">
+                        <label class="form-label">Pilih Hari yang DIBLOKIR:</label>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                            ${['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].map(day => `
+                                <label style="display:flex; align-items:center; gap:4px; font-size:0.85rem; cursor:pointer; background:var(--bg); padding:4px 8px; border-radius:4px; border:1px solid var(--border);">
+                                    <input type="checkbox" name="days" value="${day}"> ${day}
+                                </label>
+                            `).join('')}
+                        </div>
+
+                        <label class="form-label">Pilih Jam yang DIBLOKIR (Biarkan kosong jika seharian):</label>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            ${['08:30', '10:00', '11:30', '13:30'].map(time => `
+                                <label style="display:flex; align-items:center; gap:4px; font-size:0.85rem; cursor:pointer; background:var(--bg); padding:4px 8px; border-radius:4px; border:1px solid var(--border);">
+                                    <input type="checkbox" name="times" value="${time}"> ${time}
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                     <div class="form-group">
+                        <label class="form-label">Keterangan / Alasan</label>
+                        <input type="text" name="reason" class="form-input" required placeholder="Contoh: Mengajar Kelas Lain, Dinas, dll">
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" onclick="window.toggleAddLiburModal(false)">Batal</button>
+                        <button type="submit">Simpan Aturan</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(modalContainer);
+        setTimeout(() => modalContainer.classList.add('active'), 10);
+    } else {
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+    }
+};
+
+// Handle Rule Type Change Logic
+window.handleRuleTypeChange = (type) => {
+    document.getElementById('inputDate').style.display = type === 'date' ? 'block' : 'none';
+    document.getElementById('inputRange').style.display = type === 'range' ? 'flex' : 'none';
+    document.getElementById('inputRecurring').style.display = type === 'recurring' ? 'block' : 'none';
+};
+
+window.saveNewLibur = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const type = formData.get('type');
+
+    let newLibur = {
+        dosenId: formData.get('dosenId'),
+        reason: formData.get('reason'),
+        type: type
+    };
+
+    if (type === 'date') {
+        newLibur.date = formData.get('date');
+    } else if (type === 'range') {
+        newLibur.start = formData.get('start');
+        newLibur.end = formData.get('end');
+        // Basic validation: swap if start > end? Naah, user responsibility for now
+        if (newLibur.start > newLibur.end) {
+            alert('Tanggal awal tidak boleh lebih akhir dari tanggal akhir.');
+            return;
+        }
+    } else if (type === 'recurring') {
+        newLibur.days = formData.getAll('days');
+        newLibur.times = formData.getAll('times');
+
+        if (newLibur.days.length === 0) {
+            alert('Pilih minimal satu hari untuk aturan rutin.');
+            return;
+        }
+    }
+
+    MOCK_DATA.libur.push(newLibur);
+
+    if (currentView === 'libur') {
+        mainContent.innerHTML = views.libur();
+    }
+
+    window.toggleAddLiburModal(false);
+    saveLiburToStorage();
+};
+
+window.deleteLibur = (index) => {
+    // if (confirm('Hapus jadwal libur ini?')) { // Removed confirm to ensure it works
+    MOCK_DATA.libur.splice(index, 1);
+    if (currentView === 'libur') {
+        mainContent.innerHTML = views.libur();
+    }
+    // }
+    saveLiburToStorage();
+};
+
+
+
 // --- LOGIKA PENJADWALAN OTOMATIS (ALGORITMA LOOPING KETAT) ---
 
 // Log helper
@@ -1901,11 +1934,32 @@ window.generateSchedule = async () => {
     logToLogic(`⚖️ Soft Constraint Aktif: Maksimal ${MAX_EXAMINER_ASSIGNMENTS} tugas per dosen (kecuali pembimbing wajib).`);
 
     // Helper: Cari Penguji Pendamping (STRATEGI: SEQUENTIAL / FIRST-FIT + LOAD BALANCING)
-    const findExaminers = (pembimbing, date, time) => {
+    // Helper: Cari Penguji Pendamping (STRATEGI: SEQUENTIAL / FIRST-FIT + LOAD BALANCING + PRODI MATCHING)
+    const findExaminers = (pembimbing, date, time, studentProdi) => {
         let candidates = [];
+
+        // Strict Prodi Matching Logic
+        // FES & FST: Wajib sesama prodi
+        // FIK: Campur, KECUALI Teknologi Informasi (Wajib sesama TI)
+        const isStrictProdi = (
+            MOCK_DATA.facultyData.FES.some(d => d.prodi === studentProdi) ||
+            MOCK_DATA.facultyData.FST.some(d => d.prodi === studentProdi) ||
+            studentProdi === 'S1 Teknologi Informasi' || studentProdi === 'Teknologi Informasi'
+        );
+
         for (const d of allDosen) {
             if (candidates.length >= 2) break;
             if (d.nama !== pembimbing) {
+
+                // Cek constraint Prodi
+                if (isStrictProdi) {
+                    // Normalisasi nama prodi untuk perbandingan aman
+                    const dProdi = d.prodi?.trim().toLowerCase();
+                    const sProdi = studentProdi?.trim().toLowerCase();
+                    // Jika prodi tidak sama, skip dosen ini
+                    if (dProdi !== sProdi) continue;
+                }
+
                 // Check availability
                 if (!isDosenAvailable(d.nama, date, time)) continue;
 
@@ -1970,7 +2024,7 @@ window.generateSchedule = async () => {
             if (!isDosenAvailable(mhs.pembimbing, date, time)) continue; // Dosen Sibuk
 
             // 2. Cek Penguji Pendamping
-            const examiners = findExaminers(mhs.pembimbing, date, time);
+            const examiners = findExaminers(mhs.pembimbing, date, time, mhs.prodi);
             if (!examiners) continue; // Tidak dapat penguji
 
             candidateFound = mhs;
@@ -2031,4 +2085,16 @@ window.generateSchedule = async () => {
 };
 
 // Call initializeApp (defined earlier at line 214)
+initializeApp();
+
+window.handleProdiFilterChange = (event) => {
+    selectedProdiFilter = event.target.value;
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = views.dosen();
+};
+
+
+// All persistence helpers are now imported from store.js
+
+// Initialize the application when the module loads
 initializeApp();

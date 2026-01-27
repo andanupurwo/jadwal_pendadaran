@@ -1,7 +1,7 @@
 // Load Faculty Data from CSV
 export async function loadFacultyData() {
     try {
-        const response = await fetch('/file/Dosen Prodi.csv');
+        const response = await fetch('/src/assets/data/Dosen Prodi.csv');
         const csvText = await response.text();
 
         // Parse CSV
