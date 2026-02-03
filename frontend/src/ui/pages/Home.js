@@ -5,10 +5,6 @@ export const HomeView = () => {
     const dateObj = DATES.find(d => d.value === currentDate);
     const selectedDay = dateObj.label;
 
-    const times = selectedDay === 'Jumat'
-        ? TIMES.filter(t => t !== '11:30')
-        : TIMES;
-
     return `
         <div class="container">
             <header class="page-header">
@@ -57,21 +53,35 @@ export const HomeView = () => {
                     <div>
                         <strong>${dateObj.display} (${selectedDay})</strong>
                         <span style="margin-left: 1.5rem; color: var(--text-muted);">
-                            ${ROOMS.length} Ruangan × ${times.length} Sesi
+                            ${ROOMS.length} Ruangan × ${TIMES.length} Sesi
                         </span>
                     </div>
                     <div style="font-size: 0.85rem; color: var(--text-muted);">
                         <span style="display: inline-block; width: 12px; height: 12px; background: var(--success); border-radius: 2px; margin-right: 4px;"></span> Terisi
                         <span style="display: inline-block; width: 12px; height: 12px; background: var(--border); border-radius: 2px; margin: 0 4px 0 12px;"></span> Kosong
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #e0e0e0; border: 1px dashed #bbb; border-radius: 2px; margin: 0 4px 0 12px;"></span> Istirahat
                     </div>
                 </div>
 
-                <div class="room-schedule-grid" style="display: grid; grid-template-columns: 80px repeat(${times.length}, 1fr); gap: 6px; width: 100%;">
+                <div class="room-schedule-grid" style="display: grid; grid-template-columns: 80px repeat(${TIMES.length}, 1fr); gap: 6px; width: 100%;">
                     <div style="font-weight: 600; padding: 0.75rem 0.5rem; text-align: center; background: var(--card-bg); border-radius: 6px;">Ruangan</div>
-                    ${times.map(time => `<div style="font-weight: 600; padding: 0.75rem 0.5rem; text-align: center; background: var(--card-bg); border-radius: 6px; font-size: 0.9rem;">${time}</div>`).join('')}
+                    ${TIMES.map(time => {
+        const isJumatBreak = selectedDay === 'Jumat' && time === '11:30';
+        return `<div style="font-weight: 600; padding: 0.75rem 0.5rem; text-align: center; background: ${isJumatBreak ? '#f0f0f0' : 'var(--card-bg)'}; color: ${isJumatBreak ? '#999' : 'inherit'}; border-radius: 6px; font-size: 0.9rem;">${time}</div>`;
+    }).join('')}
                     ${ROOMS.map(room => `
                         <div style="font-weight: 600; padding: 0.75rem 0.5rem; display: flex; align-items: center; justify-content: center; background: var(--card-bg); border-radius: 6px;">${room}</div>
-                        ${times.map(time => {
+                        ${TIMES.map(time => {
+        const isJumatBreak = selectedDay === 'Jumat' && time === '11:30';
+
+        if (isJumatBreak) {
+            return `
+                                    <div style="padding: 0.6rem; border-radius: 8px; min-height: 100px; background: #f5f5f7; border: 1px dashed #d1d1d6; display: flex; align-items: center; justify-content: center; color: #a1a1a6; font-size: 0.75rem; font-style: italic;">
+                                        ⛔ Istirahat
+                                    </div>
+                                `;
+        }
+
         const slot = APP_DATA.slots.find(s => s.date === currentDate && s.time === time && s.room === room);
         return `
                                 <div class="room-slot ${slot ? 'slot-filled' : 'slot-empty'}" 

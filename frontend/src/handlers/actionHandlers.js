@@ -3,6 +3,7 @@ import { INITIAL_LIBUR } from '../data/initialLibur.js';
 import * as views from '../ui/pages/index.js';
 import { navigate } from '../ui/core/router.js';
 import { getAllDosen } from '../utils/helpers.js';
+import { showConfirm } from '../ui/components/ConfirmationModal.js';
 
 const getContainer = () => document.getElementById('main-content');
 const refreshView = (viewName) => {
@@ -27,7 +28,7 @@ const refreshView = (viewName) => {
 };
 
 export async function deleteMahasiswa(nim) {
-    if (!confirm('Hapus mahasiswa ini?')) return;
+    if (!(await showConfirm('Hapus mahasiswa ini?'))) return;
     try {
         const { mahasiswaAPI } = await import('../services/api.js');
         const response = await mahasiswaAPI.delete(nim);
@@ -41,7 +42,7 @@ export async function deleteMahasiswa(nim) {
 }
 
 export async function deleteSlot(id) {
-    if (confirm('Hapus jadwal ini?')) {
+    if (await showConfirm('Hapus jadwal ini?')) {
         try {
             const { slotsAPI } = await import('../services/api.js');
             const response = await slotsAPI.delete(id);
@@ -103,7 +104,7 @@ export async function toggleDosenScheduling(faculty, nik) {
 }
 
 export async function wipeLiburData() {
-    if (confirm('Hapus SEMUA aturan ketersediaan dosen dari DATABASE?')) {
+    if (await showConfirm('Hapus SEMUA aturan ketersediaan dosen dari DATABASE?', 'Konfirmasi Bahaya!')) {
         try {
             const { liburAPI } = await import('../services/api.js');
 
@@ -122,8 +123,8 @@ export async function wipeLiburData() {
 }
 
 
-export function resetLiburData() {
-    if (confirm('Reset data libur ke Default?')) {
+export async function resetLiburData() {
+    if (await showConfirm('Reset data libur ke Default?')) {
         APP_DATA.libur = [...INITIAL_LIBUR];
         saveLiburToStorage();
         refreshView('libur');
@@ -131,7 +132,7 @@ export function resetLiburData() {
 }
 
 export async function deleteLibur(dosenId) {
-    if (!confirm('Hapus semua aturan libur untuk dosen ini?')) return;
+    if (!(await showConfirm('Hapus semua aturan libur untuk dosen ini?'))) return;
     try {
         const { liburAPI } = await import('../services/api.js');
 
@@ -150,7 +151,7 @@ export async function deleteLibur(dosenId) {
 }
 
 export async function wipeMahasiswaData() {
-    if (confirm('Hapus SEMUA data mahasiswa dan jadwal dari DATABASE?')) {
+    if (await showConfirm('Hapus SEMUA data mahasiswa dan jadwal dari DATABASE?', 'Konfirmasi Bahaya!')) {
         try {
             const { mahasiswaAPI, slotsAPI } = await import('../services/api.js');
             await slotsAPI.deleteAll();
@@ -281,7 +282,7 @@ export function onDrop(e, date, time, room) {
 }
 
 export async function runStressTest() {
-    if (!confirm('STRESS TEST akan menghapus data saat ini dan membuat 500 mahasiswa acak. Lanjutkan?')) return;
+    if (!(await showConfirm('STRESS TEST akan menghapus data saat ini dan membuat 500 mahasiswa acak. Lanjutkan?', 'Warning: Stress Test'))) return;
 
     // Pastikan kita bisa import helper di dalam fungsi ini atau pastikan dia global
     const logEl = document.getElementById('logicLog');

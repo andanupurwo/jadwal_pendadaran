@@ -80,3 +80,14 @@
     border-color: var(--primary);
     box-shadow: 0 0 0 4px var(--primary-subtle);
 }
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

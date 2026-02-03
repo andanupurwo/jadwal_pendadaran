@@ -1,6 +1,7 @@
 import { APP_DATA, appState, DATES, TIMES, saveMahasiswaToStorage, saveLiburToStorage } from '../../data/store.js';
 import { getAllDosen } from '../../utils/helpers.js';
 import * as views from '../pages/index.js';
+import { showConfirm } from './ConfirmationModal.js';
 
 export function toggleAddMahasiswaModal(show) {
     const modalId = 'addMahasiswaModal';
@@ -617,7 +618,7 @@ export function handleDosenCSVUpload(e) {
 }
 
 export async function deleteDosen(faculty, nik) {
-    if (!confirm('Hapus dosen ini secara PERMANEN dari Database?')) return;
+    if (!(await showConfirm('Hapus dosen ini secara PERMANEN dari Database?', 'Hapus Dosen'))) return;
 
     try {
         const { dosenAPI } = await import('../../services/api.js');
