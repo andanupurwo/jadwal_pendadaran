@@ -1,4 +1,5 @@
 // Simple Authentication Module
+import { showConfirm } from '../ui/components/ConfirmationModal.js';
 
 export function isAuthenticated() {
     return localStorage.getItem('isAuthenticated') === 'true';
@@ -31,8 +32,8 @@ export function handleLogin(e) {
     }
 }
 
-export function handleLogout() {
-    if (confirm('Keluar dari aplikasi?')) {
+export async function handleLogout() {
+    if (await showConfirm('Keluar dari aplikasi?', 'Konfirmasi Logout', { text: 'Keluar', variant: 'danger' })) {
         logout();
         window.location.reload();
     }

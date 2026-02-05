@@ -1,6 +1,7 @@
 import { APP_DATA, DATES, TIMES, ROOMS } from '../data/store.js';
 import { navigate } from '../ui/core/router.js';
 import { scheduleAPI, slotsAPI } from '../services/api.js';
+import { showConfirm } from '../ui/components/ConfirmationModal.js';
 
 export function logToLogic(message) {
     const logEl = document.getElementById('logicLog');
@@ -28,7 +29,7 @@ export async function generateSchedule(options = { silent: false }) {
 
     try {
         // Call backend API to generate schedule
-        const response = await scheduleAPI.generate(targetProdi, isIncremental);
+        const response = await scheduleAPI.generate(targetProdi, isIncremental, options.targetStudent);
 
         if (response.success) {
             // Display logs from backend
@@ -46,20 +47,20 @@ export async function generateSchedule(options = { silent: false }) {
             }
 
             if (!options.silent) {
-                setTimeout(() => {
-                    if (confirm(`Selesai! Terjadwal: ${response.scheduled}/${response.total}\n\nLihat hasil?`)) {
+                setTimeout(async () => {
+                    if (await showConfirm(`Selesai! Terjadwal: ${response.scheduled}/${response.total}\n\nLihat hasil?`, 'Hasil Penjadwalan', { text: 'Lihat Hasil', variant: 'primary' })) {
                         navigate('home');
                     }
                 }, 300);
             }
         } else {
             logToLogic(`❌ Error: ${response.error}`);
-            alert('Gagal generate jadwal: ' + response.error);
+            showToast('Gagal generate jadwal: ' + response.error, 'error');
         }
 
     } catch (error) {
         logToLogic(`❌ Error: ${error.message}`);
         console.error('Error generating schedule:', error);
-        alert('Gagal terhubung ke backend: ' + error.message);
+        showToast('Gagal terhubung ke backend: ' + error.message, 'error');
     }
 }

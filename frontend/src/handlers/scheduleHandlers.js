@@ -1,6 +1,7 @@
 import { APP_DATA } from '../data/store.js';
 import { generateSchedule } from '../logic/schedulingEngine.js';
 import { navigate } from '../ui/core/router.js';
+import { showConfirm } from '../ui/components/ConfirmationModal.js';
 
 /**
  * Schedule individual student by NIM
@@ -14,14 +15,14 @@ export async function scheduleIndividualStudent(nim) {
         return;
     }
 
-    if (!confirm(`Jadwalkan pendadaran untuk ${student.nama}?`)) {
+    if (!(await showConfirm(`Jadwalkan pendadaran untuk ${student.nama}?`, 'Konfirmasi Penjadwalan', { text: 'Ya, Jadwalkan', variant: 'primary' }))) {
         return;
     }
 
     try {
         // Call scheduling engine with specific student
         await generateSchedule({
-            silent: false,
+            silent: true,  // Suppress success modal, because we handle navigation manually here
             targetStudent: nim
         });
 

@@ -114,9 +114,13 @@ export const slotsAPI = {
 
 // Schedule API
 export const scheduleAPI = {
-    generate: (targetProdi = 'all', isIncremental = false) => apiRequest('/schedule/generate', {
+    generate: (targetProdi = 'all', isIncremental = false, targetStudent = null) => apiRequest('/schedule/generate', {
         method: 'POST',
-        body: JSON.stringify({ targetProdi, isIncremental })
+        body: JSON.stringify({ targetProdi, isIncremental, targetStudent })
+    }),
+    moveSlot: (slotId, newDate, newTime, newRoom) => apiRequest('/schedule/move', {
+        method: 'POST',
+        body: JSON.stringify({ slotId, newDate, newTime, newRoom })
     })
 };
 

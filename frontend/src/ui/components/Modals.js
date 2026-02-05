@@ -618,7 +618,7 @@ export function handleDosenCSVUpload(e) {
 }
 
 export async function deleteDosen(faculty, nik) {
-    if (!(await showConfirm('Hapus dosen ini secara PERMANEN dari Database?', 'Hapus Dosen'))) return;
+    if (!(await showConfirm('Hapus dosen ini secara PERMANEN dari Database?', 'Hapus Dosen', { text: 'Ya, Hapus', variant: 'danger' }))) return;
 
     try {
         const { dosenAPI } = await import('../../services/api.js');

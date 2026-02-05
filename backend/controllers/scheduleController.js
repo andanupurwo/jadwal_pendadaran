@@ -54,14 +54,14 @@ async function isDosenAvailable(namaDosen, date, time, allDosen, liburData, slot
 
         // Condition A: Block specific date AND specific time
         if (l.date && l.time) {
-            const hit = l.date === date && l.time === time;
+            const hit = String(l.date) === String(date) && String(l.time) === String(time);
             if (isAmir && hit) console.log(`[DEBUG AMIR] 🛑 BLOCKED by Condition A (Specific D&T)`);
             return hit;
         }
 
         // Condition B: Block specific date (all times)
         if (l.date && !l.time) {
-            const hit = l.date === date;
+            const hit = String(l.date) === String(date);
             if (isAmir && hit) console.log(`[DEBUG AMIR] 🛑 BLOCKED by Condition B (Date Only)`);
             return hit;
         }
@@ -115,7 +115,7 @@ export async function generateSchedule(req, res) {
     const client = await pool.connect();
 
     try {
-        const { targetProdi = 'all', isIncremental = false } = req.body;
+        let { targetProdi = 'all', isIncremental = false } = req.body;
 
         const logs = [];
         const log = (message) => {
@@ -139,6 +139,9 @@ export async function generateSchedule(req, res) {
 
         // Fallback defaults if DB is empty
         const ROOMS = settings.schedule_rooms || ['6.3.A'];
+        const DISABLED_ROOMS = settings.schedule_disabled_rooms || [];
+        const ACTIVE_ROOMS = ROOMS.filter(r => !DISABLED_ROOMS.includes(r));
+
         const TIMES = settings.schedule_times || ['08:30'];
         const DATES = settings.schedule_dates || [];
 
@@ -150,7 +153,14 @@ export async function generateSchedule(req, res) {
 
         // Load data
         let { rows: mahasiswaList } = await client.query('SELECT * FROM mahasiswa ORDER BY nim');
-        if (targetProdi !== 'all') {
+
+        // Filter by target student if specified (Single Student Scheduling Mode)
+        const { targetStudent } = req.body;
+        if (targetStudent) {
+            mahasiswaList = mahasiswaList.filter(m => m.nim === targetStudent);
+            isIncremental = true; // Force incremental so existing slots are not wiped
+            log(`🎯 ONLY SCHEDULING: ${mahasiswaList[0]?.nama || targetStudent}`);
+        } else if (targetProdi !== 'all') {
             mahasiswaList = mahasiswaList.filter(m => m.prodi === targetProdi);
         }
 
@@ -242,7 +252,7 @@ export async function generateSchedule(req, res) {
             for (const time of TIMES) {
                 if (dateObj.label === 'Jumat' && time === '11:30') continue;
 
-                for (const room of ROOMS) {
+                for (const room of ACTIVE_ROOMS) {
                     const slotExists = slotsData.some(s => s.date === dateObj.value && s.time === time && s.room === room);
                     if (slotExists) continue;
 
@@ -309,6 +319,77 @@ export async function generateSchedule(req, res) {
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error generating schedule:', error);
+        res.status(500).json({ success: false, error: error.message });
+    } finally {
+        client.release();
+    }
+}
+
+export async function moveSlot(req, res) {
+    const client = await pool.connect();
+    try {
+        const { slotId, newDate, newTime, newRoom } = req.body;
+
+        // 1. Get Target Slot
+        const { rows: slotRows } = await client.query('SELECT * FROM slots WHERE id = $1', [slotId]);
+        if (slotRows.length === 0) return res.status(404).json({ success: false, error: 'Slot not found' });
+        const slot = slotRows[0];
+
+        // 2. Check if new position is occupied
+        const { rows: collision } = await client.query(
+            'SELECT * FROM slots WHERE date = $1 AND time = $2 AND room = $3 AND id != $4',
+            [newDate, newTime, newRoom, slotId]
+        );
+        if (collision.length > 0) {
+            return res.json({ success: false, error: `Ruangan ${newRoom} sudah terisi pada ${newDate} ${newTime}` });
+        }
+
+        // 3. Get Data for Validation
+        const allDosen = await getAllDosen();
+        const { rows: liburData } = await client.query('SELECT * FROM libur');
+        const { rows: currentSlots } = await client.query('SELECT * FROM slots');
+        const { rows: examinerRows } = await client.query('SELECT slot_id, examiner_name FROM slot_examiners ORDER BY slot_id, examiner_order');
+
+        const slotExaminersMap = {};
+        examinerRows.forEach(row => {
+            if (!slotExaminersMap[row.slot_id]) slotExaminersMap[row.slot_id] = [];
+            slotExaminersMap[row.slot_id].push(row.examiner_name);
+        });
+
+        const slotsData = currentSlots.map(s => ({
+            ...s,
+            examiners: slotExaminersMap[s.id] || []
+        }));
+
+        // 4. Validate All Examiners (including Supervisor)
+        const myExaminers = slotExaminersMap[slot.id] || [];
+
+        for (const dosenName of myExaminers) {
+            const available = await isDosenAvailable(
+                dosenName,
+                newDate,
+                newTime,
+                allDosen,
+                liburData,
+                slotsData,
+                slot.student // Exclude this slot from busy check
+            );
+
+            if (!available) {
+                return res.json({ success: false, error: `Gagal: ${dosenName} tidak tersedia/bentrok.` });
+            }
+        }
+
+        // 5. Update Slot
+        await client.query(
+            'UPDATE slots SET date = $1, time = $2, room = $3 WHERE id = $4',
+            [newDate, newTime, newRoom, slotId]
+        );
+
+        res.json({ success: true, message: 'Jadwal berhasil dipindahkan' });
+
+    } catch (error) {
+        console.error('Move Slot Error:', error);
         res.status(500).json({ success: false, error: error.message });
     } finally {
         client.release();

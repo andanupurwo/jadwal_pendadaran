@@ -1,6 +1,11 @@
 
-export function showConfirm(message, title = 'Konfirmasi') {
+export function showConfirm(message, title = 'Konfirmasi', options = {}) {
     return new Promise((resolve) => {
+        // Handle options
+        const confirmText = typeof options === 'string' ? options : (options.text || 'Ya, Lanjutkan');
+        const isDanger = typeof options === 'object' && options.variant === 'danger';
+        const buttonColor = isDanger ? 'var(--danger)' : 'var(--primary)';
+
         const modalId = 'custom-confirm-modal';
         // Remove existing if any
         const existing = document.getElementById(modalId);
@@ -18,7 +23,7 @@ export function showConfirm(message, title = 'Konfirmasi') {
                 <p style="color: var(--text-secondary); margin-bottom: 2rem;">${message}</p>
                 <div class="modal-footer" style="justify-content: center; gap: 10px;">
                     <button id="btn-cancel" class="btn-secondary" style="min-width: 100px;">Batal</button>
-                    <button id="btn-confirm" class="btn-primary" style="background: var(--danger); min-width: 100px;">Ya, Hapus</button>
+                    <button id="btn-confirm" class="btn-primary" style="background: ${buttonColor}; min-width: 100px;">${confirmText}</button>
                 </div>
             </div>
         `;
@@ -44,7 +49,7 @@ export function showConfirm(message, title = 'Konfirmasi') {
 
         btnCancel.addEventListener('click', () => close(false));
         btnConfirm.addEventListener('click', () => close(true));
-        
+
         // Focus confirm for quick access, or cancel for safety? Safety first -> focus cancel.
         btnCancel.focus();
     });

@@ -5,56 +5,66 @@
 const style = `
 .toast-container {
     position: fixed;
-    top: 24px;
-    right: 24px;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 99999;
     font-family: 'Inter', system-ui, sans-serif;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
     pointer-events: none;
+    width: 100%;
+    max-width: 420px;
 }
 
 .toast {
-    background: white;
-    min-width: 300px;
-    max-width: 400px;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.05);
-    border: 1px solid rgba(0,0,0,0.04);
-    border-left: 5px solid #ccc;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    width: 100%;
+    max-width: 380px;
+    padding: 14px 18px;
+    border-radius: 50px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-left: none; /* Removed colored border for cleaner mobile look */
     font-size: 0.95rem;
     font-weight: 500;
-    color: #333;
+    color: #1f2937;
     pointer-events: auto;
     
-    transform: translateX(120%);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    /* Animation start state */
+    transform: translateY(-100%);
+    transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     opacity: 0;
     
     display: flex;
     align-items: center;
+    justify-content: center; /* Center content */
     gap: 12px;
 }
 
 .toast.show {
-    transform: translateX(0);
+    transform: translateY(0);
     opacity: 1;
 }
 
 .toast.removing {
-    transform: translateX(20px);
+    transform: translateY(-20px);
     opacity: 0;
 }
 
-.toast-success { border-left-color: #10B981; }
-.toast-error { border-left-color: #EF4444; }
-.toast-info { border-left-color: #3B82F6; }
-.toast-warning { border-left-color: #F59E0B; }
+.toast-success .toast-icon { color: #10B981; }
+.toast-error .toast-icon { color: #EF4444; }
+.toast-info .toast-icon { color: #3B82F6; }
+.toast-warning .toast-icon { color: #F59E0B; }
 
 .toast-icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
 }
 `;
 
@@ -83,7 +93,7 @@ export function showToast(message, type = 'info', duration = 4000) {
     el.className = `toast toast-${type}`;
     el.innerHTML = `
         <span class="toast-icon">${icons[type] || ''}</span>
-        <span style="flex:1; line-height:1.4;">${message}</span>
+        <span style="line-height:1.4; text-align: left;">${message}</span>
     `;
 
     container.appendChild(el);

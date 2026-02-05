@@ -1,4 +1,4 @@
-import { APP_DATA, appState, DATES, TIMES, ROOMS } from '../../data/store.js';
+import { APP_DATA, appState, DATES, TIMES, ROOMS, DISABLED_ROOMS } from '../../data/store.js';
 
 export const HomeView = () => {
     // Ensure we have a valid date selected, fallback to first available if needed
@@ -95,25 +95,29 @@ export const HomeView = () => {
         const isJumatBreak = selectedDay === 'Jumat' && time === '11:30';
         return `<div style="font-weight: 600; padding: 0.75rem 0.5rem; text-align: center; background: ${isJumatBreak ? '#f0f0f0' : 'var(--card-bg)'}; color: ${isJumatBreak ? '#999' : 'inherit'}; border-radius: 6px; font-size: 0.9rem;">${time}</div>`;
     }).join('')}
-                    ${ROOMS.map(room => `
-                        <div style="font-weight: 600; padding: 0.75rem 0.5rem; display: flex; align-items: center; justify-content: center; background: var(--card-bg); border-radius: 6px;">${room}</div>
+                    ${ROOMS.map(room => {
+        const isDisabled = DISABLED_ROOMS.includes(room);
+        return `
+            <div style="font-weight: 600; padding: 0.75rem 0.5rem; display: flex; align-items: center; justify-content: center; background: ${isDisabled ? '#f3f4f6' : 'var(--card-bg)'}; color: ${isDisabled ? '#999' : 'inherit'}; border-radius: 6px; ${isDisabled ? 'text-decoration: line-through;' : ''}">${room}</div>
                         ${TIMES.map(time => {
-        const isJumatBreak = selectedDay === 'Jumat' && time === '11:30';
+            const isJumatBreak = selectedDay === 'Jumat' && time === '11:30';
 
-        if (isJumatBreak) {
-            return `
+            if (isJumatBreak) {
+                return `
                                     <div style="padding: 0.6rem; border-radius: 8px; min-height: 100px; background: #f5f5f7; border: 1px dashed #d1d1d6; display: flex; align-items: center; justify-content: center; color: #a1a1a6; font-size: 0.75rem; font-style: italic;">
                                         ⛔ Istirahat
                                     </div>
                                 `;
-        }
+            }
 
-        const slot = APP_DATA.slots.find(s => s.date === currentDate && s.time === time && s.room === room);
-        return `
+            const slot = APP_DATA.slots.find(s => s.date === currentDate && s.time === time && s.room === room);
+            const isRoomDisabled = DISABLED_ROOMS.includes(room);
+
+            return `
                                 <div class="room-slot ${slot ? 'slot-filled' : 'slot-empty'}" 
                                      ${slot ? `draggable="true" ondragstart="window.onDragStart(event, '${slot.student}', '${currentDate}', '${time}', '${room}')" onclick="window.viewSlotDetails('${currentDate}', '${time}', '${room}')"` : `draggable="false"`}
-                                     ondragover="window.onDragOver(event)" ondrop="window.onDrop(event, '${currentDate}', '${time}', '${room}')"
-                                     style="padding: 0.6rem; border-radius: 8px; min-height: 100px; background: ${slot ? '#ffffff' : 'var(--card-bg)'}; border: 1px solid ${slot ? 'var(--border)' : 'transparent'}; ${slot ? 'border-left: 4px solid var(--success);' : ''} transition: all 0.2s; cursor: ${slot ? 'pointer' : 'default'}; position: relative;">
+                                     ondragover="${isRoomDisabled ? '' : 'window.onDragOver(event)'}" ondrop="${isRoomDisabled ? '' : `window.onDrop(event, '${currentDate}', '${time}', '${room}')`}"
+                                     style="padding: 0.6rem; border-radius: 8px; min-height: 100px; background: ${slot ? '#ffffff' : (isRoomDisabled ? '#f9f9f9' : 'var(--card-bg)')}; border: 1px solid ${slot ? 'var(--border)' : (isRoomDisabled ? 'transparent' : 'transparent')}; ${isRoomDisabled ? 'background-image: repeating-linear-gradient(45deg, #f3f3f3, #f3f3f3 10px, #f9f9f9 10px, #f9f9f9 20px);' : ''} ${slot ? 'border-left: 4px solid var(--success);' : ''} transition: all 0.2s; cursor: ${slot ? 'pointer' : (isRoomDisabled ? 'not-allowed' : 'default')}; position: relative;">
                                     ${slot ? `
                                         <div style="display: flex; flex-direction: column; height: 100%;">
                                             <div style="position: absolute; top: 4px; right: 4px; display: flex; gap: 4px; z-index: 10;">
@@ -129,18 +133,19 @@ export const HomeView = () => {
                                                 ` : '<div style="font-style:italic; opacity:0.5;">Data tidak lengkap</div>'}
                                             </div>
                                         </div>
-                                    ` : `
+                                    ` : (isRoomDisabled ? '' : `
                                         <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border:2px dashed ${APP_DATA.clipboard ? 'var(--primary)' : 'var(--border)'}; border-radius:6px; color: ${APP_DATA.clipboard ? 'var(--primary)' : 'var(--text-muted)'};"
                                              ${APP_DATA.clipboard ? `onclick="window.pasteSlotFromClipboard('${currentDate}', '${time}', '${room}')"` : ''}>
                                              <span>${APP_DATA.clipboard ? '📋' : '+'}</span><span style="font-size:0.75rem;">${APP_DATA.clipboard ? 'Tempel' : 'Kosong'}</span>
                                         </div>
-                                    `}
+                                    `)}
                                 </div>
                             `;
+        }).join('')}
+                    `;
     }).join('')}
-                    `).join('')}
-                </div>
-            </div>
+                </div >
+            </div >
         </div >
     `;
 };

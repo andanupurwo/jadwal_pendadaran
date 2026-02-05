@@ -197,10 +197,33 @@ export function moveSlotToClipboard(name) {
     }
     refreshView('home');
 }
-export function pasteSlotFromClipboard(date, time, room) {
+export async function pasteSlotFromClipboard(date, time, room) {
     if (APP_DATA.clipboard) {
-        APP_DATA.slots.push({ ...APP_DATA.clipboard, date, time, room });
-        APP_DATA.clipboard = null;
+        try {
+            const { scheduleAPI, slotsAPI } = await import('../services/api.js');
+            const movingSlot = APP_DATA.clipboard;
+
+            const loadingToast = showToast('Memindahkan jadwal...', 'info', 20000);
+
+            const response = await scheduleAPI.moveSlot(movingSlot.id, date, time, room);
+
+            const toastEl = document.querySelector('.toast-info');
+            if (toastEl) toastEl.remove();
+
+            if (response.success) {
+                showToast('Jadwal berhasil dipindahkan ✅', 'success');
+                // Refresh data
+                const freshSlots = await slotsAPI.getAll();
+                APP_DATA.slots = freshSlots.data;
+                APP_DATA.clipboard = null; // Clear clipboard on success
+            } else {
+                showToast('Gagal: ' + response.error, 'error');
+                // Do NOT clear clipboard so user can try another slot
+            }
+        } catch (error) {
+            console.error('Paste error:', error);
+            showToast('Terjadi kesalahan saat menempel jadwal: ' + error.message, 'error');
+        }
         refreshView('home');
     }
 }
@@ -324,7 +347,7 @@ export function onDragOver(e) {
     e.preventDefault();
 }
 
-export function onDrop(e, date, time, room) {
+export async function onDrop(e, date, time, room) {
     e.preventDefault();
     try {
         const data = JSON.parse(e.dataTransfer.getData('text/plain'));
@@ -337,36 +360,35 @@ export function onDrop(e, date, time, room) {
             return;
         }
 
-        // 2. Cari dan pindahkan slot
-        const slotIdx = APP_DATA.slots.findIndex(s => s.student === data.name);
-        if (slotIdx !== -1) {
-            const slot = APP_DATA.slots[slotIdx];
+        // 2. Cari slot asli
+        const movingSlot = APP_DATA.slots.find(s => s.student === data.name);
+        if (!movingSlot) return;
 
-            // Perbaiki kabel: Kirim perubahan ke Backend
-            import('../services/api.js').then(async ({ slotsAPI }) => {
-                try {
-                    // Dalam sistem ini, kita hapus yang lama dan buat yang baru atau update
-                    // Karena id-nya ada, kita bisa asumsikan ada API update atau delete/create
-                    // Untuk simpelnya kita kirim perintah update ke backend jika ada
-                    // Di sini kita update local state dulu, lalu sync.
-                    slot.date = date;
-                    slot.time = time;
-                    slot.room = room;
+        // 3. Panggil API Backend untuk Validasi & Update
+        const { scheduleAPI, slotsAPI } = await import('../services/api.js');
 
-                    // Jika backend punya endpoint update, panggil di sini.
-                    // Jika tidak, kita bisa menghapus semua slots dan simpan ulang.
-                    await slotsAPI.deleteAll(); // Hapus semua
-                    await slotsAPI.bulkCreate(APP_DATA.slots); // Simpan semua posisi baru
+        const loadingToast = showToast('Memindahkan jadwal...', 'info', 20000); // Long duration until finished
 
-                    refreshView('home');
-                } catch (err) {
-                    showToast('Gagal memindahkan jadwal: ' + err.message, 'error');
-                    refreshView('home');
-                }
-            });
+        const response = await scheduleAPI.moveSlot(movingSlot.id, date, time, room);
+
+        // Hapus loading
+        const toastEl = document.querySelector('.toast-info');
+        if (toastEl) toastEl.remove();
+
+        if (response.success) {
+            showToast('Jadwal berhasil dipindahkan ✅', 'success');
+            // Refresh slot data from server to ensure consistency
+            const freshSlots = await slotsAPI.getAll();
+            APP_DATA.slots = freshSlots.data;
+        } else {
+            showToast('Gagal: ' + response.error, 'error');
         }
+
+        refreshView('home');
+
     } catch (err) {
         console.error('Drop error:', err);
+        showToast('Terjadi kesalahan saat memindahkan jadwal.', 'error');
         refreshView('home');
     }
 }

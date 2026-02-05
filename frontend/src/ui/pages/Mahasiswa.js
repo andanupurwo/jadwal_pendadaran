@@ -24,7 +24,12 @@ export const MahasiswaView = () => {
                     <span class="search-icon">🔍</span>
                     <input type="text" id="mainSearchInput" class="search-input" placeholder="Cari NIM atau Nama..." value="${searchTerm}" oninput="window.handleSearchInput(event)">
                 </div>
-                <div class="badge badge-primary">Total Mahasiswa: ${APP_DATA.mahasiswa.length}</div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <div class="badge badge-primary">Total Mahasiswa: ${APP_DATA.mahasiswa.length}</div>
+                    <button onclick="window.generateSchedule()" style="padding: 6px 16px; background: var(--text-main); color: var(--bg); border: none; border-radius: 50px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <span>▶</span> Jadwalkan Otomatis
+                    </button>
+                </div>
             </div>
 
             <div class="card">

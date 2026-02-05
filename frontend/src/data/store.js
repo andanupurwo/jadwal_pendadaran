@@ -11,6 +11,7 @@ import { mahasiswaAPI, dosenAPI, liburAPI, slotsAPI, settingsAPI } from '../serv
 
 // Export mutable variables for settings
 export let ROOMS = DEFAULT_ROOMS;
+export let DISABLED_ROOMS = [];
 export let TIMES = DEFAULT_TIMES;
 export let DATES = DEFAULT_DATES;
 
@@ -148,6 +149,10 @@ export async function loadSettingsFromAPI() {
 
             if (settings.schedule_rooms && Array.isArray(settings.schedule_rooms)) {
                 ROOMS = settings.schedule_rooms;
+            }
+
+            if (settings.schedule_disabled_rooms && Array.isArray(settings.schedule_disabled_rooms)) {
+                DISABLED_ROOMS = settings.schedule_disabled_rooms;
             }
 
             if (settings.schedule_times && Array.isArray(settings.schedule_times)) {

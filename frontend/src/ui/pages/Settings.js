@@ -1,7 +1,48 @@
 import { settingsAPI } from '../../services/api.js';
-import { ROOMS, TIMES, DATES } from '../../data/store.js';
+import { ROOMS, DISABLED_ROOMS, TIMES, DATES, appState } from '../../data/store.js';
+import { showConfirm } from '../components/ConfirmationModal.js';
+import { LogicView } from './Logic.js';
+import { navigate } from '../core/router.js';
 
 export const SettingsView = () => {
+    // Default tab state if not set
+    if (!appState.settingsTab) appState.settingsTab = 'config';
+
+    const renderTabs = () => `
+        <div class="tabs-container" style="margin-bottom: 2rem;">
+             <div class="tabs" style="display: flex; gap: 4px; padding: 4px; background: rgba(118, 118, 128, 0.08); border-radius: 14px; width: fit-content;">
+                <div class="tab-item ${appState.settingsTab === 'config' ? 'active' : ''}"
+                     onclick="window.switchSettingsTab('config')"
+                     style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'config' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'config' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
+                    ⚙️ Konfigurasi
+                </div>
+                <div class="tab-item ${appState.settingsTab === 'logic' ? 'active' : ''}"
+                     onclick="window.switchSettingsTab('logic')"
+                     style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'logic' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'logic' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
+                    🧠 Logika
+                </div>
+             </div>
+        </div>
+    `;
+
+    // Render logic content if tab is logic
+    if (appState.settingsTab === 'logic') {
+        return `
+            <div class="container">
+                <header class="page-header">
+                     <div class="header-info">
+                        <h1>Pengaturan</h1>
+                        <p class="subtitle">Konfigurasi jadwal dan logika sistem.</p>
+                    </div>
+                </header>
+                ${renderTabs()}
+                <div style="margin-top: -2rem;">
+                    ${LogicView().replace('class="container"', 'class="inner-container"').replace(/padding: 3rem 2rem 6rem;/, 'padding: 1rem 0;')}
+                </div>
+            </div>
+        `;
+    }
+
     // Helper to format array to newline separated string
     const formatList = (arr) => arr.join('\n');
 
@@ -24,6 +65,8 @@ export const SettingsView = () => {
                     <p class="subtitle">Konfigurasi jadwal, ruangan, dan waktu pelaksanaan.</p>
                 </div>
             </header>
+            
+            ${renderTabs()}
 
             <form id="settings-form">
                 
@@ -36,6 +79,21 @@ export const SettingsView = () => {
                         <label class="form-label">Daftar Ruangan (Satu per baris)</label>
                         <textarea id="setting-rooms" class="form-input" rows="8" style="font-family: monospace;">${ROOMS.join('\n')}</textarea>
                         <p class="form-hint">Masukkan nama ruangan, satu per baris. Contoh: 6.3.A</p>
+                    </div>
+
+                    <div class="form-group" style="padding: 1rem; background: var(--bg); border-radius: 8px; margin-top: 1rem;">
+                        <label class="form-label" style="margin-bottom: 0.5rem;">Status Ruangan (Penjadwalan Otomatis)</label>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+                            Centang ruangan yang ingin <strong>DINONAKTIFKAN</strong> (tidak dipakai saat generate jadwal).
+                        </p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-height: 200px; overflow-y: auto;">
+                            ${ROOMS.map(room => `
+                                <label style="display: flex; align-items: center; gap: 8px; padding: 6px; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
+                                    <input type="checkbox" name="disabled_room" value="${room}" ${DISABLED_ROOMS.includes(room) ? 'checked' : ''}>
+                                    ${room}
+                                </label>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
 
@@ -96,6 +154,12 @@ export const SettingsView = () => {
     `;
 };
 
+// Handle tab switching
+window.switchSettingsTab = (tab) => {
+    appState.settingsTab = tab;
+    navigate('settings');
+};
+
 // Global handlers
 window.generateDateList = () => {
     const startDateInput = document.getElementById('gen-start-date').value;
@@ -103,7 +167,7 @@ window.generateDateList = () => {
     const skipWeekend = document.getElementById('gen-skip-weekend').checked;
 
     if (!startDateInput) {
-        alert('Pilih tanggal mulai terlebih dahulu');
+        showToast('Pilih tanggal mulai terlebih dahulu', 'warning');
         return;
     }
 
@@ -148,7 +212,7 @@ window.generateDateList = () => {
 async function handleSettingsSubmit(e) {
     e.preventDefault();
 
-    if (!confirm('Simpan perubahan? Aplikasi akan dimuat ulang.')) return;
+    if (!(await showConfirm('Simpan perubahan? Aplikasi akan dimuat ulang.', 'Simpan Pengaturan', { text: 'Simpan', variant: 'primary' }))) return;
 
     try {
         const roomsText = document.getElementById('setting-rooms').value;
@@ -163,24 +227,25 @@ async function handleSettingsSubmit(e) {
         try {
             schedule_dates = JSON.parse(datesText);
         } catch (jsonErr) {
-            alert('Format JSON Tanggal tidak valid!');
+            showToast('Format JSON Tanggal tidak valid!', 'error');
             return;
         }
 
         // Send to API
         const response = await settingsAPI.update({
             schedule_rooms,
+            schedule_disabled_rooms: Array.from(document.querySelectorAll('input[name="disabled_room"]:checked')).map(cb => cb.value),
             schedule_times,
             schedule_dates
         });
 
         if (response.success) {
-            alert('Pengaturan berhasil disimpan!');
+            showToast('Pengaturan berhasil disimpan!', 'success');
             window.location.reload();
         }
 
     } catch (error) {
         console.error('Save failed:', error);
-        alert('Gagal menyimpan pengaturan: ' + error.message);
+        showToast('Gagal menyimpan pengaturan: ' + error.message, 'error');
     }
 }
