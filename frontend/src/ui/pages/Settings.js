@@ -115,24 +115,36 @@ export const SettingsView = () => {
                         <h3>📅 Tanggal Pelaksanaan</h3>
                     </div>
                     
-                    <div class="form-group" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--bg); border-radius: 8px;">
-                        <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Generator Tanggal Otomatis</label>
-                        <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+                    <div class="form-group" style="margin-bottom: 1.5rem; padding: 1.25rem; background: var(--bg); border: 1px solid var(--border-subtle); border-radius: 12px;">
+                        <label style="font-weight: 600; font-size: 0.95rem; margin-bottom: 1rem; display: block; color: var(--primary);">✨ Generator Tanggal Otomatis</label>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end;">
+                            <!-- Tanggal Mulai -->
+                            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Tanggal Mulai</label>
+                                <input type="date" id="gen-start-date" class="form-input" style="width: 100%;">
+                            </div>
+
+                            <!-- Jumlah Hari -->
+                            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                                <label style="font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);">Jumlah Hari</label>
+                                <input type="number" id="gen-days" class="form-input" value="10" min="1" max="30" style="width: 100%;">
+                            </div>
+
+                            <!-- Opsi Weekend -->
+                            <div style="display: flex; align-items: center; padding-bottom: 0.6rem;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; user-select: none;">
+                                    <input type="checkbox" id="gen-skip-weekend" checked style="width: 16px; height: 16px; accent-color: var(--primary);">
+                                    <span>Lewati Sabtu/Minggu</span>
+                                </label>
+                            </div>
+
+                            <!-- Tombol Action -->
                             <div>
-                                <label style="font-size: 0.8rem;">Tanggal Mulai</label>
-                                <input type="date" id="gen-start-date" class="form-input">
+                                <button type="button" id="btn-generate-dates" class="btn-primary" onclick="window.generateDateList()" style="width: 100%; justify-content: center;">
+                                    Generate List
+                                </button>
                             </div>
-                            <div>
-                                <label style="font-size: 0.8rem;">Jumlah Hari</label>
-                                <input type="number" id="gen-days" class="form-input" value="10" min="1" max="30" style="width: 80px;">
-                            </div>
-                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                                <input type="checkbox" id="gen-skip-weekend" checked>
-                                <label for="gen-skip-weekend" style="margin-left: 8px;">Lewati Sabtu/Minggu</label>
-                            </div>
-                            <button type="button" id="btn-generate-dates" class="btn-secondary" onclick="window.generateDateList()">
-                                Generate List
-                            </button>
                         </div>
                     </div>
 
