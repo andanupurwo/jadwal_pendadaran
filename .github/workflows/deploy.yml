@@ -51,41 +51,48 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # Langkah tambahan: Install cloudflared di Runner GitHub
     - name: Install Cloudflared
       run: |
         wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
         sudo dpkg -i cloudflared-linux-amd64.deb
 
-    - name: Executing remote ssh commands using key
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_HOST }} # Isi dengan: ssh-penjadwalan.daak.my.id
-        username: ${{ secrets.SERVER_USER }} # Isi dengan: root
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        # Tambahkan ProxyCommand di bawah ini
-        proxy_command: /usr/local/bin/cloudflared access ssh --hostname ${{ secrets.SERVER_HOST }}
-        script: |
-          # 1. Masuk ke folder project
-          cd /var/www/jadwal-pendadaran
-          
-          # 2. Tarik update terbaru
-          echo "📥 Pulling latest code..."
-          git pull origin main
-          
-          # 3. Update & Build Frontend
-          echo "🏗️ Building Frontend..."
-          cd frontend
-          npm install
-          npm run build
-          
-          # 4. Update Backend
-          echo "🔄 Updating Backend..."
-          cd ../backend
-          npm install
-          
-          # 5. Restart Aplikasi via PM2
-          echo "🚀 Restarting PM2..."
-          pm2 restart all || pm2 start server.js --name "jadwal-backend"
-          
-          echo "✅ Deployment Success!"
+    - name: Deploy via SSH
+      env:
+        SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        HOST: ${{ secrets.SERVER_HOST }}
+        USER: ${{ secrets.SERVER_USER }}
+      run: |
+        # 1. Setup folder .ssh dan simpan Private Key
+        mkdir -p ~/.ssh
+        echo "$SSH_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+        # 2. Jalankan perintah SSH secara langsung dengan ProxyCommand
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no \
+            -o ProxyCommand="/usr/local/bin/cloudflared access ssh --hostname %h" \
+            $USER@$HOST << 'EOF'
+              set -e
+              # 1. Masuk ke folder project
+              cd /var/www/jadwal-pendadaran
+              
+              # 2. Tarik update terbaru
+              echo "📥 Pulling latest code..."
+              git pull origin main
+              
+              # 3. Update & Build Frontend
+              echo "🏗️ Building Frontend..."
+              cd frontend
+              npm install
+              npm run build
+              
+              # 4. Update Backend
+              echo "🔄 Updating Backend..."
+              cd ../backend
+              npm install
+              
+              # 5. Restart Aplikasi via PM2
+              echo "🚀 Restarting PM2..."
+              pm2 restart all || pm2 start server.js --name "jadwal-backend"
+              
+              echo "✅ Deployment Success!"
+        EOF
