@@ -16,8 +16,18 @@ fi
 # Tambahkan semua perubahan
 git add .
 
-# Commit dengan pesan otomatis
-git commit -m "WIP: Auto-save $(date '+%Y-%m-%d %H:%M:%S') - leaving workstation"
+# Ambil daftar file yang berubah
+CHANGED_FILES=$(git diff --name-only --cached)
+FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l | tr -d ' ')
+
+# Buat pesan commit dengan daftar file
+COMMIT_MSG="WIP: Auto-save $(date '+%Y-%m-%d %H:%M:%S') - $FILE_COUNT files changed
+
+Files modified:
+$CHANGED_FILES"
+
+# Commit dengan pesan detail
+git commit -m "$COMMIT_MSG"
 
 # Push ke GitHub
 git push -u origin update
