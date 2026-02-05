@@ -2,7 +2,7 @@
 # jarvis-update.sh - Auto update script for Debian Server
 
 # Configuration
-APP_DIR="/var/www/jadwal-pendadaran"  # Sesuaikan dengan path server Anda
+APP_DIR="/var/www/jadwal_pendadaran"  # Sesuaikan dengan path server Anda
 PM2_APP_NAME="jadwal-pendadaran-preview" # Sesuaikan jika ada nama app PM2
 
 echo "🤖 Jarvis: Starting update process on $(hostname)..."
