@@ -24,18 +24,37 @@ git fetch origin main
 git reset --hard origin/main
 git pull origin main
 
-# 3. Install Dependencies
-echo "📦 Installing/Updating dependencies..."
-npm install
+# 3. Install Dependencies & Build Frontend
+echo "📦 Processing Frontend..."
+if [ -d "frontend" ]; then
+    cd frontend
+    echo "   Running npm install (Frontend)..."
+    npm install
+    echo "   Building Frontend..."
+    npm run build
+    cd ..
+else
+    echo "❌ Error: Directory 'frontend' not found!"
+fi
 
-# 4. Build Project
-echo "🏗️  Building project..."
-npm run build
+# 4. Install Dependencies Backend
+echo "📦 Processing Backend..."
+if [ -d "backend" ]; then
+    cd backend
+    echo "   Running npm install (Backend)..."
+    npm install
+    cd ..
+else
+    echo "❌ Error: Directory 'backend' not found!"
+fi
 
-# 5. Fix Permissions (Opsional, sesuaikan user nginx/www-data)
+# 5. Fix Permissions (Untuk folder dist di frontend)
 echo "🔑 Fixing permissions..."
-chown -R www-data:www-data dist
-chmod -R 755 dist
+if [ -d "frontend/dist" ]; then
+    # Jika Nginx serve dari frontend/dist, sesuaikan permission
+    chown -R www-data:www-data frontend/dist
+    chmod -R 755 frontend/dist
+fi
 
 # 6. Restart Services
 echo "🔄 Restarting services..."
