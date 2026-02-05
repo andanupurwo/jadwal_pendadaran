@@ -259,7 +259,7 @@ td {
 }
 
 tr:hover td {
-  background: linear-gradient(135deg, #f8fafc 0%, #fefefe 100%);
+  background-color: rgba(37, 99, 235, 0.04);
   transition: var(--transition);
 }
 
