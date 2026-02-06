@@ -59,10 +59,10 @@
 └───────────────────────────┬─────────────────────────────────┘
                             │
                             │ SQL Queries
-                            │ (mysql2)
+                            │ (node-postgres)
                             │
 ┌───────────────────────────▼─────────────────────────────────┐
-│                    DATABASE (MySQL 8)                        │
+│                    DATABASE (PostgreSQL)                     │
 │                   Database: jadwal_pendadaran                │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  Tables:                                                │ │
@@ -159,14 +159,14 @@ Frontend: Update local state
 ### Backend Stack
 - **Runtime**: Node.js 18+
 - **Framework**: Express.js 4.18
-- **Database Driver**: mysql2 3.6
+- **Database Driver**: pg (node-postgres)
 - **Middleware**: 
   - cors (CORS handling)
   - express.json (JSON parsing)
   - dotenv (environment variables)
 
 ### Database Stack
-- **RDBMS**: MySQL 8.0
+- **RDBMS**: PostgreSQL 14+
 - **Storage Engine**: InnoDB
 - **Character Set**: utf8mb4
 - **Collation**: utf8mb4_unicode_ci
@@ -191,7 +191,7 @@ Frontend: Update local state
                     │
 ┌─────────────────────────────────────────────┐
 │  4. SQL Injection Prevention                │
-│     - Prepared statements (mysql2)          │
+│     - Prepared statements (pg)              │
 │     - Parameterized queries                 │
 └─────────────────────────────────────────────┘
                     │
@@ -210,7 +210,7 @@ Frontend: Update local state
 - **Frontend**: Serve static files via CDN
 
 ### Vertical Scaling
-- **MySQL**: Increase buffer pool size, connections
+- **PostgreSQL**: Increase shared_buffers, max_connections
 - **Node.js**: Use PM2 cluster mode
 - **Nginx**: Tune worker processes
 
@@ -235,7 +235,7 @@ Backend Logs
 
 Database Logs
     │
-    └─► MySQL slow query log
+    └─► PostgreSQL query log
 ```
 
 ## Development Workflow

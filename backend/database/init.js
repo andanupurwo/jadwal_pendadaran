@@ -1,6 +1,7 @@
 import pg from 'pg';
 const { Client } = pg;
 import dotenv from 'dotenv';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -142,6 +143,30 @@ async function initializeDatabase() {
             )
         `);
         console.log('✅ Table app_settings created');
+
+        // Tabel: users
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                role VARCHAR(20) DEFAULT 'admin',
+                last_login TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('✅ Table users created');
+
+        // Seed Admin if not exists
+        const { rowCount: userCount } = await client.query('SELECT 1 FROM users LIMIT 1');
+        if (userCount === 0) {
+            const hashedPassword = await bcrypt.hash('admin123', 10);
+            await client.query(
+                'INSERT INTO users (username, password, role) VALUES ($1, $2, $3)',
+                ['admin', hashedPassword, 'admin']
+            );
+            console.log('👤 Default admin user created (admin / admin123)');
+        }
 
         // Create indexes
         await client.query('CREATE INDEX IF NOT EXISTS idx_nik ON master_dosen(nik)');

@@ -1,34 +1,54 @@
-// Simple Authentication Module
+// Authentication Module
 import { showConfirm } from '../ui/components/ConfirmationModal.js';
+import { authAPI } from './api.js';
 
 export function isAuthenticated() {
-    return localStorage.getItem('isAuthenticated') === 'true';
+    const token = localStorage.getItem('token');
+    return !!token;
 }
 
-export function login(username, password) {
-    // Simple hardcoded auth (dapat diganti dengan API call)
-    if (username === 'admin' && password === 'admin123') {
-        localStorage.setItem('isAuthenticated', 'true');
-        return true;
+export async function login(username, password) {
+    try {
+        const response = await authAPI.login(username, password);
+        if (response.success) {
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('user', JSON.stringify(response.user));
+            return { success: true };
+        }
+        return { success: false, error: response.error };
+    } catch (error) {
+        console.error('Login failed', error);
+        return { success: false, error: error.message || 'Gagal terhubung ke server' };
     }
-    return false;
 }
 
 export function logout() {
-    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    // localStorage.removeItem('isAuthenticated'); // Cleanup old key if exists
 }
 
-export function handleLogin(e) {
+export async function handleLogin(e) {
     e.preventDefault();
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.textContent = 'Memuat...';
+    submitBtn.disabled = true;
+
     const formData = new FormData(e.target);
     const username = formData.get('username');
     const password = formData.get('password');
 
-    if (login(username, password)) {
+    const result = await login(username, password);
+
+    if (result.success) {
         window.showToast('Login berhasil!', 'success');
-        setTimeout(() => window.location.reload(), 800);
+        setTimeout(() => window.location.reload(), 500);
     } else {
-        window.showToast('Username atau password salah!', 'error');
+        window.showToast(result.error || 'Username atau password salah!', 'error');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 }
 

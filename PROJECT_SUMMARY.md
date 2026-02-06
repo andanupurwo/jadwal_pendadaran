@@ -174,7 +174,7 @@ jadwal-pendadaran/
 
 ### ✅ All Data Preserved
 
-Migration from **LocalStorage** to **MySQL**:
+Migration from **LocalStorage** to **PostgreSQL**:
 - `mahasiswa_data_v1` → `mahasiswa` table
 - `slots_data_v1` → `slots` + `slot_examiners` tables
 - `libur_data_v1` → `libur` table
@@ -238,7 +238,7 @@ Migration from **LocalStorage** to **MySQL**:
 cd backend
 npm install
 cp .env.example .env
-# Edit .env with your MySQL credentials
+# Edit .env with your PostgreSQL credentials
 npm run init-db
 npm run dev
 ```
@@ -285,8 +285,8 @@ npm run dev
 ### Backend
 - **Runtime:** Node.js 18+
 - **Framework:** Express.js 4.18
-- **Database:** MySQL 8.0
-- **Driver:** mysql2 (with connection pooling)
+- **Database:** PostgreSQL 14+
+- **Driver:** pg (node-postgres)
 - **Middleware:** cors, dotenv
 
 ### Frontend
@@ -297,7 +297,7 @@ npm run dev
 - **Architecture:** Modular ES6 modules
 
 ### Database
-- **RDBMS:** MySQL 8.0
+- **RDBMS:** PostgreSQL 14+
 - **Engine:** InnoDB
 - **Charset:** utf8mb4_unicode_ci
 
@@ -331,7 +331,7 @@ All documentation is comprehensive and production-ready:
 - Comprehensive documentation
 
 ### 3. **Data Persistence** ✅
-- MySQL > LocalStorage
+- PostgreSQL > LocalStorage
 - ACID compliance
 - Concurrent access support
 - Backup & restore capability
@@ -375,7 +375,7 @@ All documentation is comprehensive and production-ready:
 | Aspect | Before | After |
 |--------|--------|-------|
 | **Architecture** | Monolithic | Full Stack (Frontend + Backend) |
-| **Data Storage** | LocalStorage | MySQL Database |
+| **Data Storage** | LocalStorage | PostgreSQL Database |
 | **Business Logic** | Client-side only | Server-side (API) |
 | **API** | None | RESTful API (Express) |
 | **Scalability** | Limited | Highly scalable |

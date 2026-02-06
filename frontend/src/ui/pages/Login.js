@@ -12,7 +12,7 @@ export const LoginView = () => `
         <form onsubmit="window.handleLogin(event)">
             <div class="form-group">
                 <label>Username</label>
-                <input type="text" name="username" class="form-input" placeholder="admin" required value="admin">
+                <input type="text" name="username" class="form-input" placeholder="admin" required>
             </div>
             <div class="form-group">
                 <label>Password</label>

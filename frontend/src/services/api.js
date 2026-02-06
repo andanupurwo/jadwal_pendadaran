@@ -136,5 +136,24 @@ export const settingsAPI = {
     })
 };
 
+// Auth API
+export const authAPI = {
+    login: (username, password) => apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ username, password })
+    }),
+    me: (token) => apiRequest('/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    }),
+    changePassword: (currentPassword, newPassword) => {
+        const token = localStorage.getItem('token');
+        return apiRequest('/auth/change-password', {
+            method: 'POST',
+            body: JSON.stringify({ currentPassword, newPassword }),
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+    }
+};
+
 // Health Check
 export const healthCheck = () => fetch(`${API_BASE_URL.replace('/api', '')}/health`).then(r => r.json());

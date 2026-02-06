@@ -5,7 +5,7 @@ Backend RESTful API untuk sistem manajemen dan penjadwalan otomatis ujian pendad
 ## 🚀 Fitur
 
 - **RESTful API** dengan Express.js
-- **MySQL Database** untuk data persistence
+- **PostgreSQL Database** untuk data persistence
 - **Scheduling Engine** dengan algoritma Sequential Greedy Search
 - **CORS Support** untuk frontend integration
 - **Error Handling** yang comprehensive
@@ -15,7 +15,7 @@ Backend RESTful API untuk sistem manajemen dan penjadwalan otomatis ujian pendad
 ### Prerequisites
 
 - Node.js (v18 atau lebih baru)
-- MySQL (v8 atau lebih baru)
+- PostgreSQL (v14 atau lebih baru)
 
 ### Setup
 
