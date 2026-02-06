@@ -41,3 +41,16 @@ uploads/
 tmp/
 temp/
 *.tmp
+
+# Deployment keys
+gh_deploy_key
+gh_deploy_key.pub
+*.pem
+*.key
+
+# Jarvis scripts (keep in repo but ignore if needed)
+# .jarvis/
+
+# Agent files
+.agent/brain/
+.antigravity/
