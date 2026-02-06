@@ -4,12 +4,12 @@ Aplikasi web full-stack modern untuk manajemen dan penjadwalan otomatis ujian pe
 
 ## 🏗️ Arsitektur
 
-Project ini telah dipisahkan menjadi **Frontend** dan **Backend** dengan MySQL database:
+Project ini telah dipisahkan menjadi **Frontend** dan **Backend** dengan PostgreSQL database:
 
 ```
 jadwal-pendadaran/
 ├── frontend/          # Client-side application (Vite + Vanilla JS)
-├── backend/           # Server-side API (Node.js + Express + MySQL)
+├── backend/           # Server-side API (Node.js + Express + PostgreSQL)
 ├── docs/              # Documentation
 └── README.md          # This file
 ```
@@ -22,7 +22,7 @@ jadwal-pendadaran/
 - **Aturan Ketersediaan** - Atur jadwal libur dan ketidaktersediaan dosen
 - **Validasi Data** - Matching otomatis dengan master data SDM
 - **REST API** - Backend API yang scalable dan maintainable
-- **MySQL Database** - Data persistence yang reliable
+- **PostgreSQL Database** - Data persistence yang reliable
 - **Responsive UI** - Antarmuka modern dengan dark mode support
 
 ## 🛠️ Tech Stack
@@ -36,12 +36,12 @@ jadwal-pendadaran/
 ### Backend
 - **Node.js** - Runtime environment
 - **Express.js** - Web framework
-- **MySQL 2** - Database driver
+- **pg** - PostgreSQL client for Node.js
 - **CORS** - Cross-origin resource sharing
 - **dotenv** - Environment variable management
 
 ### Database
-- **MySQL** - Relational database
+- **PostgreSQL** - Relational database
 - 7 tables: `master_dosen`, `dosen`, `mahasiswa`, `libur`, `slots`, `slot_examiners`, `app_settings`
 
 ## 📦 Quick Start
@@ -49,7 +49,7 @@ jadwal-pendadaran/
 ### Prerequisites
 
 - **Node.js** v18+ 
-- **MySQL** v8+
+- **PostgreSQL** v14+
 - **npm** atau **yarn**
 
 ### Installation Steps
@@ -71,7 +71,7 @@ npm install
 
 # Copy dan edit .env
 cp .env.example .env
-# Edit .env dan sesuaikan kredensial MySQL Anda
+# Edit .env dan sesuaikan kredensial PostgreSQL Anda
 
 # Inisialisasi database
 npm run init-db
@@ -246,8 +246,8 @@ Project ini menggunakan modular architecture untuk memudahkan pengembangan:
 
 ## 🐛 Troubleshooting
 
-### Backend tidak bisa connect ke MySQL
-- Cek MySQL service sudah running
+### Backend tidak bisa connect ke PostgreSQL
+- Cek PostgreSQL service sudah running
 - Cek kredensial di `.env`
 - Cek port 3306 tidak bentrok
 
@@ -265,7 +265,7 @@ Project ini menggunakan modular architecture untuk memudahkan pengembangan:
 ### Version 1.0.0 - Full Stack Migration
 - ✅ Pisahkan frontend dan backend
 - ✅ Implementasi REST API
-- ✅ Migrasi dari LocalStorage ke MySQL
+- ✅ Migrasi dari LocalStorage ke PostgreSQL
 - ✅ Maintain semua fitur dan business logic existing
 - ✅ Add comprehensive error handling
 - ✅ Add API documentation

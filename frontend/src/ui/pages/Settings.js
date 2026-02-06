@@ -1,4 +1,4 @@
-import { settingsAPI } from '../../services/api.js';
+import { settingsAPI, authAPI } from '../../services/api.js';
 import { ROOMS, DISABLED_ROOMS, TIMES, DATES, appState } from '../../data/store.js';
 import { showConfirm } from '../components/ConfirmationModal.js';
 import { LogicView } from './Logic.js';
@@ -26,9 +26,60 @@ export const SettingsView = () => {
                      style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'about' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'about' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
                     ℹ️ About
                 </div>
+                <div class="tab-item ${appState.settingsTab === 'account' ? 'active' : ''}"
+                     onclick="window.switchSettingsTab('account')"
+                     style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'account' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'account' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
+                    🔒 Akun
+                </div>
              </div>
         </div>
     `;
+
+    // Render Account content
+    if (appState.settingsTab === 'account') {
+        setTimeout(() => {
+            const form = document.getElementById('change-password-form');
+            if (form) {
+                form.addEventListener('submit', handleChangePassword);
+            }
+        }, 0);
+
+        return `
+            <div class="container">
+                <header class="page-header">
+                     <div class="header-info">
+                        <h1>Pengaturan Akun</h1>
+                        <p class="subtitle">Kelola keamanan dan akses akun Anda.</p>
+                    </div>
+                </header>
+                ${renderTabs()}
+                
+                <div class="card" style="max-width: 600px; margin: 0 auto;">
+                    <div class="card-header">
+                        <h3>🔑 Ganti Password</h3>
+                    </div>
+                    <form id="change-password-form" style="padding: 1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Password Lama</label>
+                            <input type="password" name="currentPassword" class="form-input" required placeholder="••••••">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password Baru</label>
+                            <input type="password" name="newPassword" class="form-input" required placeholder="••••••" minlength="6">
+                            <p class="form-hint">Minimal 6 karakter</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Konfirmasi Password Baru</label>
+                            <input type="password" name="confirmNewPassword" class="form-input" required placeholder="••••••">
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                            Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
 
     // Render logic content if tab is logic
     if (appState.settingsTab === 'logic') {
@@ -322,5 +373,40 @@ async function handleSettingsSubmit(e) {
     } catch (error) {
         console.error('Save failed:', error);
         showToast('Gagal menyimpan pengaturan: ' + error.message, 'error');
+    }
+}
+
+
+async function handleChangePassword(e) {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const currentPassword = formData.get('currentPassword');
+    const newPassword = formData.get('newPassword');
+    const confirmNewPassword = formData.get('confirmNewPassword');
+
+    if (newPassword !== confirmNewPassword) {
+        showToast('Konfirmasi password baru tidak cocok!', 'error');
+        return;
+    }
+
+    if (!(await showConfirm('Anda yakin ingin mengubah password?', 'Ganti Password', { text: 'Ubah', variant: 'warning' }))) return;
+
+    try {
+        const response = await authAPI.changePassword(currentPassword, newPassword);
+
+        if (response.success) {
+            showToast('Password berhasil diubah! Silakan login ulang.', 'success');
+            setTimeout(() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.reload();
+            }, 1500);
+        } else {
+            showToast(response.error || 'Gagal mengubah password', 'error');
+        }
+    } catch (error) {
+        console.error('Change password error:', error);
+        showToast('Terjadi kesalahan saat mengubah password', 'error');
     }
 }

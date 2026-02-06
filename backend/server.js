@@ -9,6 +9,7 @@ import liburRoutes from './routes/libur.js';
 import slotsRoutes from './routes/slots.js';
 import scheduleRoutes from './routes/schedule.js';
 import settingsRoutes from './routes/settings.js';
+import authRoutes from './routes/auth.js';
 
 // Import database
 import pool from './config/database.js';
@@ -42,6 +43,7 @@ app.use('/api/libur', liburRoutes);
 app.use('/api/slots', slotsRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use((req, res) => {
