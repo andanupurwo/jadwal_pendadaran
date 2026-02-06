@@ -11,7 +11,14 @@ async function apiRequest(endpoint, options = {}) {
         },
     };
 
-    const config = { ...defaultOptions, ...options };
+    const config = {
+        ...defaultOptions,
+        ...options,
+        headers: {
+            ...defaultOptions.headers,
+            ...options.headers
+        }
+    };
 
     try {
         const response = await fetch(url, config);
@@ -145,11 +152,11 @@ export const authAPI = {
     me: (token) => apiRequest('/auth/me', {
         headers: { 'Authorization': `Bearer ${token}` }
     }),
-    changePassword: (currentPassword, newPassword) => {
+    updateAccount: (data) => {
         const token = localStorage.getItem('token');
-        return apiRequest('/auth/change-password', {
+        return apiRequest('/auth/update-account', {
             method: 'POST',
-            body: JSON.stringify({ currentPassword, newPassword }),
+            body: JSON.stringify(data),
             headers: { 'Authorization': `Bearer ${token}` }
         });
     }
