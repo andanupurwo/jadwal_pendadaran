@@ -55,7 +55,7 @@ async function initializeApp() {
             console.log('✅ Backend API connected:', health);
         } catch (error) {
             console.error('⚠️ Cannot connect to backend API:', error);
-            alert('Tidak dapat terhubung ke server backend. Pastikan backend sudah berjalan di http://localhost:3000');
+            alert('Tidak dapat terhubung ke server backend. Refresh halaman atau hubungi admin jika masalah berlanjut.');
             document.body.style.opacity = '1';
             return;
         }

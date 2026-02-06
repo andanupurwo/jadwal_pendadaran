@@ -31,7 +31,8 @@ if [ -d "frontend" ]; then
     echo "   Running npm install (Frontend)..."
     npm install
     echo "   Building Frontend..."
-    npm run build
+    # Force URL production agar tidak fallback ke localhost
+    VITE_API_URL="https://be-jpdd.daak.my.id/api" npm run build
     cd ..
 else
     echo "❌ Error: Directory 'frontend' not found!"
@@ -62,7 +63,11 @@ echo "🔄 Restarting services..."
 # Jika pakai PM2 untuk backend/preview
 if pm2 list | grep -q "$PM2_APP_NAME"; then
     pm2 restart "$PM2_APP_NAME"
-    echo "✅ PM2 restarted."
+    echo "✅ PM2 restarted ($PM2_APP_NAME)."
+else
+    echo "⚠️  App '$PM2_APP_NAME' not found in PM2. Attempting to restart ALL processes..."
+    pm2 restart all
+    echo "✅ All PM2 processes restarted."
 fi
 
 # Jika pakai Nginx untuk static files
