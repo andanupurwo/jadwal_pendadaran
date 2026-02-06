@@ -2,8 +2,6 @@
 
 Aplikasi web full-stack modern untuk manajemen dan penjadwalan otomatis ujian pendadaran menggunakan algoritma AI.
 
-![Deploy to Debian Server](https://github.com/andanupurwo/jadwal_pendadaran/actions/workflows/deploy.yml/badge.svg)
-
 ## 🏗️ Arsitektur
 
 Project ini telah dipisahkan menjadi **Frontend** dan **Backend** dengan MySQL database:
