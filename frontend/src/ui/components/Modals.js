@@ -148,9 +148,12 @@ export function toggleAddMahasiswaModal(show, studentData = null) {
                 </form>
             </div>
 
-            <div style="text-align:center; margin-top:1rem;">
-                <button type="button" class="btn-secondary" onclick="window.toggleAddMahasiswaModal(false)">Tutup</button>
-            </div>
+            <!-- FOOTER FOR CSV (Only show if not edit) -->
+            ${!isEdit ? `
+                <div id="mhsCsvFooter" style="text-align:center; margin-top:1.5rem;">
+                    <button type="button" class="btn-secondary" onclick="window.toggleAddMahasiswaModal(false)">Batal / Tutup</button>
+                </div>
+            ` : ''}
         </div>
     `;
     document.body.appendChild(modalContainer);
@@ -175,9 +178,11 @@ export function switchMahasiswaInputMode(mode) {
     if (mode === 'csv') {
         csvSection.style.display = 'block';
         manualSection.style.display = 'none';
+        if (document.getElementById('mhsCsvFooter')) document.getElementById('mhsCsvFooter').style.display = 'block';
     } else {
         csvSection.style.display = 'none';
         manualSection.style.display = 'block';
+        if (document.getElementById('mhsCsvFooter')) document.getElementById('mhsCsvFooter').style.display = 'none';
     }
 }
 
@@ -188,7 +193,7 @@ export function handleMahasiswaCSVUpload(e) {
     const reader = new FileReader();
     reader.onload = async function (event) {
         const csvText = event.target.result;
-        const lines = csvText.split('\n');
+        const lines = csvText.split(/\r?\n/);
         let dataToUpload = [];
 
         // Parse CSV (Skip header)
@@ -196,19 +201,67 @@ export function handleMahasiswaCSVUpload(e) {
             const line = lines[i].trim();
             if (!line) continue;
 
-            // Handle CSV fields logic
-            const fields = line.split(',').map(f => f.trim().replace(/^"|"$/g, ''));
+            // Robust CSV parser using state machine or clever regex
+            // Matches either a quoted value or a non-comma value
+            const fields = [];
+            let currentField = "";
+            let inQuotes = false;
 
-            if (fields.length < 3) continue;
+            for (let j = 0; j < line.length; j++) {
+                const char = line[j];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    fields.push(currentField.trim());
+                    currentField = "";
+                } else {
+                    currentField += char;
+                }
+            }
+            fields.push(currentField.trim()); // Push last field
 
-            const nim = fields[1];
-            const nama = fields[2];
-            const prodi = fields[3] || 'Informatika';
-            const pembimbing = fields[4] || '';
-            const gender = fields[5] ? fields[5].toUpperCase().trim() : null; // Asumsi kolom ke-6 adalah gender
+            // Clean up: remove surrounding quotes that might remain
+            const cleanFields = fields.map(f => f.replace(/^"|"$/g, '').trim());
+
+            if (cleanFields.length < 5) continue;
+
+            const nim = cleanFields[1];
+            const nama = cleanFields[2];
+            const prodi = cleanFields[3] || 'Informatika';
+            const pembimbing = cleanFields[4] || '';
+
+            let penguji_1 = null;
+            let penguji_2 = null;
+            let gender = null;
+
+            // Logic detection based on column count
+            if (cleanFields.length >= 8) {
+                // New Format (8 columns)
+                penguji_1 = cleanFields[5] || null;
+                penguji_2 = cleanFields[6] || null;
+                gender = cleanFields[7] ? cleanFields[7].toUpperCase().trim() : null;
+            } else if (cleanFields.length >= 6) {
+                // Old Format (6 columns)
+                gender = cleanFields[5] ? cleanFields[5].toUpperCase().trim() : null;
+            }
+
+            // Strict Gender Normalization
+            if (gender) {
+                if (gender.startsWith('L')) gender = 'L';
+                else if (gender.startsWith('P')) gender = 'P';
+                else gender = null;
+            }
 
             if (nim && nama) {
-                dataToUpload.push({ nim, nama, prodi, pembimbing, gender });
+                dataToUpload.push({
+                    nim,
+                    nama,
+                    prodi: prodi.trim(),
+                    pembimbing: pembimbing.trim(),
+                    penguji_1: penguji_1 ? penguji_1.trim() : null,
+                    penguji_2: penguji_2 ? penguji_2.trim() : null,
+                    gender
+                });
             }
         }
 
