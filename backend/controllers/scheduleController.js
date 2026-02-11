@@ -5,7 +5,16 @@ import { createLog } from './logsController.js';
 
 // Helper functions
 function normalizeName(nama) {
-    return nama?.toLowerCase().trim() || '';
+    if (!nama) return '';
+    // 1. Ambil nama depan sebelum gelar (koma)
+    let base = nama.split(',')[0];
+    // 2. Hapus gelar depan umum
+    base = base.replace(/^(dr|drs|prof|apt|irk)\.?\s+/gi, '');
+    // 3. Bersihkan tanda baca dan spasi ganda
+    return base.toLowerCase()
+        .replace(/[.,]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
 }
 
 async function getAllDosen() {
@@ -43,11 +52,14 @@ async function isDosenAvailable(namaDosen, date, time, allDosen, liburData, slot
 
     // 2. Check Libur/Unavailability Rules
     const isLibur = liburData.some(l => {
-        // Match by NIK if available (more accurate), otherwise by Name
-        const matchId = (dosenData && l.nik && String(l.nik) === String(dosenData.nik));
-        const matchNama = normalizeName(l.nama || "") === searchNameNorm;
-
-        if (!matchId && !matchNama) return false;
+        // Match by NIK (Best)
+        if (dosenData && l.nik && String(l.nik) === String(dosenData.nik)) {
+            // Match found by NIK
+        } else {
+            // Fallback to name match if NIK in libur is missing
+            const liburNameNorm = normalizeName(l.dosen_name || l.nama || "");
+            if (liburNameNorm !== searchNameNorm) return false;
+        }
 
         // DEBUG AMIR
         if (isAmir) {
@@ -206,6 +218,29 @@ export async function generateSchedule(req, res) {
         const allDosen = await getAllDosen();
         const { rows: liburData } = await client.query('SELECT * FROM libur');
 
+        // STRATEGY: Prioritize students with high-constraint supervisors (Busiest First)
+        // Use IMPROVED normalization to ensure Novita with titles matches Novita in Libur table.
+        const busyScores = {};
+        liburData.forEach(l => {
+            if (l.dosen_name) {
+                const normName = normalizeName(l.dosen_name);
+                busyScores[normName] = (busyScores[normName] || 0) + 1;
+            }
+        });
+
+        mahasiswaList.sort((a, b) => {
+            const normA = normalizeName(a.pembimbing);
+            const normB = normalizeName(b.pembimbing);
+            const scoreA = busyScores[normA] || 0;
+            const scoreB = busyScores[normB] || 0;
+
+            // Primary sort: Busy score (desc)
+            if (scoreB !== scoreA) return scoreB - scoreA;
+
+            // Secondary sort: NIM (asc) for consistency
+            return (a.nim || '').localeCompare(b.nim || '');
+        });
+
         const examinerCounts = {};
         if (isIncremental || !isIncremental) { // counts for fairness
             slotsData.forEach(slot => {
@@ -216,37 +251,60 @@ export async function generateSchedule(req, res) {
         }
 
         // Scheduling algorithm
-        const findExaminers = async (pembimbing, date, time, studentProdi, studentGender) => {
+        const findExaminers = async (pembimbing, date, time, studentProdi, studentGender, forceSearch = false) => {
             let candidates = [];
             const sProdiNorm = studentProdi?.toLowerCase().trim();
-            const pembimbingNorm = pembimbing?.toLowerCase().trim();
+            const pembimbingNorm = normalizeName(pembimbing);
+            const studentGenderNorm = studentGender?.toUpperCase().trim() || null;
 
-            const candidatePool = [...allDosen].sort((a, b) => (examinerCounts[a.nama] || 0) - (examinerCounts[b.nama] || 0));
+            // Sort by workload (fairness). If forceSearch = true, we allow higher workloads to ensure scheduling.
+            const candidatePool = [...allDosen].sort((a, b) => {
+                const countA = examinerCounts[a.nama] || 0;
+                const countB = examinerCounts[b.nama] || 0;
+                return countA - countB;
+            });
 
             for (const d of candidatePool) {
                 if (candidates.length >= 2) break;
 
-                const candidateNameNorm = d.nama.toLowerCase().trim();
+                const candidateNameNorm = normalizeName(d.nama);
 
                 // 1. Not the student's supervisor
                 if (candidateNameNorm === pembimbingNorm) continue;
 
                 // 2. Not already selected as P1
-                if (candidates.some(c => c.toLowerCase().trim() === candidateNameNorm)) continue;
+                if (candidates.some(c => normalizeName(c) === candidateNameNorm)) continue;
 
-                // 3. STRICT RULE: Candidate must be from the EXACT SAME PRODI as the student
+                // 3. STRICT RULE: Same prodi
                 const dProdiNorm = d.prodi?.toLowerCase().trim();
                 if (dProdiNorm !== sProdiNorm) continue;
 
-                // NEW RULE: Dynamic Gender Constraint
-                if (d.pref_gender && studentGender) {
-                    if (d.pref_gender !== studentGender) {
-                        // Skip if preference mismatch (e.g. Pref 'P' but Student is 'L')
-                        continue;
-                    }
+                // 4. QUOTA CHECK: Respect max_slots if set
+                const currentCount = examinerCounts[d.nama] || 0;
+                if (d.max_slots !== null && d.max_slots !== undefined && currentCount >= d.max_slots) {
+                    continue; // Skip if quota reached
                 }
 
-                // 4. Check availability
+                // SUPERVISOR PROTECTION RULE:
+                // Don't take this lecturer as an examiner IF they still have their own supervisees to schedule.
+                // This ensures their availability is preserved for their own students first.
+                const hasUnscheduledBimbingan = mahasiswaList.some(m =>
+                    normalizeName(m.pembimbing) === candidateNameNorm &&
+                    !scheduledMahasiswaIds.has(m.nim)
+                );
+
+                if (hasUnscheduledBimbingan) {
+                    // Skip picking this lecturer as an examiner for now, 
+                    // because they must prioritize their own students first.
+                    continue;
+                }
+
+                // 4. Gender Constraint
+                if (d.pref_gender && studentGenderNorm) {
+                    if (d.pref_gender !== studentGenderNorm) continue;
+                }
+
+                // 5. Availability
                 const available = await isDosenAvailable(d.nama, date, time, allDosen, liburData, slotsData);
                 if (!available) continue;
 
@@ -257,60 +315,262 @@ export async function generateSchedule(req, res) {
 
         let successCount = 0;
         const newSlotsCreated = [];
+        const failureReasons = []; // Track why students were skipped
 
-        for (const dateObj of DATES) {
-            for (const time of TIMES) {
-                if (dateObj.label === 'Jumat' && time === '11:30') continue;
+        // ==========================================
+        // HYBRID SCHEDULING LOGIC - 3 SCENARIOS
+        // ==========================================
 
-                for (const room of ACTIVE_ROOMS) {
-                    const slotExists = slotsData.some(s => s.date === dateObj.value && s.time === time && s.room === room);
-                    if (slotExists) continue;
+        // Group students by assignment type for priority processing
+        const fullyAssigned = [];     // Has Penguji1 AND Penguji2
+        const partiallyAssigned = []; // Has ONLY Penguji1 OR Penguji2
+        const autoAssign = [];         // No pre-assigned examiners
 
-                    for (const mhs of mahasiswaList) {
-                        if (scheduledMahasiswaIds.has(mhs.nim)) continue;
+        for (const mhs of mahasiswaList) {
+            if (scheduledMahasiswaIds.has(mhs.nim)) continue;
+            if (!mhs.pembimbing || !mhs.prodi) continue;
 
-                        const supervisorAvailable = await isDosenAvailable(mhs.pembimbing, dateObj.value, time, allDosen, liburData, slotsData, null, true);
-                        if (!mhs.pembimbing || !supervisorAvailable) continue;
+            if (mhs.penguji_1 && mhs.penguji_2) {
+                fullyAssigned.push(mhs);
+            } else if (mhs.penguji_1 || mhs.penguji_2) {
+                partiallyAssigned.push(mhs);
+            } else {
+                autoAssign.push(mhs);
+            }
+        }
 
-                        const examiners = await findExaminers(mhs.pembimbing, dateObj.value, time, mhs.prodi, mhs.gender);
-                        if (!examiners) continue;
+        log(`📊 Mahasiswa Categories: ${fullyAssigned.length} fully assigned, ${partiallyAssigned.length} partially, ${autoAssign.length} auto`);
 
-                        const final = [...examiners, mhs.pembimbing];
+        // ==============================================
+        // SCENARIO A: FULLY PRE-ASSIGNED (P1 + P2)
+        // ==============================================
+        log(`\n🎯 SCENARIO A: Processing ${fullyAssigned.length} fully pre-assigned students...`);
 
-                        // Save to database
-                        const { rows: insertedSlot } = await client.query(
-                            'INSERT INTO slots (date, time, room, student, mahasiswa_nim) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-                            [dateObj.value, time, room, mhs.nama, mhs.nim]
+        for (const mhs of fullyAssigned) {
+            const allThree = [mhs.pembimbing, mhs.penguji_1, mhs.penguji_2];
+
+            // Validate uniqueness
+            const uniqueNames = new Set(allThree.map(normalizeName));
+            if (uniqueNames.size !== 3) {
+                const msg = `❌ ${mhs.nama}: Penguji duplikat (${mhs.pembimbing}, ${mhs.penguji_1}, ${mhs.penguji_2})`;
+                log(msg);
+                failureReasons.push({ student: mhs.nama, reason: 'Duplicate examiners' });
+                continue;
+            }
+
+            let scheduled = false;
+
+            searchFullyAssigned: for (const dateObj of DATES) {
+                for (const time of TIMES) {
+                    if (dateObj.label === 'Jumat' && time === '11:30') continue;
+
+                    for (const room of ACTIVE_ROOMS) {
+                        const slotExists = slotsData.find(s => s.date === dateObj.value && s.time === time && s.room === room);
+                        if (slotExists) continue;
+
+                        // Check availability of ALL 3
+                        const availChecks = await Promise.all(
+                            allThree.map(name =>
+                                isDosenAvailable(name, dateObj.value, time, allDosen, liburData, slotsData, null, name === mhs.pembimbing)
+                            )
                         );
 
-                        const slotId = insertedSlot[0].id;
-
-                        for (let i = 0; i < final.length; i++) {
-                            await client.query(
-                                'INSERT INTO slot_examiners (slot_id, examiner_name, examiner_order) VALUES ($1, $2, $3)',
-                                [slotId, final[i], i]
+                        if (availChecks.every(a => a)) {
+                            // Create slot
+                            const { rows: insertedSlot } = await client.query(
+                                'INSERT INTO slots (date, time, room, student, mahasiswa_nim) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                                [dateObj.value, time, room, mhs.nama, mhs.nim]
                             );
+                            const slotId = insertedSlot[0].id;
+
+                            const finalExaminers = [mhs.penguji_1, mhs.penguji_2, mhs.pembimbing];
+                            for (let i = 0; i < finalExaminers.length; i++) {
+                                await client.query(
+                                    'INSERT INTO slot_examiners (slot_id, examiner_name, examiner_order) VALUES ($1, $2, $3)',
+                                    [slotId, finalExaminers[i], i]
+                                );
+                            }
+
+                            const newSlotObj = { id: slotId, date: dateObj.value, time, room, student: mhs.nama, examiners: finalExaminers };
+                            newSlotsCreated.push(newSlotObj);
+                            slotsData.push(newSlotObj);
+                            scheduledMahasiswaIds.add(mhs.nim);
+                            successCount++;
+                            finalExaminers.forEach(ex => { examinerCounts[ex] = (examinerCounts[ex] || 0) + 1; });
+                            log(`✅ [${dateObj.value} ${time}] ${mhs.nama} (${room}) - Pre-assigned: ${mhs.penguji_1}, ${mhs.penguji_2}`);
+                            scheduled = true;
+                            break searchFullyAssigned;
                         }
-
-                        const newSlotObj = {
-                            date: dateObj.value,
-                            time,
-                            room,
-                            student: mhs.nama,
-                            examiners: final
-                        };
-
-                        newSlotsCreated.push(newSlotObj);
-                        slotsData.push(newSlotObj);
-
-                        scheduledMahasiswaIds.add(mhs.nim);
-                        successCount++;
-                        final.forEach(ex => { examinerCounts[ex] = (examinerCounts[ex] || 0) + 1; });
-                        log(`✅ [${dateObj.value} ${time}] ${mhs.nama}`);
-
-                        break;
                     }
                 }
+            }
+
+            if (!scheduled) {
+                const msg = `❌ ${mhs.nama}: No available slot for all 3 examiners`;
+                log(msg);
+                failureReasons.push({ student: mhs.nama, reason: msg });
+            }
+        }
+
+        // ==============================================
+        // SCENARIO B: PARTIALLY PRE-ASSIGNED (P1 OR P2)
+        // ==============================================
+        log(`\n🔍 SCENARIO B: Processing ${partiallyAssigned.length} partially pre-assigned students...`);
+
+        for (const mhs of partiallyAssigned) {
+            const preAssigned = mhs.penguji_1 || mhs.penguji_2;
+            const needToFind = mhs.penguji_1 ? 'Penguji 2' : 'Penguji  1';
+
+            log(`🔍 ${mhs.nama}: Finding ${needToFind} (${preAssigned} pre-assigned)`);
+
+            let scheduled = false;
+
+            searchPartial: for (const dateObj of DATES) {
+                for (const time of TIMES) {
+                    if (dateObj.label === 'Jumat' && time === '11:30') continue;
+
+                    for (const room of ACTIVE_ROOMS) {
+                        const slotExists = slotsData.find(s => s.date === dateObj.value && s.time === time && s.room === room);
+                        if (slotExists) continue;
+
+                        // Check availability of pembimbing + pre-assigned examiner
+                        const pembimbingAvail = await isDosenAvailable(mhs.pembimbing, dateObj.value, time, allDosen, liburData, slotsData, null, true);
+                        const preAssignedAvail = await isDosenAvailable(preAssigned, dateObj.value, time, allDosen, liburData, slotsData, null, false);
+
+                        if (!pembimbingAvail || !preAssignedAvail) continue;
+
+                        // AUTO-FIND the missing examiner with FULL VALIDATION
+                        const autoExaminers = await findExaminers(mhs.pembimbing, dateObj.value, time, mhs.prodi, mhs.gender, false);
+
+                        if (autoExaminers && autoExaminers.length >= 2) {
+                            // Filter out the pre-assigned examiner
+                            const preNorm = normalizeName(preAssigned);
+                            const pembNorm = normalizeName(mhs.pembimbing);
+                            const available = autoExaminers.filter(ex => {
+                                const exNorm = normalizeName(ex);
+                                return exNorm !== preNorm && exNorm !== pembNorm;
+                            });
+
+                            if (available.length >= 1) {
+                                const autoExaminer = available[0];
+
+                                // Create slot
+                                const { rows: insertedSlot } = await client.query(
+                                    'INSERT INTO slots (date, time, room, student, mahasiswa_nim) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                                    [dateObj.value, time, room, mhs.nama, mhs.nim]
+                                );
+                                const slotId = insertedSlot[0].id;
+
+                                const finalExaminers = mhs.penguji_1
+                                    ? [mhs.penguji_1, autoExaminer, mhs.pembimbing]
+                                    : [autoExaminer, mhs.penguji_2, mhs.pembimbing];
+
+                                for (let i = 0; i < finalExaminers.length; i++) {
+                                    await client.query(
+                                        'INSERT INTO slot_examiners (slot_id, examiner_name, examiner_order) VALUES ($1, $2, $3)',
+                                        [slotId, finalExaminers[i], i]
+                                    );
+                                }
+
+                                const newSlotObj = { id: slotId, date: dateObj.value, time, room, student: mhs.nama, examiners: finalExaminers };
+                                newSlotsCreated.push(newSlotObj);
+                                slotsData.push(newSlotObj);
+                                scheduledMahasiswaIds.add(mhs.nim);
+                                successCount++;
+                                finalExaminers.forEach(ex => { examinerCounts[ex] = (examinerCounts[ex] || 0) + 1; });
+                                log(`✅ [${dateObj.value} ${time}] ${mhs.nama} (${room}) - Hybrid: ${preAssigned} + ${autoExaminer}`);
+                                scheduled = true;
+                                break searchPartial;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!scheduled) {
+                const msg = `❌ ${mhs.nama}: Cannot find ${needToFind}`;
+                log(msg);
+                failureReasons.push({ student: mhs.nama, reason: msg });
+            }
+        }
+
+        // ==============================================
+        // SCENARIO C: AUTO-ASSIGN (Existing Logic)
+        // ==============================================
+        log(`\n⚙️ SCENARIO C: Processing ${autoAssign.length} auto-assignment students...`);
+
+        for (const mhs of autoAssign) {
+            let scheduled = false;
+
+            // Search for an available slot for THIS student
+            searchLoop:
+            for (const dateObj of DATES) {
+                for (const time of TIMES) {
+                    if (dateObj.label === 'Jumat' && time === '11:30') continue;
+
+                    for (const room of ACTIVE_ROOMS) {
+                        const slotExists = slotsData.some(s => s.date === dateObj.value && s.time === time && s.room === room);
+                        if (slotExists) continue;
+
+                        const supervisorAvailable = await isDosenAvailable(mhs.pembimbing, dateObj.value, time, allDosen, liburData, slotsData, null, true);
+                        if (!supervisorAvailable) continue;
+
+                        const isHighPriority = (busyScores[normalizeName(mhs.pembimbing)] || 0) > 0;
+                        const examiners = await findExaminers(mhs.pembimbing, dateObj.value, time, mhs.prodi, mhs.gender, isHighPriority);
+
+                        if (examiners) {
+                            const final = [...examiners, mhs.pembimbing];
+                            const { rows: insertedSlot } = await client.query(
+                                'INSERT INTO slots (date, time, room, student, mahasiswa_nim) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                                [dateObj.value, time, room, mhs.nama, mhs.nim]
+                            );
+
+                            const slotId = insertedSlot[0].id;
+                            for (let i = 0; i < final.length; i++) {
+                                await client.query('INSERT INTO slot_examiners (slot_id, examiner_name, examiner_order) VALUES ($1, $2, $3)', [slotId, final[i], i]);
+                            }
+
+                            const newSlotObj = { id: slotId, date: dateObj.value, time, room, student: mhs.nama, examiners: final };
+                            newSlotsCreated.push(newSlotObj);
+                            slotsData.push(newSlotObj);
+                            scheduledMahasiswaIds.add(mhs.nim);
+                            successCount++;
+                            final.forEach(ex => { examinerCounts[ex] = (examinerCounts[ex] || 0) + 1; });
+                            log(`✅ [${dateObj.value} ${time}] ${mhs.nama} (${room})`);
+                            scheduled = true;
+                            break searchLoop;
+                        }
+                    }
+                }
+            }
+
+            if (!scheduled) {
+                // Diagnostic check for more specific failure reason
+                let reason = "Tidak ada slot yang cocok (Cek libur atau kuota penguji)";
+
+                const supervisorAvailCount = await (async () => {
+                    let count = 0;
+                    for (const d of DATES) {
+                        for (const t of TIMES) {
+                            if (await isDosenAvailable(mhs.pembimbing, d.value, t, allDosen, liburData, slotsData, null, true)) count++;
+                        }
+                    }
+                    return count;
+                })();
+
+                if (supervisorAvailCount === 0) {
+                    reason = `Dosen Pembimbing (${mhs.pembimbing}) tidak memiliki jam kosong di seluruh jadwal.`;
+                } else {
+                    const sameProdiDosen = allDosen.filter(d => d.prodi?.toLowerCase().trim() === mhs.prodi?.toLowerCase().trim());
+                    if (sameProdiDosen.length < 3) {
+                        reason = `Jumlah dosen di prodi ${mhs.prodi} kurang dari minimum 3 untuk membentuk tim (1 Pembimbing + 2 Penguji).`;
+                    } else {
+                        reason = "Bentrok Penguji: Semua dosen penguji di prodi ini sudah terisi atau libur di jam yang pembimbing bisa.";
+                    }
+                }
+
+                failureReasons.push({ nim: mhs.nim, nama: mhs.nama, reason });
+                log(`❌ GAGAL: ${mhs.nama} - ${reason}`);
             }
         }
 
@@ -323,7 +583,8 @@ export async function generateSchedule(req, res) {
             logs,
             scheduled: successCount,
             total: mahasiswaList.length,
-            slots: newSlotsCreated
+            slots: newSlotsCreated,
+            failures: failureReasons
         });
 
         await createLog('GENERATE', 'Jadwal', `Generate jadwal (${isIncremental ? 'Incremental' : 'Full Reset'}). Target: ${targetProdi}. Berhasil: ${successCount}.`);
@@ -586,6 +847,142 @@ export async function createSlotManual(req, res) {
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Create Slot Manual Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    } finally {
+        client.release();
+    }
+}
+
+// Update Examiners in Existing Slot
+export async function updateSlotExaminers(req, res) {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const { slotId, penguji1, penguji2 } = req.body;
+
+        if (!slotId || !penguji1 || !penguji2) {
+            await client.query('ROLLBACK');
+            return res.status(400).json({ success: false, error: 'Data tidak lengkap.' });
+        }
+
+        // 1. Get Slot Data
+        const { rows: slotRows } = await client.query('SELECT * FROM slots WHERE id = $1', [slotId]);
+        if (slotRows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ success: false, error: 'Slot tidak ditemukan' });
+        }
+        const slot = slotRows[0];
+
+        // 2. Get Mahasiswa Data
+        const { rows: mahasiswaRows } = await client.query(
+            'SELECT * FROM mahasiswa WHERE nim = $1',
+            [slot.mahasiswa_nim]
+        );
+        if (mahasiswaRows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ success: false, error: 'Data mahasiswa invalid' });
+        }
+        const mahasiswa = mahasiswaRows[0];
+        const pembimbing = mahasiswa.pembimbing;
+
+        // 3. Validate Unique Examiners
+        const examiners = [penguji1, penguji2, pembimbing];
+        const uniqueExaminers = new Set(examiners.map(e => normalizeName(e)));
+        if (uniqueExaminers.size !== 3) {
+            await client.query('ROLLBACK');
+            return res.json({ success: false, error: 'Penguji 1, Penguji 2, dan Pembimbing harus berbeda' });
+        }
+
+        // 4. Get Data for Availability Validation
+        const allDosen = await getAllDosen();
+        const { rows: liburData } = await client.query('SELECT * FROM libur');
+        const { rows: currentSlots } = await client.query('SELECT * FROM slots');
+        const { rows: examinerRows } = await client.query('SELECT slot_id, examiner_name FROM slot_examiners ORDER BY slot_id, examiner_order');
+
+        const slotExaminersMap = {};
+        examinerRows.forEach(row => {
+            if (!slotExaminersMap[row.slot_id]) slotExaminersMap[row.slot_id] = [];
+            slotExaminersMap[row.slot_id].push(row.examiner_name);
+        });
+
+        const slotsData = currentSlots.map(s => ({
+            ...s,
+            examiners: slotExaminersMap[s.id] || []
+        }));
+
+        // 5. Check Availability (Only for NEW examiners)
+        // We only check Penguji 1 and Penguji 2 because Pembimbing usually stays same or is checked elsewhere.
+        // Also simpler to check everyone passed in request
+        const dosenToCheck = [
+            { name: penguji1, role: 'Penguji 1' },
+            { name: penguji2, role: 'Penguji 2' }
+        ];
+
+        for (const dosen of dosenToCheck) {
+            const available = await isDosenAvailable(
+                dosen.name,
+                slot.date,
+                slot.time,
+                allDosen,
+                liburData,
+                slotsData,
+                slot.student, // Exclude CURRENT slot from busy check
+                false
+            );
+
+            if (!available) {
+                await client.query('ROLLBACK');
+                return res.json({
+                    success: false,
+                    error: `${dosen.role} (${dosen.name}) tidak tersedia pada ${slot.date} ${slot.time}.`
+                });
+            }
+        }
+
+        // 6. Validate Faculty/Prodi Rules
+        const studentProdi = mahasiswa.prodi?.toLowerCase().trim();
+        for (const dosenName of [penguji1, penguji2]) {
+            const dosenData = allDosen.find(d => normalizeName(d.nama) === normalizeName(dosenName));
+            if (!dosenData) {
+                await client.query('ROLLBACK');
+                return res.json({ success: false, error: `Data dosen ${dosenName} tidak ditemukan` });
+            }
+            const dosenProdi = dosenData.prodi?.toLowerCase().trim();
+            if (dosenProdi !== studentProdi) {
+                await client.query('ROLLBACK');
+                return res.json({
+                    success: false,
+                    error: `${dosenName} beda prodi dengan mahasiswa.`
+                });
+            }
+        }
+
+
+        // 7. Update Database
+        await client.query('DELETE FROM slot_examiners WHERE slot_id = $1', [slotId]);
+
+        const finalExaminers = [penguji1, penguji2, pembimbing];
+        for (let i = 0; i < finalExaminers.length; i++) {
+            await client.query(
+                'INSERT INTO slot_examiners (slot_id, examiner_name, examiner_order) VALUES ($1, $2, $3)',
+                [slotId, finalExaminers[i], i]
+            );
+        }
+
+        await client.query('COMMIT');
+
+        res.json({
+            success: true,
+            message: 'Penguji berhasil diperbarui',
+            examiners: finalExaminers
+        });
+
+        await createLog('UPDATE EXAMINER', 'Jadwal', `Update penguji ${slot.student}: ${penguji1}, ${penguji2}`);
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Update Examiner Error:', error);
         res.status(500).json({ success: false, error: error.message });
     } finally {
         client.release();

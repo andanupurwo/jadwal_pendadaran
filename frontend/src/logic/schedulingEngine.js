@@ -2,6 +2,7 @@ import { APP_DATA, DATES, TIMES, ROOMS } from '../data/store.js';
 import { navigate } from '../ui/core/router.js';
 import { scheduleAPI, slotsAPI } from '../services/api.js';
 import { showConfirm } from '../ui/components/ConfirmationModal.js';
+import { showSchedulingResult } from '../ui/components/SchedulingResultModal.js';
 
 export function logToLogic(message) {
     const logEl = document.getElementById('logicLog');
@@ -68,8 +69,16 @@ export async function generateSchedule(options = { silent: false }) {
 
             if (!options.silent) {
                 setTimeout(async () => {
-                    if (await showConfirm(`Selesai! Terjadwal: ${response.scheduled}/${response.total}\n\nLihat hasil?`, 'Hasil Penjadwalan', { text: 'Lihat Hasil', variant: 'primary' })) {
+                    const result = await showSchedulingResult({
+                        scheduled: response.scheduled,
+                        total: response.total,
+                        failures: response.failures
+                    });
+
+                    if (result) {
                         navigate('home');
+                    } else {
+                        navigate(appState.currentView);
                     }
                 }, 300);
             }

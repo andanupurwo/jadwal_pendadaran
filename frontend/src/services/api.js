@@ -139,6 +139,10 @@ export const scheduleAPI = {
     createManual: (data) => apiRequest('/schedule/create-manual', {
         method: 'POST',
         body: JSON.stringify(data)
+    }),
+    updateExaminers: (data) => apiRequest('/schedule/update-examiners', {
+        method: 'POST',
+        body: JSON.stringify(data)
     })
 };
 

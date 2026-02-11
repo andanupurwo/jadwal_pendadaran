@@ -21,7 +21,8 @@ export async function getAllDosen(req, res) {
                     prodi: dosen.prodi,
                     fakultas: dosen.fakultas,
                     exclude: Boolean(dosen.exclude),
-                    pref_gender: dosen.pref_gender || null // Add this
+                    pref_gender: dosen.pref_gender || null,
+                    max_slots: dosen.max_slots || null
                 });
             }
         });
@@ -89,11 +90,11 @@ export async function bulkInsertDosen(req, res) {
 
             try {
                 await client.query(
-                    `INSERT INTO dosen (nik, nama, prodi, fakultas, exclude, pref_gender) 
-                     VALUES ($1, $2, $3, $4, $5, $6) 
+                    `INSERT INTO dosen (nik, nama, prodi, fakultas, exclude, pref_gender, max_slots) 
+                     VALUES ($1, $2, $3, $4, $5, $6, $7) 
                      ON CONFLICT (nik) 
-                     DO UPDATE SET nama = EXCLUDED.nama, prodi = EXCLUDED.prodi, fakultas = EXCLUDED.fakultas, pref_gender = EXCLUDED.pref_gender`,
-                    [d.nik, d.nama, d.prodi || '', d.fakultas, false, d.pref_gender || null]
+                     DO UPDATE SET nama = EXCLUDED.nama, prodi = EXCLUDED.prodi, fakultas = EXCLUDED.fakultas, pref_gender = EXCLUDED.pref_gender, max_slots = EXCLUDED.max_slots`,
+                    [d.nik, d.nama, d.prodi || '', d.fakultas, false, d.pref_gender || null, d.max_slots || null]
                 );
                 insertedCount++;
             } catch (err) {
@@ -239,11 +240,11 @@ export async function deleteMasterDosen(req, res) {
 export async function updateDosen(req, res) {
     try {
         const { nik } = req.params;
-        const { nama, prodi, fakultas, pref_gender } = req.body;
+        const { nama, prodi, fakultas, pref_gender, max_slots } = req.body;
 
         const { rowCount } = await pool.query(
-            'UPDATE dosen SET nama = $1, prodi = $2, fakultas = $3, pref_gender = $4 WHERE nik = $5',
-            [nama, prodi, fakultas, pref_gender || null, nik]
+            'UPDATE dosen SET nama = $1, prodi = $2, fakultas = $3, pref_gender = $4, max_slots = $5 WHERE nik = $6',
+            [nama, prodi, fakultas, pref_gender || null, max_slots || null, nik]
         );
 
         if (rowCount === 0) {

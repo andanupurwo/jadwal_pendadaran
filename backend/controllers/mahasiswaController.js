@@ -32,15 +32,15 @@ export async function getMahasiswaByNim(req, res) {
 // Create mahasiswa
 export async function createMahasiswa(req, res) {
     try {
-        const { nim, nama, prodi, pembimbing, gender } = req.body;
+        const { nim, nama, prodi, pembimbing, penguji_1, penguji_2, gender } = req.body;
 
         if (!nim || !nama || !prodi) {
             return res.status(400).json({ success: false, error: 'NIM, nama, and prodi are required' });
         }
 
         const { rows } = await pool.query(
-            'INSERT INTO mahasiswa (nim, nama, prodi, pembimbing, gender) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [nim, nama, prodi, pembimbing || null, gender || null]
+            'INSERT INTO mahasiswa (nim, nama, prodi, pembimbing, penguji_1, penguji_2, gender) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [nim, nama, prodi, pembimbing || null, penguji_1 || null, penguji_2 || null, gender || null]
         );
 
         res.status(201).json({
@@ -62,11 +62,11 @@ export async function createMahasiswa(req, res) {
 export async function updateMahasiswa(req, res) {
     try {
         const { nim } = req.params;
-        const { nama, prodi, pembimbing, gender } = req.body;
+        const { nama, prodi, pembimbing, penguji_1, penguji_2, gender } = req.body;
 
         const { rowCount } = await pool.query(
-            'UPDATE mahasiswa SET nama = $1, prodi = $2, pembimbing = $3, gender = $4, updated_at = CURRENT_TIMESTAMP WHERE nim = $5',
-            [nama, prodi, pembimbing || null, gender || null, nim]
+            'UPDATE mahasiswa SET nama = $1, prodi = $2, pembimbing = $3, penguji_1 = $4, penguji_2 = $5, gender = $6, updated_at = CURRENT_TIMESTAMP WHERE nim = $7',
+            [nama, prodi, pembimbing || null, penguji_1 || null, penguji_2 || null, gender || null, nim]
         );
 
         if (rowCount === 0) {
@@ -252,17 +252,39 @@ export async function bulkCreateMahasiswa(req, res) {
                 }
             }
 
+            // Handle Penguji 1 with fuzzy matching
+            let finalPenguji1 = mhs.penguji_1 || mhs.penguji1 || null;
+            if (finalPenguji1) {
+                const canonical = findCanonicalName(finalPenguji1);
+                if (canonical && canonical !== finalPenguji1) {
+                    finalPenguji1 = canonical;
+                    correctedCount++;
+                }
+            }
+
+            // Handle Penguji 2 with fuzzy matching
+            let finalPenguji2 = mhs.penguji_2 || mhs.penguji2 || null;
+            if (finalPenguji2) {
+                const canonical = findCanonicalName(finalPenguji2);
+                if (canonical && canonical !== finalPenguji2) {
+                    finalPenguji2 = canonical;
+                    correctedCount++;
+                }
+            }
+
             try {
                 await client.query(
-                    `INSERT INTO mahasiswa (nim, nama, prodi, pembimbing, gender) 
-                     VALUES ($1, $2, $3, $4, $5)
+                    `INSERT INTO mahasiswa (nim, nama, prodi, pembimbing, penguji_1, penguji_2, gender) 
+                     VALUES ($1, $2, $3, $4, $5, $6, $7)
                      ON CONFLICT (nim) DO UPDATE 
                      SET nama = EXCLUDED.nama, 
                          prodi = EXCLUDED.prodi, 
                          pembimbing = EXCLUDED.pembimbing,
+                         penguji_1 = EXCLUDED.penguji_1,
+                         penguji_2 = EXCLUDED.penguji_2,
                          gender = EXCLUDED.gender,
                          updated_at = CURRENT_TIMESTAMP`,
-                    [mhs.nim, mhs.nama, mhs.prodi, finalPembimbing, mhs.gender || null]
+                    [mhs.nim, mhs.nama, mhs.prodi, finalPembimbing, finalPenguji1, finalPenguji2, mhs.gender || null]
                 );
                 insertedCount++;
             } catch (err) {

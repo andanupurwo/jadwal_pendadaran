@@ -14,7 +14,7 @@ export const DosenView = () => {
 
         const rows = sorted.map(d => [
             d.nik,
-            `<div class="text-truncate" title="${d.nama}"><strong>${d.nama}</strong></div>`,
+            `<div class="text-truncate" title="Klik untuk lihat jadwal" style="cursor:pointer; color:var(--primary);" onclick="window.showLecturerSchedule('${d.nama.replace(/'/g, "\\'")}')"><strong>${d.nama}</strong> <span style="font-size:0.8rem;">📅</span></div>`,
             `<div style="text-align:center;"><span class="badge ${d.status === 'DOSEN' ? 'badge-primary' : 'badge-secondary'}" style="display:inline-block; min-width:60px;">${d.status}</span></div>`,
             `<div class="text-truncate">${d.kategori || '-'}</div>`,
             `<div style="font-family: monospace; font-size: 0.8rem; text-align:center;">${d.nidn || '-'}</div>`,
@@ -70,9 +70,10 @@ export const DosenView = () => {
             return {
                 content: [
                     d.nik,
-                    `<div class="text-truncate" title="${d.nama}"><strong>${d.nama}</strong></div>`,
+                    `<div class="text-truncate" title="Klik untuk lihat jadwal" style="cursor:pointer; color:var(--primary);" onclick="window.showLecturerSchedule('${d.nama.replace(/'/g, "\\'")}')"><strong>${d.nama}</strong> <span style="font-size:0.8rem;">📅</span></div>`,
                     d.prodi,
-                    prefLabel, // New Column
+                    prefLabel,
+                    d.max_slots ? `<span style="font-weight:700; color:var(--success);">${d.max_slots} Slot</span>` : '<span style="color:#d9d9d9;">-</span>',
                     `${d.matchResult?.matched
                         ? `<span class="badge badge-success" style="background:#e6f9f1; color:#00a854; border:1px solid #b7eb8f;">✓ Valid</span>`
                         : `<span class="badge badge-danger" style="background:#fff1f0; color:#f5222d; border:1px solid #ffa39e;">Unmatched</span>`}`,
@@ -95,11 +96,12 @@ export const DosenView = () => {
         const headers = [
             { label: 'NIK', key: 'nik', width: '12%' },
             { label: 'Nama Dosen', key: 'nama', width: '25%' },
-            { label: 'Prodi', key: 'prodi', width: '18%' },
-            { label: 'Pref', key: 'pref_gender', width: '10%', align: 'center' }, // New Header
+            { label: 'Prodi', key: 'prodi', width: '15%' },
+            { label: 'Pref', key: 'pref_gender', width: '8%', align: 'center' },
+            { label: 'Quota', key: 'max_slots', width: '8%', align: 'center' },
             { label: 'Status Data', key: 'isMatched', width: '10%', align: 'center' },
-            { label: 'Active', key: 'exclude', width: '10%', align: 'center' },
-            { label: 'Aksi', align: 'center', width: '15%' }
+            { label: 'Active', key: 'exclude', width: '9%', align: 'center' },
+            { label: 'Aksi', align: 'center', width: '13%' }
         ];
 
         const prodis = [...new Set((APP_DATA.facultyData[faculty] || []).map(d => d.prodi))].sort();

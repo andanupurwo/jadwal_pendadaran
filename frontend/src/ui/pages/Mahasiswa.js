@@ -69,12 +69,34 @@ export const MahasiswaView = () => {
             `;
         }
 
+        // Badge for pre-assigned status
+        const hasPreAssigned = m.penguji_1 || m.penguji_2;
+        let pengujiStatus = '';
+        if (m.penguji_1 && m.penguji_2) {
+            pengujiStatus = '<div style="display:flex; gap:4px; flex-wrap:wrap;"><span class="badge" style="background:var(--success); color:white; font-size:0.65rem; padding:2px 6px;">✓ Penguji Lengkap</span></div>';
+        } else if (m.penguji_1 || m.penguji_2) {
+            pengujiStatus = '<div style="display:flex; gap:4px; flex-wrap:wrap;"><span class="badge" style="background:var(--warning); color:white; font-size:0.65rem; padding:2px 6px;">⚡ Hybrid</span></div>';
+        } else {
+            pengujiStatus = '<span style="color:var(--text-muted); font-size:0.7rem; font-style:italic;">Auto</span>';
+        }
+
+        let pengujiDisplay = '';
+        if (m.penguji_1 && m.penguji_2) {
+            pengujiDisplay = `<div style="font-size:0.8rem; line-height:1.4;">P1: ${m.penguji_1}<br>P2: ${m.penguji_2}</div>`;
+        } else if (m.penguji_1 || m.penguji_2) {
+            pengujiDisplay = `<div style="font-size:0.8rem;">P${m.penguji_1 ? '1' : '2'}: ${m.penguji_1 || m.penguji_2}<br><span style="color:var(--text-muted); font-style:italic; font-size:0.7rem;">P${m.penguji_1 ? '2' : '1'}: Auto</span></div>`;
+        } else {
+            pengujiDisplay = '<span style="color:var(--text-muted); font-size:0.7rem; font-style:italic;">Belum ditentukan</span>';
+        }
+
         return [
             `<div style="font-family:monospace; font-weight:600;">${m.nim}</div>`,
             `<strong>${m.nama}</strong>`,
             `<div style="text-align:center;">${m.gender || '-'}</div>`,
             `<span class="badge" style="background:rgba(0,0,0,0.05); color:var(--text-main); font-weight:600;">${m.prodi}</span>`,
             pembimbingDisplay,
+            pengujiDisplay,
+            pengujiStatus,
             sched
                 ? `<div onclick="window.viewAndHighlightSchedule('${m.nama}')" class="badge-success" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
                         <span style="font-size:12px;">📅</span> ${sched.date} (${sched.time})
@@ -87,13 +109,15 @@ export const MahasiswaView = () => {
     });
 
     const headers = [
-        { label: 'NIM', key: 'nim', width: '12%' },
-        { label: 'Nama Mahasiswa', key: 'nama', width: '20%' },
-        { label: 'L/P', key: 'gender', width: '5%', align: 'center' },
-        { label: 'Program Studi', key: 'prodi', width: '15%' },
-        { label: 'Pembimbing Utama', key: 'pembimbing', width: '20%' },
-        { label: 'Status Jadwal', width: '15%', align: 'center' }, // Status is dynamic, hard to sort by column unless we process it first. keeping it unsortable for now or simple.
-        { label: 'Aksi', width: '13%', align: 'center' }
+        { label: 'NIM', key: 'nim', width: '10%' },
+        { label: 'Nama Mahasiswa', key: 'nama', width: '15%' },
+        { label: 'L/P', key: 'gender', width: '4%', align: 'center' },
+        { label: 'Program Studi', key: 'prodi', width: '12%' },
+        { label: 'Pembimbing Utama', key: 'pembimbing', width: '15%' },
+        { label: 'Penguji Pre-assigned', width: '15%' },
+        { label: 'Status', width: '8%', align: 'center' },
+        { label: 'Jadwal', width: '12%', align: 'center' },
+        { label: 'Aksi', width: '9%', align: 'center' }
     ];
 
     return `
