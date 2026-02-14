@@ -16,6 +16,7 @@ import './services/auth.js'; // Initialize auth handlers
 
 import { generateScheduleWithOptions } from './handlers/scheduleOptionsHandler.js';
 import { showLecturerSchedule } from './ui/components/DosenScheduleModal.js';
+import { showDetailedLecturerSchedule } from './ui/components/DosenDetailedScheduleModal.js';
 
 // Export to window for HTML access
 Object.assign(window, modals, actions, scheduleHandlers, {
@@ -23,7 +24,8 @@ Object.assign(window, modals, actions, scheduleHandlers, {
     navigate,
     getAllDosen,
     generateScheduleWithOptions,
-    showLecturerSchedule
+    showLecturerSchedule,
+    showDetailedLecturerSchedule
 });
 // Ensure new modal methods are available globally
 window.switchMahasiswaInputMode = modals.switchMahasiswaInputMode;

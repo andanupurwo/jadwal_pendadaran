@@ -1,6 +1,7 @@
 import { APP_DATA, appState } from '../../data/store.js';
 import { getAllDosen, sortData } from '../../utils/helpers.js';
 import { renderTable } from '../components/Common.js';
+import { PRODI_SHORTNAMES } from '../../utils/constants.js';
 
 export const LiburView = () => {
     const searchTerm = appState.searchTerm || '';
@@ -59,7 +60,7 @@ export const LiburView = () => {
         const dosen = l.dosenObj;
         let htmlNama = '';
         if (dosen) {
-            htmlNama = `<strong>${dosen.nama}</strong><br><span style="font-size:0.75rem; color:var(--text-muted);">${dosen.prodi}</span>`;
+            htmlNama = `<strong>${dosen.nama}</strong><br><span style="font-size:0.75rem; color:var(--text-muted); cursor:help;" title="${dosen.prodi}">${PRODI_SHORTNAMES[dosen.prodi] || dosen.prodi}</span>`;
         } else {
             htmlNama = `<strong>${l.nama || l.dosenId}</strong><br><span style="font-size:0.75rem; color:var(--danger);">(Data Dosen Tidak Ditemukan)</span>`;
         }
@@ -104,7 +105,7 @@ export const LiburView = () => {
             <div class="controls-bar" style="margin-bottom:1.5rem; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
                 <select onchange="window.handleProdiFilterChange(event)" class="form-select" style="width: 200px;">
                     <option value="">Semua Prodi</option>
-                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${p}</option>`).join('')}
+                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${PRODI_SHORTNAMES[p] || p} - ${p}</option>`).join('')}
                 </select>
 
                 <div style="display: flex; gap: 12px; align-items: center; flex: 1;">

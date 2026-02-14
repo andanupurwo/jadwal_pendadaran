@@ -12,6 +12,12 @@ import settingsRoutes from './routes/settings.js';
 import authRoutes from './routes/auth.js';
 import logsRoutes from './routes/logs.js';
 
+// Import security middleware
+import { apiLimiter, loginLimiter, schedulingLimiter } from './middleware/rateLimiter.js';
+
+// Import logging
+import { requestLogger } from './utils/logger.js';
+
 // Import database
 import pool from './config/database.js';
 
@@ -25,11 +31,19 @@ app.use(cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
     credentials: true
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
+// Security: Apply rate limiting
+app.use('/api/', apiLimiter);
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/schedule', schedulingLimiter);
+
+// Logging: Request logger
+app.use(requestLogger);
+
+// Health check endpoint (moved to /api/health for consistency)
+app.get('/api/health', (req, res) => {
     res.json({
         status: 'OK',
         message: 'Jadwal Pendadaran API is running',

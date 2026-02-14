@@ -17,6 +17,37 @@ function normalizeName(nama) {
         .trim();
 }
 
+/**
+ * Compare two names by matching minimum 2 words
+ * Handles variations like "Yusuf Amri Amrullah" vs "Yusuf Amri Amri Amrullah"
+ * Returns true if both names share at least 2 common words (after normalization)
+ */
+function compareNames(name1, name2) {
+    if (!name1 || !name2) return false;
+    
+    // Normalize and split into words
+    const normalize = (n) => {
+        let base = n.split(',')[0]; // Take before comma (remove titles)
+        base = base.replace(/^(dr|drs|prof|apt|irk)\.?\s+/gi, ''); // Remove prefixes
+        return base.toLowerCase()
+            .replace(/[.,]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .split(' ')
+            .filter(w => w.length > 0); // Common words only
+    };
+    
+    const words1 = normalize(name1);
+    const words2 = normalize(name2);
+    
+    if (words1.length === 0 || words2.length === 0) return false;
+    
+    // Count common words
+    const commonWords = words1.filter(w => words2.includes(w));
+    
+    // At least 2 words must match
+    return commonWords.length >= 2;
+}
+
 async function getAllDosen() {
     // Select lecturers who are NOT excluded (ON)
     const { rows } = await pool.query('SELECT * FROM dosen WHERE exclude = FALSE');
@@ -27,15 +58,16 @@ async function getAllDosen() {
         prodi: d.prodi,
         fakultas: d.fakultas,
         exclude: false,
-        pref_gender: d.pref_gender || null // Add this
+        pref_gender: d.pref_gender || null,
+        max_slots: d.max_slots
     }));
 }
 
 async function isDosenAvailable(namaDosen, date, time, allDosen, liburData, slotsData, excludeSlotStudent = null, ignoreGlobalExclude = false) {
-    const searchNameNorm = normalizeName(namaDosen);
-    const dosenData = allDosen.find(d => normalizeName(d.nama) === searchNameNorm);
+    const dosenData = allDosen.find(d => compareNames(d.nama, namaDosen));
 
     // DEBUG KHUSUS UNTUK AMIR
+    const searchNameNorm = normalizeName(namaDosen);
     const isAmir = searchNameNorm.includes('amir');
     if (isAmir) {
         // console.log(`[DEBUG AMIR] Checking ${namaDosen} for ${date} ${time}`);
@@ -57,8 +89,7 @@ async function isDosenAvailable(namaDosen, date, time, allDosen, liburData, slot
             // Match found by NIK
         } else {
             // Fallback to name match if NIK in libur is missing
-            const liburNameNorm = normalizeName(l.dosen_name || l.nama || "");
-            if (liburNameNorm !== searchNameNorm) return false;
+            if (!compareNames(l.dosen_name || l.nama || "", namaDosen)) return false;
         }
 
         // DEBUG AMIR
@@ -113,7 +144,7 @@ async function isDosenAvailable(namaDosen, date, time, allDosen, liburData, slot
         // See: const final = [...examiners, mhs.pembimbing]; 
         // So checking slot.examiners IS enough.
 
-        const isBusy = slot.examiners && slot.examiners.some(ex => normalizeName(ex) === searchNameNorm);
+        const isBusy = slot.examiners && slot.examiners.some(ex => compareNames(ex, namaDosen));
         if (isAmir && isBusy) console.log(`[DEBUG AMIR] 📅 BUSY at ${slot.date} ${slot.time} with ${slot.student}`);
         return isBusy;
     });
@@ -229,10 +260,11 @@ export async function generateSchedule(req, res) {
         });
 
         mahasiswaList.sort((a, b) => {
-            const normA = normalizeName(a.pembimbing);
-            const normB = normalizeName(b.pembimbing);
-            const scoreA = busyScores[normA] || 0;
-            const scoreB = busyScores[normB] || 0;
+            let scoreA = 0, scoreB = 0;
+            for (const [normName, score] of Object.entries(busyScores)) {
+                if (compareNames(a.pembimbing, normName)) scoreA = score;
+                if (compareNames(b.pembimbing, normName)) scoreB = score;
+            }
 
             // Primary sort: Busy score (desc)
             if (scoreB !== scoreA) return scoreB - scoreA;
@@ -254,7 +286,6 @@ export async function generateSchedule(req, res) {
         const findExaminers = async (pembimbing, date, time, studentProdi, studentGender, forceSearch = false) => {
             let candidates = [];
             const sProdiNorm = studentProdi?.toLowerCase().trim();
-            const pembimbingNorm = normalizeName(pembimbing);
             const studentGenderNorm = studentGender?.toUpperCase().trim() || null;
 
             // Sort by workload (fairness). If forceSearch = true, we allow higher workloads to ensure scheduling.
@@ -267,13 +298,11 @@ export async function generateSchedule(req, res) {
             for (const d of candidatePool) {
                 if (candidates.length >= 2) break;
 
-                const candidateNameNorm = normalizeName(d.nama);
-
                 // 1. Not the student's supervisor
-                if (candidateNameNorm === pembimbingNorm) continue;
+                if (compareNames(d.nama, pembimbing)) continue;
 
                 // 2. Not already selected as P1
-                if (candidates.some(c => normalizeName(c) === candidateNameNorm)) continue;
+                if (candidates.some(c => compareNames(c, d.nama))) continue;
 
                 // 3. STRICT RULE: Same prodi
                 const dProdiNorm = d.prodi?.toLowerCase().trim();
@@ -289,7 +318,7 @@ export async function generateSchedule(req, res) {
                 // Don't take this lecturer as an examiner IF they still have their own supervisees to schedule.
                 // This ensures their availability is preserved for their own students first.
                 const hasUnscheduledBimbingan = mahasiswaList.some(m =>
-                    normalizeName(m.pembimbing) === candidateNameNorm &&
+                    compareNames(m.pembimbing, d.nama) &&
                     !scheduledMahasiswaIds.has(m.nim)
                 );
 
@@ -788,7 +817,7 @@ export async function createSlotManual(req, res) {
         const studentProdi = mahasiswa.prodi?.toLowerCase().trim();
 
         for (const dosenName of [penguji1, penguji2]) {
-            const dosenData = allDosen.find(d => normalizeName(d.nama) === normalizeName(dosenName));
+            const dosenData = allDosen.find(d => compareNames(d.nama, dosenName));
 
             if (!dosenData) {
                 await client.query('ROLLBACK');
@@ -943,7 +972,7 @@ export async function updateSlotExaminers(req, res) {
         // 6. Validate Faculty/Prodi Rules
         const studentProdi = mahasiswa.prodi?.toLowerCase().trim();
         for (const dosenName of [penguji1, penguji2]) {
-            const dosenData = allDosen.find(d => normalizeName(d.nama) === normalizeName(dosenName));
+            const dosenData = allDosen.find(d => compareNames(d.nama, dosenName));
             if (!dosenData) {
                 await client.query('ROLLBACK');
                 return res.json({ success: false, error: `Data dosen ${dosenName} tidak ditemukan` });

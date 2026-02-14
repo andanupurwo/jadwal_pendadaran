@@ -60,7 +60,14 @@ export async function verifyToken(req, res, next) {
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
-            return res.status(403).json({ success: false, error: 'Invalid token' });
+            // Different error messages for different JWT errors
+            let errorMessage = 'Invalid token';
+            if (err.name === 'TokenExpiredError') {
+                errorMessage = 'Token sudah expired, silakan login kembali';
+            } else if (err.name === 'JsonWebTokenError') {
+                errorMessage = 'Token tidak valid';
+            }
+            return res.status(403).json({ success: false, error: errorMessage });
         }
         req.user = user;
         next();

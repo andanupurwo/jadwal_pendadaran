@@ -1,19 +1,19 @@
 import { APP_DATA } from '../../data/store.js';
-import { normalizeName } from '../../utils/helpers.js';
+import { compareNames } from '../../utils/helpers.js';
+import { showDetailedLecturerSchedule } from './DosenDetailedScheduleModal.js';
 
 export function showLecturerSchedule(lecturerName) {
     const modalId = 'lecturerScheduleModal';
     let modal = document.getElementById(modalId);
     if (modal) modal.remove();
 
-    const lecturerNameNorm = normalizeName(lecturerName);
     const slots = APP_DATA.slots || [];
 
-    // Filter slots for this lecturer
+    // Filter slots for this lecturer using compareNames
     const mySchedule = slots.filter(slot =>
-        slot.examiners && slot.examiners.some(ex => normalizeName(ex) === lecturerNameNorm)
+        slot.examiners && slot.examiners.some(ex => compareNames(ex, lecturerName))
     ).map(slot => {
-        const myIndex = slot.examiners.findIndex(ex => normalizeName(ex) === lecturerNameNorm);
+        const myIndex = slot.examiners.findIndex(ex => compareNames(ex, lecturerName));
         const role = myIndex === slot.examiners.length - 1 ? 'Pembimbing' : `Penguji ${myIndex + 1}`;
         return { ...slot, role };
     }).sort((a, b) => {
@@ -36,7 +36,7 @@ export function showLecturerSchedule(lecturerName) {
         `;
     } else {
         tableHtml = `
-            <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: 12px; margin-top:1rem;">
+            <div style="max-height: 700px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: 12px; margin-top:1rem;">
                 <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;">
                     <thead style="background:var(--bg-subtle); position: sticky; top:0; z-index:1;">
                         <tr>
@@ -73,7 +73,7 @@ export function showLecturerSchedule(lecturerName) {
     }
 
     modalOverlay.innerHTML = `
-        <div class="modal-content" style="max-width: 650px; animation: modalSlideIn 0.3s ease;">
+        <div class="modal-content" style="max-width: 900px; animation: modalSlideIn 0.3s ease;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem;">
                 <div>
                     <h2 style="margin:0; font-size:1.5rem;">Rincian Jadwal Dosen</h2>
@@ -95,7 +95,8 @@ export function showLecturerSchedule(lecturerName) {
 
             ${tableHtml}
 
-            <div class="modal-footer" style="margin-top:2rem; justify-content: flex-end;">
+            <div class="modal-footer" style="margin-top:2rem; justify-content: space-between;">
+                <button type="button" class="btn-secondary" onclick="window.showDetailedLecturerSchedule('${lecturerName}')">📋 Lihat Detail Lengkap</button>
                 <button type="button" class="btn-primary" style="min-width:100px;" onclick="window.closeLecturerScheduleModal()">Tutup</button>
             </div>
         </div>
@@ -108,4 +109,7 @@ export function showLecturerSchedule(lecturerName) {
         modalOverlay.classList.remove('active');
         setTimeout(() => modalOverlay.remove(), 300);
     };
+
+    // Global show detailed handler
+    window.showDetailedLecturerSchedule = showDetailedLecturerSchedule;
 }

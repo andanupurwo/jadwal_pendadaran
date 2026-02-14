@@ -23,12 +23,14 @@ export async function generateSchedule(options = { silent: false }) {
     const targetProdi = scopeEl ? scopeEl.value : 'all';
     let isIncremental = incrementalEl ? incrementalEl.checked : false;
 
-    // Override options (from checkbox handler)
-    if (options.overrideIncremental !== undefined) {
+    // Override for single student or specific options
+    if (options.targetStudent) {
+        isIncremental = true;
+    } else if (options.overrideIncremental !== undefined) {
         isIncremental = options.overrideIncremental;
     }
-    // SAFETY CHECK: If triggered from outside Logic page (no checkbox) and data exists AND no override provided
-    else if (!incrementalEl && APP_DATA.slots && APP_DATA.slots.length > 0) {
+    // SAFETY CHECK: If triggered from outside Logic page (no checkbox) and data exists AND no override/target provided
+    else if (options.overrideIncremental === undefined && !options.targetStudent && !incrementalEl && APP_DATA.slots && APP_DATA.slots.length > 0) {
         // ... (keep existing prompt logic as fallback if needed) ...
         const wantIncremental = await showConfirm(
             'Terdapat jadwal yang sudah tersimpan. Apakah Anda ingin melanjutkan penjadwalan hanya untuk mahasiswa yang belum dapat jadwal (Incremental)?\n\nPilih "Batal" jika tidak ingin melakukan perubahan.',

@@ -272,32 +272,41 @@ export async function exportScheduleToCSV() {
     }
 
     try {
+        showToast('Mempersiapkan file Excel...', 'info');
+
         // Dynamically import xlsx library
         const XLSX = await import('xlsx');
 
+        // Sort slots by date, then time, then room for better readability
+        const sortedSlots = [...APP_DATA.slots].sort((a, b) => {
+            if (a.date !== b.date) return a.date.localeCompare(b.date);
+            if (a.time !== b.time) return a.time.localeCompare(b.time);
+            return a.room.localeCompare(b.room);
+        });
+
         // 1. Prepare data in array format
         const data = [
-            // Header row
+            // Header row with styling hint
             ['No', 'NIM', 'Mahasiswa', 'Tanggal', 'Jam', 'Ruangan', 'Penguji 1', 'Penguji 2', 'Pembimbing']
         ];
 
-        // 2. Add data rows
-        APP_DATA.slots.forEach((slot, index) => {
-            const p1 = slot.examiners && slot.examiners[0] ? slot.examiners[0] : '-';
-            const p2 = slot.examiners && slot.examiners[1] ? slot.examiners[1] : '-';
-            const p3 = slot.examiners && slot.examiners[2] ? slot.examiners[2] : '-';
+        // 2. Add data rows with proper data sanitization
+        sortedSlots.forEach((slot, index) => {
+            const p1 = slot.examiners && slot.examiners[0] ? String(slot.examiners[0]) : '-';
+            const p2 = slot.examiners && slot.examiners[1] ? String(slot.examiners[1]) : '-';
+            const p3 = slot.examiners && slot.examiners[2] ? String(slot.examiners[2]) : '-';
 
             // Find mahasiswa data to get NIM
             const mahasiswa = APP_DATA.mahasiswa.find(m => m.nama === slot.student);
-            const nim = mahasiswa ? mahasiswa.nim : '-';
+            const nim = mahasiswa ? String(mahasiswa.nim) : '-';
 
             data.push([
                 index + 1,
                 nim,
-                slot.student,
-                slot.date,
-                slot.time,
-                slot.room,
+                String(slot.student || '-'),
+                String(slot.date || '-'),
+                String(slot.time || '-'),
+                String(slot.room || '-'),
                 p1,
                 p2,
                 p3
@@ -311,13 +320,13 @@ export async function exportScheduleToCSV() {
         ws['!cols'] = [
             { wch: 5 },   // No
             { wch: 18 },  // NIM
-            { wch: 30 },  // Mahasiswa
+            { wch: 35 },  // Mahasiswa
             { wch: 12 },  // Tanggal
             { wch: 8 },   // Jam
             { wch: 10 },  // Ruangan
-            { wch: 30 },  // Penguji 1
-            { wch: 30 },  // Penguji 2
-            { wch: 30 }   // Pembimbing
+            { wch: 35 },  // Penguji 1
+            { wch: 35 },  // Penguji 2
+            { wch: 35 }   // Pembimbing
         ];
 
         // 5. Create workbook and add worksheet
@@ -329,13 +338,80 @@ export async function exportScheduleToCSV() {
         const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
         const filename = `Jadwal_Pendadaran_${timestamp}.xlsx`;
 
-        // 7. Write and download
-        XLSX.writeFile(wb, filename);
+        // 7. Generate binary string and create blob
+        const wbout = XLSX.write(wb, {
+            bookType: 'xlsx',
+            type: 'array',
+            compression: false
+        });
 
-        showToast('Jadwal berhasil di-export ke Excel (.xlsx)', 'success');
+        // 8. Create blob and trigger download
+        const blob = new Blob([wbout], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        // 9. Create download link and trigger
+        const url = URL.createObjectURL(blob);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = url;
+        downloadLink.download = filename;
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        // 10. Cleanup
+        setTimeout(() => {
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
+        }, 100);
+
+        showToast(`Jadwal berhasil di-export (${sortedSlots.length} slot)`, 'success');
+
+        console.log(`✅ Export completed: ${filename} (${sortedSlots.length} records)`);
     } catch (error) {
         console.error('Error exporting to Excel:', error);
         showToast('Gagal export Excel: ' + error.message, 'error');
+
+        // Fallback: Try to export as CSV if XLSX fails
+        try {
+            console.warn('Attempting CSV fallback...');
+            const csvData = [
+                ['No', 'NIM', 'Mahasiswa', 'Tanggal', 'Jam', 'Ruangan', 'Penguji 1', 'Penguji 2', 'Pembimbing'].join(',')
+            ];
+
+            APP_DATA.slots.forEach((slot, index) => {
+                const mahasiswa = APP_DATA.mahasiswa.find(m => m.nama === slot.student);
+                const nim = mahasiswa ? mahasiswa.nim : '-';
+                const p1 = slot.examiners?.[0] || '-';
+                const p2 = slot.examiners?.[1] || '-';
+                const p3 = slot.examiners?.[2] || '-';
+
+                csvData.push([
+                    index + 1,
+                    nim,
+                    `"${slot.student}"`,
+                    slot.date,
+                    slot.time,
+                    slot.room,
+                    `"${p1}"`,
+                    `"${p2}"`,
+                    `"${p3}"`
+                ].join(','));
+            });
+
+            const csvContent = csvData.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Jadwal_Pendadaran_${new Date().getTime()}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            showToast('Export sebagai CSV berhasil (XLSX error)', 'warning');
+        } catch (csvError) {
+            console.error('CSV fallback also failed:', csvError);
+        }
     }
 }
 

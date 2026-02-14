@@ -1,4 +1,5 @@
 import { APP_DATA, appState, DATES, TIMES, saveMahasiswaToStorage, saveLiburToStorage, loadLiburFromAPI } from '../../data/store.js';
+import { PRODI_SHORTNAMES } from '../../utils/constants.js';
 
 // ... (existing code but skipping for brevity in replacement chunk)
 
@@ -103,7 +104,7 @@ export function toggleAddMahasiswaModal(show, studentData = null) {
                 'FST': ['S1 Arsitektur', 'S1 Perencanaan Wilayah Kota', 'S1 Geografi']
             };
             const allProdis = [...validProdis.FIK, ...validProdis.FES, ...validProdis.FST].sort();
-            return allProdis.map(p => `<option value="${p}" ${p === data.prodi ? 'selected' : ''}>${p}</option>`).join('');
+            return allProdis.map(p => `<option value="${p}" ${p === data.prodi ? 'selected' : ''}>${PRODI_SHORTNAMES[p] || p} - ${p}</option>`).join('');
         })()}
                         </select>
                     </div>
@@ -554,7 +555,7 @@ export function toggleAddDosenModal(show, editData = null) {
 
         const allProdis = [...validProdis.FIK, ...validProdis.FES, ...validProdis.FST].sort();
         let targetProdis = validProdis[currentFaculty] || allProdis;
-        const prodiOptions = targetProdis.map(p => `<option value="${p}" ${editData && editData.prodi === p ? 'selected' : ''}>${p}</option>`).join('');
+        const prodiOptions = targetProdis.map(p => `<option value="${p}" ${editData && editData.prodi === p ? 'selected' : ''}>${PRODI_SHORTNAMES[p] || p} - ${p}</option>`).join('');
 
         const tabsHtml = !isEdit ? `
         <div style="margin-bottom:1.5rem;">

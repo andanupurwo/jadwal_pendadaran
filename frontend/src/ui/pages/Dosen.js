@@ -1,6 +1,7 @@
 import { APP_DATA, appState } from '../../data/store.js';
 import { sortData, filterData } from '../../utils/helpers.js';
 import { renderTable, renderTabItem } from '../components/Common.js';
+import { PRODI_SHORTNAMES } from '../../utils/constants.js';
 
 export const DosenView = () => {
     const currentDosenTab = appState.currentDosenTab;
@@ -71,7 +72,7 @@ export const DosenView = () => {
                 content: [
                     d.nik,
                     `<div class="text-truncate" title="Klik untuk lihat jadwal" style="cursor:pointer; color:var(--primary);" onclick="window.showLecturerSchedule('${d.nama.replace(/'/g, "\\'")}')"><strong>${d.nama}</strong> <span style="font-size:0.8rem;">📅</span></div>`,
-                    d.prodi,
+                    `<span style="cursor:help;" title="${d.prodi}">${PRODI_SHORTNAMES[d.prodi] || d.prodi}</span>`,
                     prefLabel,
                     d.max_slots ? `<span style="font-weight:700; color:var(--success);">${d.max_slots} Slot</span>` : '<span style="color:#d9d9d9;">-</span>',
                     `${d.matchResult?.matched
@@ -110,7 +111,7 @@ export const DosenView = () => {
             <div class="controls-bar">
                 <select onchange="window.handleProdiFilterChange(event)" class="form-select" style="width: 250px;">
                     <option value="">Semua Prodi</option>
-                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${p}</option>`).join('')}
+                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${PRODI_SHORTNAMES[p] || p} - ${p}</option>`).join('')}
                 </select>
                 <select onchange="window.handleStatusFilterChange(event)" class="form-select" style="width: 170px;">
                     <option value="all">Semua Status</option>

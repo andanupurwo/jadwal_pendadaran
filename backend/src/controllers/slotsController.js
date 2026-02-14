@@ -1,29 +1,38 @@
 import pool from '../config/database.js';
 import { createLog } from './logsController.js';
 
-// Get all slots with examiners
+// Get all slots with examiners (Optimized: Batch load examiners)
 export async function getAllSlots(req, res) {
     try {
         const { rows: slots } = await pool.query('SELECT * FROM slots ORDER BY date, time, room');
 
-        // Get examiners for each slot
-        const slotsWithExaminers = await Promise.all(
-            slots.map(async (slot) => {
-                const { rows: examiners } = await pool.query(
-                    'SELECT examiner_name FROM slot_examiners WHERE slot_id = $1 ORDER BY examiner_order',
-                    [slot.id]
-                );
+        if (slots.length === 0) {
+            return res.json({ success: true, data: [] });
+        }
 
-                return {
-                    id: slot.id,
-                    date: slot.date,
-                    time: slot.time,
-                    room: slot.room,
-                    student: slot.student,
-                    examiners: examiners.map(e => e.examiner_name)
-                };
-            })
+        // Batch load examiners for ALL slots in one query (No more N+1!)
+        const slotIds = slots.map(s => s.id);
+        const { rows: allExaminers } = await pool.query(
+            'SELECT slot_id, examiner_name FROM slot_examiners WHERE slot_id = ANY($1) ORDER BY slot_id, examiner_order',
+            [slotIds]
         );
+
+        // Create a map for O(1) lookup
+        const examinerMap = {};
+        allExaminers.forEach(e => {
+            if (!examinerMap[e.slot_id]) examinerMap[e.slot_id] = [];
+            examinerMap[e.slot_id].push(e.examiner_name);
+        });
+
+        // Merge slots with examiners
+        const slotsWithExaminers = slots.map(slot => ({
+            id: slot.id,
+            date: slot.date,
+            time: slot.time,
+            room: slot.room,
+            student: slot.student,
+            examiners: examinerMap[slot.id] || []
+        }));
 
         res.json({ success: true, data: slotsWithExaminers });
     } catch (error) {
@@ -32,29 +41,39 @@ export async function getAllSlots(req, res) {
     }
 }
 
-// Get slots by date
+// Get slots by date (Optimized: Batch load examiners)
 export async function getSlotsByDate(req, res) {
     try {
         const { date } = req.params;
         const { rows: slots } = await pool.query('SELECT * FROM slots WHERE date = $1 ORDER BY time, room', [date]);
 
-        const slotsWithExaminers = await Promise.all(
-            slots.map(async (slot) => {
-                const { rows: examiners } = await pool.query(
-                    'SELECT examiner_name FROM slot_examiners WHERE slot_id = $1 ORDER BY examiner_order',
-                    [slot.id]
-                );
+        if (slots.length === 0) {
+            return res.json({ success: true, data: [] });
+        }
 
-                return {
-                    id: slot.id,
-                    date: slot.date,
-                    time: slot.time,
-                    room: slot.room,
-                    student: slot.student,
-                    examiners: examiners.map(e => e.examiner_name)
-                };
-            })
+        // Batch load examiners for ALL slots in one query
+        const slotIds = slots.map(s => s.id);
+        const { rows: allExaminers } = await pool.query(
+            'SELECT slot_id, examiner_name FROM slot_examiners WHERE slot_id = ANY($1) ORDER BY slot_id, examiner_order',
+            [slotIds]
         );
+
+        // Create examiner map for O(1) lookup
+        const examinerMap = {};
+        allExaminers.forEach(e => {
+            if (!examinerMap[e.slot_id]) examinerMap[e.slot_id] = [];
+            examinerMap[e.slot_id].push(e.examiner_name);
+        });
+
+        // Merge slots with examiners
+        const slotsWithExaminers = slots.map(slot => ({
+            id: slot.id,
+            date: slot.date,
+            time: slot.time,
+            room: slot.room,
+            student: slot.student,
+            examiners: examinerMap[slot.id] || []
+        }));
 
         res.json({ success: true, data: slotsWithExaminers });
     } catch (error) {

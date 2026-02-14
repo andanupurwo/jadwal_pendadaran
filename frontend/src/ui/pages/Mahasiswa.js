@@ -1,6 +1,7 @@
 import { APP_DATA, appState } from '../../data/store.js';
 import { filterData, sortData } from '../../utils/helpers.js';
 import { renderTable } from '../components/Common.js';
+import { PRODI_SHORTNAMES } from '../../utils/constants.js';
 
 export const MahasiswaView = () => {
     const searchTerm = appState.searchTerm;
@@ -93,7 +94,7 @@ export const MahasiswaView = () => {
             `<div style="font-family:monospace; font-weight:600;">${m.nim}</div>`,
             `<strong>${m.nama}</strong>`,
             `<div style="text-align:center;">${m.gender || '-'}</div>`,
-            `<span class="badge" style="background:rgba(0,0,0,0.05); color:var(--text-main); font-weight:600;">${m.prodi}</span>`,
+            `<span class="badge" style="background:rgba(0,0,0,0.05); color:var(--text-main); font-weight:600; cursor:help;" title="${m.prodi}">${PRODI_SHORTNAMES[m.prodi] || m.prodi}</span>`,
             pembimbingDisplay,
             pengujiDisplay,
             pengujiStatus,
@@ -137,7 +138,7 @@ export const MahasiswaView = () => {
                 
                 <select onchange="window.handleProdiFilterChange(event)" class="form-select" style="width: 200px;">
                     <option value="">Semua Prodi</option>
-                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${p}</option>`).join('')}
+                    ${prodis.map(p => `<option value="${p}" ${appState.selectedProdiFilter === p ? 'selected' : ''}>${PRODI_SHORTNAMES[p] || p} - ${p}</option>`).join('')}
                 </select>
 
                 <select onchange="window.handleStatusFilterChange(event)" class="form-select" style="width: 180px;">
