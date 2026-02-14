@@ -44,12 +44,44 @@ jadwal-pendadaran/
 - **PostgreSQL** - Relational database
 - 7 tables: `master_dosen`, `dosen`, `mahasiswa`, `libur`, `slots`, `slot_examiners`, `app_settings`
 
-## 📦 Quick Start
+# Jadwal Pendadaran AI System
+
+System penjadwalan otomatis untuk pendadaran mahasiswa menggunakan algoritma cerdas, dibangun dengan Stack Modern (Node.js, React/Vite, PostgreSQL).
+
+## 🐳 Quick Start dengan Docker (Recommended)
+
+Cara termudah untuk menjalankan aplikasi ini adalah menggunakan Docker. Pastikan Docker Desktop sudah terinstall.
+
+### 1. Persiapan
+Pastikan file backup database tersedia di `backend/database/backup_latest.sql` (jika ada).
+
+### 2. Jalankan Aplikasi
+Buka terminal di root project dan jalankan:
+
+```bash
+docker-compose up --build
+```
+
+### 3. Akses Aplikasi
+- **Frontend (Web App)**: [http://localhost:8080](http://localhost:8080)
+- **Backend API**: [http://localhost:3001](http://localhost:3001)
+- **Database**: Port 5433
+
+> **Catatan Port:**
+> Kami menggunakan port `8080` (Frontend), `3001` (Backend), dan `5433` (DB) untuk menghindari konflik dengan aplikasi lain yang mungkin sedang berjalan di komputer Anda.
+
+### 4. Menghentikan Aplikasi
+Tekan `Ctrl+C` atau jalankan:
+```bash
+docker-compose down
+```
+
+## 🛠 Manual Installation (Tanpa Docker)
 
 ### Prerequisites
 
 - **Node.js** v18+ 
-- **PostgreSQL** v14+
+- **PostgreSQL** v15+
 - **npm** atau **yarn**
 
 ### Installation Steps
