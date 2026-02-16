@@ -16,14 +16,13 @@ export async function exportBackup(req, res) {
 
     try {
         const now = new Date();
-        const dateStr = now.getFullYear() + '-' +
-            String(now.getMonth() + 1).padStart(2, '0') + '-' +
-            String(now.getDate()).padStart(2, '0');
-        const timeStr = String(now.getHours()).padStart(2, '0') + '-' +
-            String(now.getMinutes()).padStart(2, '0') + '-' +
-            String(now.getSeconds()).padStart(2, '0');
+        const dateStr = String(now.getDate()).padStart(2, '0') +
+            String(now.getMonth() + 1).padStart(2, '0') +
+            now.getFullYear();
+        const timeStr = String(now.getHours()).padStart(2, '0') +
+            String(now.getMinutes()).padStart(2, '0');
 
-        const filename = `backup_jadwal_full_${dateStr}_${timeStr}.sql`;
+        const filename = `backup_jadwal-${dateStr}-${timeStr}.sql`;
 
         console.log(`🔄 Starting database backup: ${filename}`);
 
