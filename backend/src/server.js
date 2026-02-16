@@ -88,6 +88,33 @@ app.listen(PORT, async () => {
         await pool.query(`ALTER TABLE mahasiswa ADD COLUMN IF NOT EXISTS gender VARCHAR(10)`);
         // New: Add pref_gender column to dosen
         await pool.query(`ALTER TABLE dosen ADD COLUMN IF NOT EXISTS pref_gender VARCHAR(1)`);
+
+        // New: Add penguji columns to mahasiswa
+        await pool.query(`ALTER TABLE mahasiswa ADD COLUMN IF NOT EXISTS penguji_1 VARCHAR(255)`);
+        await pool.query(`ALTER TABLE mahasiswa ADD COLUMN IF NOT EXISTS penguji_2 VARCHAR(255)`);
+
+        // New: Add max_slots column to dosen
+        await pool.query(`ALTER TABLE dosen ADD COLUMN IF NOT EXISTS max_slots INT DEFAULT NULL`);
+
+        // Migration: Handle 'exclude' vs 'excluded' name conflict
+        try {
+            // Ensure BOTH columns exist for maximum compatibility with old backups and new code
+            await pool.query(`ALTER TABLE dosen ADD COLUMN IF NOT EXISTS exclude BOOLEAN DEFAULT FALSE`);
+            await pool.query(`ALTER TABLE dosen ADD COLUMN IF NOT EXISTS excluded BOOLEAN DEFAULT FALSE`);
+
+            // Sync data: if one is true, make both true (just in case)
+            await pool.query(`UPDATE dosen SET exclude = TRUE WHERE excluded = TRUE`);
+            await pool.query(`UPDATE dosen SET excluded = TRUE WHERE exclude = TRUE`);
+
+            console.log('✅ Database Migration: Synced exclude/excluded columns for compatibility');
+        } catch (e) {
+            console.log('ℹ️ Migration notice:', e.message);
+        }
+
+        // New: Add libur columns
+        await pool.query(`ALTER TABLE libur ADD COLUMN IF NOT EXISTS nik VARCHAR(50)`);
+        await pool.query(`ALTER TABLE libur ADD COLUMN IF NOT EXISTS dosen_name VARCHAR(255)`);
+
         console.log('✅ Database Schema verified: gender columns exist');
     } catch (e) {
         console.error('⚠️ Database Schema Check Failed:', e.message);

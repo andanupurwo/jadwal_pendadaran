@@ -9,6 +9,9 @@ RUN npm install
 # Copy source code
 COPY . .
 
+# Create uploads directory for backup/import
+RUN mkdir -p uploads
+
 # Expose port
 EXPOSE 3000
 

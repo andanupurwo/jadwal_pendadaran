@@ -69,7 +69,8 @@ async function initializeDatabase() {
                 nama VARCHAR(255) NOT NULL,
                 prodi VARCHAR(255),
                 fakultas VARCHAR(10) NOT NULL,
-                excluded BOOLEAN DEFAULT FALSE,
+                exclude BOOLEAN DEFAULT FALSE,
+                max_slots INT DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -85,6 +86,8 @@ async function initializeDatabase() {
                 prodi VARCHAR(255) NOT NULL,
                 gender VARCHAR(10),
                 pembimbing VARCHAR(255),
+                penguji_1 VARCHAR(255),
+                penguji_2 VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -103,10 +106,12 @@ async function initializeDatabase() {
         await client.query(`
             CREATE TABLE IF NOT EXISTS libur (
                 id SERIAL PRIMARY KEY,
-                date VARCHAR(20) NOT NULL,
+                date VARCHAR(20),
                 time VARCHAR(20),
                 room VARCHAR(100),
                 reason VARCHAR(255),
+                nik VARCHAR(50),
+                dosen_name VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )

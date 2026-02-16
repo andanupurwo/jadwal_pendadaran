@@ -37,7 +37,7 @@ export async function exportBackup(req, res) {
 -- Schema Version: ${SCHEMA_VERSION}
 -- Checksum: ${checksum}
 -- Database: ${process.env.DB_NAME || 'jadwal_pendadaran'}
--- Tables: mahasiswa, dosen, libur, slots, slot_examiners, app_settings, users, activity_logs
+-- Tables: mahasiswa, dosen, master_dosen, libur, slots, slot_examiners, app_settings, users, activity_logs
 -- 
 -- IMPORTANT: This backup contains sensitive data. Keep it secure!
 --
@@ -48,6 +48,7 @@ export async function exportBackup(req, res) {
         const tables = [
             'app_settings',
             'users',
+            'master_dosen',
             'dosen',
             'mahasiswa',
             'libur',
@@ -174,9 +175,9 @@ export async function importBackup(req, res) {
         await client.query('DELETE FROM libur');
         await client.query('DELETE FROM mahasiswa');
         await client.query('DELETE FROM dosen');
+        await client.query('DELETE FROM master_dosen');
         await client.query('DELETE FROM app_settings');
-        // Keep users table to preserve admin account (or clear if needed)
-        // await client.query('DELETE FROM users WHERE username != \'admin\'');
+        await client.query('DELETE FROM users'); // Clear all users to avoid conflicts during import
 
         console.log('📥 Importing data...');
 
@@ -187,20 +188,17 @@ export async function importBackup(req, res) {
             .filter(s => s.length > 0 && !s.startsWith('--'));
 
         let successCount = 0;
-        let errorCount = 0;
 
         for (const statement of statements) {
             try {
                 await client.query(statement);
                 successCount++;
             } catch (err) {
-                // Ignore duplicate key errors (in case of re-import)
-                if (err.code === '23505') {
-                    console.log(`⚠️ Skipping duplicate: ${err.detail}`);
-                } else {
-                    console.error(`❌ Error executing statement: ${err.message}`);
-                    errorCount++;
-                }
+                // In PostgreSQL, any error in a transaction aborts it.
+                // We MUST stop and throw to trigger the ROLLBACK.
+                console.error(`❌ Statement failed: ${statement.substring(0, 100)}...`);
+                console.error(`❌ Error details: ${err.message}`);
+                throw new Error(`Import failed at statement ${successCount + 1}: ${err.message}`);
             }
         }
 
@@ -212,7 +210,6 @@ export async function importBackup(req, res) {
 
         console.log(`✅ Import completed!`);
         console.log(`📊 Statements executed: ${successCount}`);
-        console.log(`⚠️ Errors: ${errorCount}`);
 
         await createLog('RESTORE', 'Database', `Imported backup: ${req.file.originalname}`);
 
@@ -221,7 +218,7 @@ export async function importBackup(req, res) {
             message: 'Backup restored successfully',
             stats: {
                 statements: successCount,
-                errors: errorCount,
+                filename: req.file.originalname,
                 version: backupVersion
             }
         });

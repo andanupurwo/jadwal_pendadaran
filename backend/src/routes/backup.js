@@ -2,8 +2,14 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { exportBackup, importBackup } from '../controllers/backupController.js';
+import fs from 'fs';
 
 const router = express.Router();
+
+// Ensure uploads directory exists
+if (!fs.existsSync('uploads')) {
+    fs.mkdirSync('uploads', { recursive: true });
+}
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
