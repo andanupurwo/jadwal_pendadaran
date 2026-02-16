@@ -155,7 +155,7 @@ export async function generateSchedule(req, res) {
             console.log(message);
         };
 
-        log("🚀 MEMULAI PROSES PENJADWALAN OTOMATIS (POSTGRES)...");
+        log("🚀 MEMULAI PROSES PENJADWALAN OTOMATIS (POSTGRES) - OPTIMIZED");
         log(`⚙️ Mode: ${isIncremental ? 'INCREMENTAL' : 'RESET FULL'}`);
         log(`🎯 Target: ${targetProdi}`);
 
@@ -235,8 +235,78 @@ export async function generateSchedule(req, res) {
         const allDosen = await getAllDosen();
         const { rows: liburData } = await client.query('SELECT * FROM libur');
 
-        // STRATEGY: Prioritize students with high-constraint supervisors (Busiest First)
-        // Use IMPROVED normalization to ensure Novita with titles matches Novita in Libur table.
+        // ==========================================
+        // 🚀 OPTIMIZATION START: PRE-CALC LOOKUPS
+        // ==========================================
+
+        // 1. Caching Resolver for Names
+        const nameToDosenCache = new Map();
+        const resolveDosen = (name) => {
+            if (!name) return null;
+            if (nameToDosenCache.has(name)) return nameToDosenCache.get(name);
+            const found = allDosen.find(d => compareNames(d.nama, name));
+            nameToDosenCache.set(name, found || null);
+            return found || null;
+        };
+
+        // 2. Libur Lookup: Map<DosenID, Array<LiburEntry>>
+        const liburLookup = new Map();
+        liburData.forEach(l => {
+            const targetDosen = l.nik
+                ? allDosen.find(d => d.nik === l.nik)
+                : resolveDosen(l.dosen_name || l.nama);
+
+            if (targetDosen) {
+                if (!liburLookup.has(targetDosen.id)) liburLookup.set(targetDosen.id, []);
+                liburLookup.get(targetDosen.id).push(l);
+            }
+        });
+
+        // 3. Slot Lookup: Map<DosenID, Set<"date:time">>
+        const slotLookup = new Map();
+        const markBusy = (dosenName, date, time) => {
+            const d = resolveDosen(dosenName);
+            if (d) {
+                if (!slotLookup.has(d.id)) slotLookup.set(d.id, new Set());
+                slotLookup.get(d.id).add(`${date}:${time}`);
+            }
+        };
+
+        // Initial population of busy slots
+        slotsData.forEach(s => {
+            if (s.examiners) s.examiners.forEach(ex => markBusy(ex, s.date, s.time));
+        });
+
+        // 4. Optimized Check Function
+        const checkAvailabilityFast = (dosenName, date, time, ignoreGlobalExclude = false) => {
+            const d = resolveDosen(dosenName);
+            if (!d) return true; // Fail open if unknown, or handle as needed
+
+            // Manual toggle
+            if (!ignoreGlobalExclude && d.exclude) return false;
+
+            // Check Libur
+            const liburs = liburLookup.get(d.id);
+            if (liburs) {
+                for (const l of liburs) {
+                    if (!l.date && !l.time) return false;
+                    if (l.date === date && !l.time) return false;
+                    if (!l.date && l.time === time) return false;
+                    if (l.date === date && l.time === time) return false;
+                }
+            }
+
+            // Check Slot Busy
+            const busySet = slotLookup.get(d.id);
+            if (busySet && busySet.has(`${date}:${time}`)) return false;
+
+            return true;
+        };
+        // ==========================================
+        // 🚀 OPTIMIZATION END
+        // ==========================================
+
+        // STRATEGY: Prioritize students with high-constraint supervisors
         const busyScores = {};
         liburData.forEach(l => {
             if (l.dosen_name) {
@@ -251,11 +321,7 @@ export async function generateSchedule(req, res) {
                 if (compareNames(a.pembimbing, normName)) scoreA = score;
                 if (compareNames(b.pembimbing, normName)) scoreB = score;
             }
-
-            // Primary sort: Busy score (desc)
             if (scoreB !== scoreA) return scoreB - scoreA;
-
-            // Secondary sort: NIM (asc) for consistency
             return (a.nim || '').localeCompare(b.nim || '');
         });
 
@@ -274,7 +340,6 @@ export async function generateSchedule(req, res) {
             const sProdiNorm = studentProdi?.toLowerCase().trim();
             const studentGenderNorm = studentGender?.toUpperCase().trim() || null;
 
-            // Sort by workload (fairness). If forceSearch = true, we allow higher workloads to ensure scheduling.
             const candidatePool = [...allDosen].sort((a, b) => {
                 const countA = examinerCounts[a.nama] || 0;
                 const countB = examinerCounts[b.nama] || 0;
@@ -284,43 +349,30 @@ export async function generateSchedule(req, res) {
             for (const d of candidatePool) {
                 if (candidates.length >= 2) break;
 
-                // 1. Not the student's supervisor
                 if (compareNames(d.nama, pembimbing)) continue;
-
-                // 2. Not already selected as P1
                 if (candidates.some(c => compareNames(c, d.nama))) continue;
 
-                // 3. STRICT RULE: Same prodi
                 const dProdiNorm = d.prodi?.toLowerCase().trim();
                 if (dProdiNorm !== sProdiNorm) continue;
 
-                // 4. QUOTA CHECK: Respect max_slots if set
                 const currentCount = examinerCounts[d.nama] || 0;
                 if (d.max_slots !== null && d.max_slots !== undefined && currentCount >= d.max_slots) {
-                    continue; // Skip if quota reached
+                    continue;
                 }
 
-                // SUPERVISOR PROTECTION RULE:
-                // Don't take this lecturer as an examiner IF they still have their own supervisees to schedule.
-                // This ensures their availability is preserved for their own students first.
                 const hasUnscheduledBimbingan = mahasiswaList.some(m =>
                     compareNames(m.pembimbing, d.nama) &&
                     !scheduledMahasiswaIds.has(m.nim)
                 );
 
-                if (hasUnscheduledBimbingan) {
-                    // Skip picking this lecturer as an examiner for now, 
-                    // because they must prioritize their own students first.
-                    continue;
-                }
+                if (hasUnscheduledBimbingan) continue;
 
-                // 4. Gender Constraint
                 if (d.pref_gender && studentGenderNorm) {
                     if (d.pref_gender !== studentGenderNorm) continue;
                 }
 
-                // 5. Availability
-                const available = await isDosenAvailable(d.nama, date, time, allDosen, liburData, slotsData);
+                // OPTIMIZED CHECK
+                const available = checkAvailabilityFast(d.nama, date, time);
                 if (!available) continue;
 
                 candidates.push(d.nama);
@@ -330,16 +382,11 @@ export async function generateSchedule(req, res) {
 
         let successCount = 0;
         const newSlotsCreated = [];
-        const failureReasons = []; // Track why students were skipped
+        const failureReasons = [];
 
-        // ==========================================
-        // HYBRID SCHEDULING LOGIC - 3 SCENARIOS
-        // ==========================================
-
-        // Group students by assignment type for priority processing
-        const fullyAssigned = [];     // Has Penguji1 AND Penguji2
-        const partiallyAssigned = []; // Has ONLY Penguji1 OR Penguji2
-        const autoAssign = [];         // No pre-assigned examiners
+        const fullyAssigned = [];
+        const partiallyAssigned = [];
+        const autoAssign = [];
 
         for (const mhs of mahasiswaList) {
             if (scheduledMahasiswaIds.has(mhs.nim)) continue;
@@ -356,15 +403,11 @@ export async function generateSchedule(req, res) {
 
         log(`📊 Mahasiswa Categories: ${fullyAssigned.length} fully assigned, ${partiallyAssigned.length} partially, ${autoAssign.length} auto`);
 
-        // ==============================================
-        // SCENARIO A: FULLY PRE-ASSIGNED (P1 + P2)
-        // ==============================================
+        // SCENARIO A: FULLY PRE-ASSIGNED
         log(`\n🎯 SCENARIO A: Processing ${fullyAssigned.length} fully pre-assigned students...`);
 
         for (const mhs of fullyAssigned) {
             const allThree = [mhs.pembimbing, mhs.penguji_1, mhs.penguji_2];
-
-            // Validate uniqueness
             const uniqueNames = new Set(allThree.map(normalizeName));
             if (uniqueNames.size !== 3) {
                 const msg = `❌ ${mhs.nama}: Penguji duplikat (${mhs.pembimbing}, ${mhs.penguji_1}, ${mhs.penguji_2})`;
@@ -383,11 +426,11 @@ export async function generateSchedule(req, res) {
                         const slotExists = slotsData.find(s => s.date === dateObj.value && s.time === time && s.room === room);
                         if (slotExists) continue;
 
-                        // Check availability of ALL 3
-                        const availChecks = await Promise.all(
-                            allThree.map(name =>
-                                isDosenAvailable(name, dateObj.value, time, allDosen, liburData, slotsData, null, name === mhs.pembimbing)
-                            )
+                        // OPTIMIZED Multi-check
+                        // Pass 'ignoreGlobalExclude = true' for supervisor (last arg true logic from original)
+                        // Originally: isDosenAvailable(name, ..., name === mhs.pembimbing)
+                        const availChecks = allThree.map(name =>
+                            checkAvailabilityFast(name, dateObj.value, time, name === mhs.pembimbing)
                         );
 
                         if (availChecks.every(a => a)) {
@@ -409,6 +452,10 @@ export async function generateSchedule(req, res) {
                             const newSlotObj = { id: slotId, date: dateObj.value, time, room, student: mhs.nama, examiners: finalExaminers };
                             newSlotsCreated.push(newSlotObj);
                             slotsData.push(newSlotObj);
+
+                            // 🚀 UPDATE OPTIMIZED MAPS
+                            finalExaminers.forEach(ex => markBusy(ex, dateObj.value, time));
+
                             scheduledMahasiswaIds.add(mhs.nim);
                             successCount++;
                             finalExaminers.forEach(ex => { examinerCounts[ex] = (examinerCounts[ex] || 0) + 1; });
@@ -419,7 +466,6 @@ export async function generateSchedule(req, res) {
                     }
                 }
             }
-
             if (!scheduled) {
                 const msg = `❌ ${mhs.nama}: No available slot for all 3 examiners`;
                 log(msg);
@@ -427,9 +473,7 @@ export async function generateSchedule(req, res) {
             }
         }
 
-        // ==============================================
-        // SCENARIO B: PARTIALLY PRE-ASSIGNED (P1 OR P2)
-        // ==============================================
+        // SCENARIO B: PARTIALLY PRE-ASSIGNED
         log(`\n🔍 SCENARIO B: Processing ${partiallyAssigned.length} partially pre-assigned students...`);
 
         for (const mhs of partiallyAssigned) {
@@ -448,17 +492,15 @@ export async function generateSchedule(req, res) {
                         const slotExists = slotsData.find(s => s.date === dateObj.value && s.time === time && s.room === room);
                         if (slotExists) continue;
 
-                        // Check availability of pembimbing + pre-assigned examiner
-                        const pembimbingAvail = await isDosenAvailable(mhs.pembimbing, dateObj.value, time, allDosen, liburData, slotsData, null, true);
-                        const preAssignedAvail = await isDosenAvailable(preAssigned, dateObj.value, time, allDosen, liburData, slotsData, null, false);
+                        // OPTIMIZED Checks
+                        const pembimbingAvail = checkAvailabilityFast(mhs.pembimbing, dateObj.value, time, true); // true = supervisor
+                        const preAssignedAvail = checkAvailabilityFast(preAssigned, dateObj.value, time, false);
 
                         if (!pembimbingAvail || !preAssignedAvail) continue;
 
-                        // AUTO-FIND the missing examiner with FULL VALIDATION
                         const autoExaminers = await findExaminers(mhs.pembimbing, dateObj.value, time, mhs.prodi, mhs.gender, false);
 
                         if (autoExaminers && autoExaminers.length >= 2) {
-                            // Filter out the pre-assigned examiner
                             const preNorm = normalizeName(preAssigned);
                             const pembNorm = normalizeName(mhs.pembimbing);
                             const available = autoExaminers.filter(ex => {
@@ -469,7 +511,6 @@ export async function generateSchedule(req, res) {
                             if (available.length >= 1) {
                                 const autoExaminer = available[0];
 
-                                // Create slot
                                 const { rows: insertedSlot } = await client.query(
                                     'INSERT INTO slots (date, time, room, student, mahasiswa_nim) VALUES ($1, $2, $3, $4, $5) RETURNING id',
                                     [dateObj.value, time, room, mhs.nama, mhs.nim]
@@ -490,6 +531,10 @@ export async function generateSchedule(req, res) {
                                 const newSlotObj = { id: slotId, date: dateObj.value, time, room, student: mhs.nama, examiners: finalExaminers };
                                 newSlotsCreated.push(newSlotObj);
                                 slotsData.push(newSlotObj);
+
+                                // 🚀 UPDATE OPTIMIZED MAPS
+                                finalExaminers.forEach(ex => markBusy(ex, dateObj.value, time));
+
                                 scheduledMahasiswaIds.add(mhs.nim);
                                 successCount++;
                                 finalExaminers.forEach(ex => { examinerCounts[ex] = (examinerCounts[ex] || 0) + 1; });
@@ -501,7 +546,6 @@ export async function generateSchedule(req, res) {
                     }
                 }
             }
-
             if (!scheduled) {
                 const msg = `❌ ${mhs.nama}: Cannot find ${needToFind}`;
                 log(msg);
@@ -509,15 +553,12 @@ export async function generateSchedule(req, res) {
             }
         }
 
-        // ==============================================
-        // SCENARIO C: AUTO-ASSIGN (Existing Logic)
-        // ==============================================
+        // SCENARIO C: AUTO-ASSIGN
         log(`\n⚙️ SCENARIO C: Processing ${autoAssign.length} auto-assignment students...`);
 
         for (const mhs of autoAssign) {
             let scheduled = false;
 
-            // Search for an available slot for THIS student
             searchLoop:
             for (const dateObj of DATES) {
                 for (const time of TIMES) {
@@ -527,7 +568,8 @@ export async function generateSchedule(req, res) {
                         const slotExists = slotsData.some(s => s.date === dateObj.value && s.time === time && s.room === room);
                         if (slotExists) continue;
 
-                        const supervisorAvailable = await isDosenAvailable(mhs.pembimbing, dateObj.value, time, allDosen, liburData, slotsData, null, true);
+                        // OPTIMIZED supervisor check
+                        const supervisorAvailable = checkAvailabilityFast(mhs.pembimbing, dateObj.value, time, true);
                         if (!supervisorAvailable) continue;
 
                         const isHighPriority = (busyScores[normalizeName(mhs.pembimbing)] || 0) > 0;
@@ -548,6 +590,10 @@ export async function generateSchedule(req, res) {
                             const newSlotObj = { id: slotId, date: dateObj.value, time, room, student: mhs.nama, examiners: final };
                             newSlotsCreated.push(newSlotObj);
                             slotsData.push(newSlotObj);
+
+                            // 🚀 UPDATE OPTIMIZED MAPS
+                            final.forEach(ex => markBusy(ex, dateObj.value, time));
+
                             scheduledMahasiswaIds.add(mhs.nim);
                             successCount++;
                             final.forEach(ex => { examinerCounts[ex] = (examinerCounts[ex] || 0) + 1; });
@@ -560,14 +606,13 @@ export async function generateSchedule(req, res) {
             }
 
             if (!scheduled) {
-                // Diagnostic check for more specific failure reason
                 let reason = "Tidak ada slot yang cocok (Cek libur atau kuota penguji)";
-
-                const supervisorAvailCount = await (async () => {
+                // Quick failure analysis requires checkAvailabilityFast
+                const supervisorAvailCount = (() => {
                     let count = 0;
                     for (const d of DATES) {
                         for (const t of TIMES) {
-                            if (await isDosenAvailable(mhs.pembimbing, d.value, t, allDosen, liburData, slotsData, null, true)) count++;
+                            if (checkAvailabilityFast(mhs.pembimbing, d.value, t, true)) count++;
                         }
                     }
                     return count;

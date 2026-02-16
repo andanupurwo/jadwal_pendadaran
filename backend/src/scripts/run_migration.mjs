@@ -1,12 +1,16 @@
 import pg from 'pg';
 const { Pool } = pg;
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 
 const pool = new Pool({
-  host: '127.0.0.1',
-  user: 'postgres',
-  password: 'admin123',
-  database: 'jadwal_pendadaran',
-  port: 5432
+  host: process.env.DB_HOST || '127.0.0.1',
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'jadwal_pendadaran',
+  port: parseInt(process.env.DB_PORT || '5432')
 });
 
 const statements = [
@@ -14,15 +18,15 @@ const statements = [
   "ALTER TABLE dosen ADD COLUMN IF NOT EXISTS exclude BOOLEAN DEFAULT FALSE",
   "ALTER TABLE dosen ADD COLUMN IF NOT EXISTS pref_gender VARCHAR(10) DEFAULT NULL",
   "ALTER TABLE dosen ADD COLUMN IF NOT EXISTS max_slots INT DEFAULT NULL",
-  
+
   // Phase 2: Add missing columns to mahasiswa
   "ALTER TABLE mahasiswa ADD COLUMN IF NOT EXISTS penguji_1 VARCHAR(255) DEFAULT NULL",
   "ALTER TABLE mahasiswa ADD COLUMN IF NOT EXISTS penguji_2 VARCHAR(255) DEFAULT NULL",
-  
+
   // Phase 3: Improve libur table
   "ALTER TABLE libur ADD COLUMN IF NOT EXISTS dosen_name VARCHAR(255) DEFAULT NULL",
   "ALTER TABLE libur ADD COLUMN IF NOT EXISTS nik VARCHAR(50) DEFAULT NULL",
-  
+
   // Phase 4: Add indexes
   "CREATE INDEX IF NOT EXISTS idx_libur_nik ON libur(nik)",
   "CREATE INDEX IF NOT EXISTS idx_libur_date ON libur(date)",
@@ -35,7 +39,7 @@ const statements = [
 async function runMigration() {
   try {
     console.log('🔄 Starting database migration...\n');
-    
+
     for (let i = 0; i < statements.length; i++) {
       const stmt = statements[i];
       try {
@@ -46,7 +50,7 @@ async function runMigration() {
         console.error(`   Error: ${err.message}`);
       }
     }
-    
+
     console.log('\n✅ Database migration completed!');
     process.exit(0);
   } catch (err) {

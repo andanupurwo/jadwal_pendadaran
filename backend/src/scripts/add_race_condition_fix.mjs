@@ -1,18 +1,20 @@
 import pg from 'pg';
 const { Pool } = pg;
+import dotenv from 'dotenv';
+dotenv.config();
 
 const pool = new Pool({
-  host: '127.0.0.1',
-  user: 'postgres',
-  password: 'admin123',
-  database: 'jadwal_pendadaran',
-  port: 5432
+  host: process.env.DB_HOST || '127.0.0.1',
+  user: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'jadwal_pendadaran',
+  port: parseInt(process.env.DB_PORT || '5432')
 });
 
 async function addRaceConditionFix() {
   try {
     console.log('🔒 Adding race condition protection...\n');
-    
+
     // Task 1: Add unique constraint pada slot_examiners
     // Ini mencegah dosen sama jadi penguji 2x untuk slot yang sama
     await pool.query(`
@@ -30,7 +32,7 @@ async function addRaceConditionFix() {
       END $$;
     `);
     console.log('✅ Added UNIQUE constraint on slot_examiners');
-    
+
     // Task 2: Add unique constraint pada slots
     // Ini mencegah berapa mahasiswa untuk slot yang sama (date, time, room)
     await pool.query(`
@@ -48,7 +50,7 @@ async function addRaceConditionFix() {
       END $$;
     `);
     console.log('✅ Added UNIQUE constraint on slots (date, time, room combo)');
-    
+
     // Task 3: Add dosen examiner count trigger
     // Ini memastikan dosen tidak melebihi max_slots
     await pool.query(`
@@ -79,7 +81,7 @@ async function addRaceConditionFix() {
       $$ LANGUAGE plpgsql;
     `);
     console.log('✅ Created examiner quota checking function');
-    
+
     // Task 4: Add trigger untuk check_examiner_quota
     await pool.query(`
       DROP TRIGGER IF EXISTS trigger_check_examiner_quota ON slot_examiners;
@@ -90,12 +92,12 @@ async function addRaceConditionFix() {
       EXECUTE FUNCTION check_examiner_quota();
     `);
     console.log('✅ Created trigger for examiner quota checking');
-    
+
     console.log('\n✅ Race condition protection activated!');
     console.log('   - Dosen tidak bisa menjadi penguji 2x untuk slot sama');
     console.log('   - Slot tidak bisa booked 2x dengan date/time/room sama');
     console.log('   - Dosen tidak bisa melebihi max_slots');
-    
+
     process.exit(0);
   } catch (err) {
     console.error('❌ Error:', err.message);
