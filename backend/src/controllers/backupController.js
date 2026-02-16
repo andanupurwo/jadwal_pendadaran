@@ -1,63 +1,42 @@
 import pool from '../config/database.js';
 import { createLog } from './logsController.js';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
-
-const execAsync = promisify(exec);
 
 // Schema version for compatibility checking
 const SCHEMA_VERSION = '1.0.0';
 
 /**
  * Export complete database backup
- * Generates SQL dump with all data and metadata
+ * Generates SQL dump using direct queries (safer than pg_dump)
  */
 export async function exportBackup(req, res) {
+    const client = await pool.connect();
+
     try {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-        const filename = `backup_${timestamp}.sql`;
-        const filepath = path.join(process.cwd(), 'backups', filename);
+        const now = new Date();
+        const dateStr = now.getFullYear() + '-' +
+            String(now.getMonth() + 1).padStart(2, '0') + '-' +
+            String(now.getDate()).padStart(2, '0');
+        const timeStr = String(now.getHours()).padStart(2, '0') + '-' +
+            String(now.getMinutes()).padStart(2, '0') + '-' +
+            String(now.getSeconds()).padStart(2, '0');
 
-        // Ensure backups directory exists
-        if (!fs.existsSync(path.join(process.cwd(), 'backups'))) {
-            fs.mkdirSync(path.join(process.cwd(), 'backups'), { recursive: true });
-        }
+        const filename = `backup_jadwal_full_${dateStr}_${timeStr}.sql`;
 
-        console.log('🔄 Starting database backup...');
+        console.log(`🔄 Starting database backup: ${filename}`);
 
-        // Use pg_dump to create backup
-        const dbConfig = {
-            host: process.env.DB_HOST || 'localhost',
-            port: process.env.DB_PORT || '5432',
-            user: process.env.DB_USER || 'postgres',
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME || 'jadwal_pendadaran'
-        };
+        // Prepare SQL statements
+        let sqlContent = '';
 
-        // Set PGPASSWORD environment variable for pg_dump
-        const env = { ...process.env, PGPASSWORD: dbConfig.password };
-
-        // pg_dump command with data-only flag (schema is handled by init.js)
-        const dumpCommand = `pg_dump -h ${dbConfig.host} -p ${dbConfig.port} -U ${dbConfig.user} -d ${dbConfig.database} --data-only --inserts --column-inserts`;
-
-        const { stdout, stderr } = await execAsync(dumpCommand, { env, maxBuffer: 50 * 1024 * 1024 });
-
-        if (stderr && !stderr.includes('WARNING')) {
-            console.error('pg_dump stderr:', stderr);
-        }
-
-        // Calculate MD5 checksum for integrity verification
-        const checksum = crypto.createHash('md5').update(stdout).digest('hex');
-
-        // Prepare backup file with metadata header
-        const header = `-- Jadwal Pendadaran Backup
+        // Header with metadata
+        const checksum = crypto.createHash('md5').update(now.toISOString()).digest('hex');
+        sqlContent += `-- Jadwal Pendadaran Backup
 -- Generated: ${new Date().toISOString()}
 -- Schema Version: ${SCHEMA_VERSION}
 -- Checksum: ${checksum}
--- Database: ${dbConfig.database}
+-- Database: ${process.env.DB_NAME || 'jadwal_pendadaran'}
 -- Tables: mahasiswa, dosen, libur, slots, slot_examiners, app_settings, users, activity_logs
 -- 
 -- IMPORTANT: This backup contains sensitive data. Keep it secure!
@@ -65,37 +44,68 @@ export async function exportBackup(req, res) {
 
 `;
 
-        const backupContent = header + stdout;
+        // Define tables in correct order (respecting foreign keys)
+        const tables = [
+            'app_settings',
+            'users',
+            'dosen',
+            'mahasiswa',
+            'libur',
+            'slots',
+            'slot_examiners',
+            'activity_logs'
+        ];
 
-        // Write to file
-        fs.writeFileSync(filepath, backupContent, 'utf8');
+        // Export each table
+        for (const table of tables) {
+            sqlContent += `\n-- Table: ${table}\n`;
 
-        console.log(`✅ Backup created: ${filename}`);
-        console.log(`📊 Size: ${(fs.statSync(filepath).size / 1024).toFixed(2)} KB`);
-        console.log(`🔒 Checksum: ${checksum}`);
+            // Get all rows
+            const result = await client.query(`SELECT * FROM ${table}`);
 
-        // Send file as download
-        res.download(filepath, filename, async (err) => {
-            if (err) {
-                console.error('Download error:', err);
-                if (!res.headersSent) {
-                    res.status(500).json({ success: false, error: 'Failed to download backup' });
-                }
+            if (result.rows.length === 0) {
+                sqlContent += `-- No data in ${table}\n`;
+                continue;
             }
 
-            // Clean up file after download (optional - keep for local backup)
-            // fs.unlinkSync(filepath);
+            // Get column names
+            const columns = Object.keys(result.rows[0]);
 
-            await createLog('BACKUP', 'Database', `Exported backup: ${filename}`);
-        });
+            // Generate INSERT statements
+            for (const row of result.rows) {
+                const values = columns.map(col => {
+                    const val = row[col];
+                    if (val === null) return 'NULL';
+                    if (typeof val === 'boolean') return val ? 'TRUE' : 'FALSE';
+                    if (typeof val === 'number') return val;
+                    if (val instanceof Date) return `'${val.toISOString()}'`;
+                    // Escape single quotes in strings
+                    return `'${String(val).replace(/'/g, "''")}'`;
+                }).join(', ');
+
+                sqlContent += `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${values});\n`;
+            }
+        }
+
+        console.log(`✅ Backup created: ${filename}`);
+        console.log(`📊 Size: ${(Buffer.byteLength(sqlContent, 'utf8') / 1024).toFixed(2)} KB`);
+
+        // Send as downloadable file
+        res.setHeader('Content-Type', 'application/sql');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(sqlContent);
+
+        await createLog('BACKUP', 'Database', `Exported backup: ${filename}`);
 
     } catch (error) {
         console.error('❌ Backup export error:', error);
         res.status(500).json({
             success: false,
             error: error.message,
-            details: 'Failed to create database backup. Ensure pg_dump is available in PATH.'
+            details: 'Failed to create database backup.'
         });
+    } finally {
+        client.release();
     }
 }
 
