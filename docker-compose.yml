@@ -1,22 +1,22 @@
-version: '3.8'
+
 
 services:
   db:
     image: postgres:17-alpine
     container_name: jadwal_pendadaran_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: jadwal_pendadaran
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # Mount backup file for initialization
-      - ./backend/database/backup_latest.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backend/src/database/backup_latest.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       # Changed to 5002 as requested
       - "5002:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,16 +25,16 @@ services:
     build: ./backend
     container_name: jadwal_pendadaran_backend
     environment:
-      - DB_HOST=db
-      - DB_USER=postgres
-      - DB_PASSWORD=password123
-      - DB_NAME=jadwal_pendadaran
-      - DB_PORT=5432
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
       # internal port 3000
-      - PORT=3000
-      - NODE_ENV=development
+      - PORT=${PORT}
+      - NODE_ENV=${NODE_ENV}
       # URL Frontend yang diakses via browser (Updated port 3002)
-      - CORS_ORIGIN=http://localhost:3002
+      - CORS_ORIGIN=${CORS_ORIGIN}
     ports:
       # Changed from 3000 to 8002 as requested
       - "8002:3000"
