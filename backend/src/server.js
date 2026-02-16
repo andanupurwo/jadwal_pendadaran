@@ -11,6 +11,7 @@ import scheduleRoutes from './routes/schedule.js';
 import settingsRoutes from './routes/settings.js';
 import authRoutes from './routes/auth.js';
 import logsRoutes from './routes/logs.js';
+import backupRoutes from './routes/backup.js';
 
 // Import security middleware
 import { apiLimiter, loginLimiter, schedulingLimiter } from './middleware/rateLimiter.js';
@@ -60,6 +61,7 @@ app.use('/api/schedule', scheduleRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/logs', logsRoutes);
+app.use('/api/backup', backupRoutes);
 
 // 404 handler
 app.use((req, res) => {

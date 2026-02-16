@@ -35,6 +35,11 @@ export const SettingsView = () => {
                      style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'logs' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'logs' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
                     📜 Log Aktivitas
                 </div>
+                <div class="tab-item ${appState.settingsTab === 'backup' ? 'active' : ''}"
+                     onclick="window.switchSettingsTab('backup')"
+                     style="padding: 8px 24px; min-width: 120px; text-align: center; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; background: ${appState.settingsTab === 'backup' ? 'var(--bg)' : 'transparent'}; box-shadow: ${appState.settingsTab === 'backup' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none'};">
+                    💾 Backup
+                </div>
              </div>
         </div>
     `;
@@ -176,6 +181,112 @@ export const SettingsView = () => {
                 
                 <div class="card">
                     <div id="logs-container"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Render Backup & Restore content
+    if (appState.settingsTab === 'backup') {
+        setTimeout(() => {
+            const exportBtn = document.getElementById('btn-export-backup');
+            const importBtn = document.getElementById('btn-import-backup');
+            const fileInput = document.getElementById('backup-file-input');
+
+            if (exportBtn) {
+                exportBtn.addEventListener('click', window.handleExportBackup);
+            }
+
+            if (importBtn && fileInput) {
+                importBtn.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', window.handleImportBackup);
+            }
+        }, 0);
+
+        return `
+            <div class="container">
+                <header class="page-header">
+                     <div class="header-info">
+                        <h1>Backup & Restore</h1>
+                        <p class="subtitle">Export dan import data untuk migrasi antar environment.</p>
+                    </div>
+                </header>
+                ${renderTabs()}
+                
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <!-- Export Section -->
+                    <div class="card" style="margin-bottom: 2rem;">
+                        <div class="card-header">
+                            <h3>📤 Export Backup</h3>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <p style="margin-bottom: 1rem; line-height: 1.6;">
+                                Export seluruh data aplikasi (mahasiswa, dosen, libur, jadwal, settings, users) 
+                                ke file SQL untuk backup atau migrasi ke PC lain.
+                            </p>
+                            
+                            <div style="background: var(--info-bg); border-left: 4px solid var(--info); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+                                <strong style="color: var(--info);">💡 Tip:</strong>
+                                <ul style="margin: 0.5rem 0 0 1.5rem; color: var(--text-secondary);">
+                                    <li>File backup berisi <strong>semua data</strong> yang sudah terjadwal</li>
+                                    <li>Simpan file di lokasi aman (USB/cloud storage)</li>
+                                    <li>Gunakan untuk migrasi antar PC development</li>
+                                </ul>
+                            </div>
+
+                            <button id="btn-export-backup" class="btn-primary" style="width: 100%;">
+                                <span style="font-size: 1.1rem;">📥</span> Download Backup SQL
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Import Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>📥 Import Backup</h3>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <p style="margin-bottom: 1rem; line-height: 1.6;">
+                                Restore data dari file backup SQL. Semua data saat ini akan <strong>ditimpa</strong> 
+                                dengan data dari backup.
+                            </p>
+
+                            <div style="background: var(--warning-bg); border-left: 4px solid var(--warning); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
+                                <strong style="color: var(--warning);">⚠️ Peringatan:</strong>
+                                <ul style="margin: 0.5rem 0 0 1.5rem; color: var(--text-secondary);">
+                                    <li>Proses ini akan <strong>menghapus semua data</strong> yang ada</li>
+                                    <li>Pastikan file backup valid dan tidak corrupt</li>
+                                    <li>Backup data saat ini terlebih dahulu jika diperlukan</li>
+                                </ul>
+                            </div>
+
+                            <input type="file" id="backup-file-input" accept=".sql" style="display: none;">
+                            <button id="btn-import-backup" class="btn-secondary" style="width: 100%;">
+                                <span style="font-size: 1.1rem;">📤</span> Pilih File Backup (.sql)
+                            </button>
+
+                            <div id="import-progress" style="display: none; margin-top: 1rem;">
+                                <div style="background: var(--bg); padding: 1rem; border-radius: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <div class="spinner" style="width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                        <span id="import-status">Mengimport data...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info Section -->
+                    <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg); border-radius: 12px; border: 1px solid var(--border-subtle);">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary);">📋 Workflow Migrasi</h4>
+                        <ol style="margin-left: 1.5rem; line-height: 1.8; color: var(--text-secondary);">
+                            <li><strong>PC Kantor:</strong> Export backup → Download file SQL</li>
+                            <li><strong>Transfer:</strong> Copy file ke USB/cloud storage</li>
+                            <li><strong>PC Rumah:</strong> Setup fresh database (<code>docker compose up</code>)</li>
+                            <li><strong>Import:</strong> Pilih file backup → Klik import</li>
+                            <li><strong>Selesai:</strong> Semua data langsung tersedia!</li>
+                        </ol>
+                    </div>
                 </div>
             </div>
         `;
@@ -532,3 +643,107 @@ async function handleUpdateAccount(e) {
         showToast('Terjadi kesalahan saat memperbarui akun', 'error');
     }
 }
+
+// Backup & Restore Handlers
+window.handleExportBackup = async () => {
+    try {
+        showToast('Membuat backup...', 'info');
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/backup/export`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to export backup');
+        }
+
+        // Get filename from Content-Disposition header or generate one
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = 'backup.sql';
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
+            if (filenameMatch) filename = filenameMatch[1];
+        }
+
+        // Download file
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        showToast('Backup berhasil didownload!', 'success');
+    } catch (error) {
+        console.error('Export error:', error);
+        showToast('Gagal export backup: ' + error.message, 'error');
+    }
+};
+
+window.handleImportBackup = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.sql')) {
+        showToast('File harus berformat .sql', 'error');
+        event.target.value = '';
+        return;
+    }
+
+    const confirmed = await showConfirm(
+        `Import backup dari "${file.name}"? Semua data saat ini akan dihapus dan diganti dengan data dari backup.`,
+        'Konfirmasi Import',
+        { text: 'Import', variant: 'danger' }
+    );
+
+    if (!confirmed) {
+        event.target.value = '';
+        return;
+    }
+
+    try {
+        const progressDiv = document.getElementById('import-progress');
+        const statusSpan = document.getElementById('import-status');
+
+        if (progressDiv) progressDiv.style.display = 'block';
+        if (statusSpan) statusSpan.textContent = 'Mengupload file...';
+
+        const formData = new FormData();
+        formData.append('backup', file);
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/backup/import`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (progressDiv) progressDiv.style.display = 'none';
+
+        if (result.success) {
+            showToast(`Backup berhasil diimport! ${result.stats?.statements || 0} statements dieksekusi.`, 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            throw new Error(result.error || 'Import failed');
+        }
+    } catch (error) {
+        console.error('Import error:', error);
+        const progressDiv = document.getElementById('import-progress');
+        if (progressDiv) progressDiv.style.display = 'none';
+        showToast('Gagal import backup: ' + error.message, 'error');
+    } finally {
+        event.target.value = '';
+    }
+};
+
