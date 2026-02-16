@@ -57,7 +57,7 @@ export const SettingsView = () => {
 
         return `
             <div class="container">
-                <header class="page-header">
+                <header class="page-header" style="margin-bottom: 1.5rem;">
                      <div class="header-info">
                         <h1>Pengaturan Akun</h1>
                         <p class="subtitle">Kelola keamanan dan akses akun Anda.</p>
@@ -65,40 +65,50 @@ export const SettingsView = () => {
                 </header>
                 ${renderTabs()}
                 
-                <div class="card" style="max-width: 600px; margin: 0 auto;">
+                <div class="card" style="max-width: 800px; margin: 0 auto;">
                     <div class="card-header">
                         <h3>👤 Update Akun</h3>
                     </div>
                     <form id="account-update-form" style="padding: 1.5rem;">
-                        <div class="form-group">
-                            <label class="form-label">Username</label>
-                            <input type="text" name="username" class="form-input" required value="${user.username || ''}">
-                            <p class="form-hint">Ganti username jika diperlukan</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                            
+                            <!-- Left Column: Identity -->
+                            <div>
+                                <h4 style="margin-bottom: 1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">Identitas</h4>
+                                <div class="form-group">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" name="username" class="form-input" required value="${user.username || ''}">
+                                    <p class="form-hint">Ganti username jika diperlukan</p>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Security -->
+                            <div>
+                                <h4 style="margin-bottom: 1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">Keamanan</h4>
+                                <div class="form-group">
+                                    <label class="form-label">Password Baru (Opsional)</label>
+                                    <input type="password" name="newPassword" class="form-input" placeholder="••••••" minlength="6">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Konfirmasi Password Baru</label>
+                                    <input type="password" name="confirmNewPassword" class="form-input" placeholder="••••••">
+                                </div>
+                            </div>
+
                         </div>
 
                         <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border);">
-                        
-                        <div class="form-group">
-                            <label class="form-label">Password Baru (Opsional)</label>
-                            <input type="password" name="newPassword" class="form-input" placeholder="••••••" minlength="6">
-                            <p class="form-hint">Kosongkan jika tidak ingin mengganti password</p>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Konfirmasi Password Baru</label>
-                            <input type="password" name="confirmNewPassword" class="form-input" placeholder="••••••">
-                        </div>
 
-                        <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border);">
+                        <div style="display: flex; align-items: flex-end; gap: 1.5rem;">
+                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                <label class="form-label" style="color: var(--danger);">Password Lama (Konfirmasi)</label>
+                                <input type="password" name="currentPassword" class="form-input" required placeholder="••••••">
+                            </div>
 
-                        <div class="form-group" style="background: var(--bg); padding: 1rem; border-radius: 8px;">
-                            <label class="form-label" style="color: var(--danger);">Password Lama (Konfirmasi)</label>
-                            <input type="password" name="currentPassword" class="form-input" required placeholder="••••••">
-                            <p class="form-hint">Masukkan password saat ini untuk menyimpan perubahan</p>
+                            <button type="submit" class="btn-primary" style="flex: 0 0 200px;">
+                                Simpan Perubahan
+                            </button>
                         </div>
-
-                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-                            Simpan Perubahan
-                        </button>
                     </form>
                 </div>
             </div>
@@ -135,9 +145,9 @@ export const SettingsView = () => {
                     }
 
                     container.innerHTML = `
-                        <div class="table-container">
+                        <div class="table-container" style="max-height: 60vh; overflow-y: auto;">
                             <table class="data-table">
-                                <thead>
+                                <thead style="position: sticky; top: 0; z-index: 10;">
                                     <tr>
                                         <th style="width: 180px;">Waktu</th>
                                         <th style="width: 120px;">Aksi</th>
@@ -167,8 +177,8 @@ export const SettingsView = () => {
         }, 0);
 
         return `
-            <div class="container">
-                <header class="page-header">
+            <div class="container" style="max-width: 100%;">
+                <header class="page-header" style="margin-bottom: 1.5rem;">
                      <div class="header-info">
                         <h1>Log Aktivitas</h1>
                         <p class="subtitle">Riwayat tindakan yang dilakukan dalam sistem.</p>
@@ -186,7 +196,7 @@ export const SettingsView = () => {
         `;
     }
 
-    // Render Backup & Restore content
+    // Render Backup & Restore content (Already done, keeping as is)
     if (appState.settingsTab === 'backup') {
         setTimeout(() => {
             const exportBtn = document.getElementById('btn-export-backup');
@@ -205,7 +215,7 @@ export const SettingsView = () => {
 
         return `
             <div class="container">
-                <header class="page-header">
+                <header class="page-header" style="margin-bottom: 1.5rem;">
                      <div class="header-info">
                         <h1>Backup & Restore</h1>
                         <p class="subtitle">Export dan import data untuk migrasi antar environment.</p>
@@ -213,63 +223,66 @@ export const SettingsView = () => {
                 </header>
                 ${renderTabs()}
                 
-                <div style="max-width: 800px; margin: 0 auto;">
-                    <!-- Export Section -->
-                    <div class="card" style="margin-bottom: 2rem;">
-                        <div class="card-header">
-                            <h3>📤 Export Backup</h3>
-                        </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="margin-bottom: 1rem; line-height: 1.6;">
-                                Export seluruh data aplikasi (mahasiswa, dosen, libur, jadwal, settings, users) 
-                                ke file SQL untuk backup atau migrasi ke PC lain.
-                            </p>
-                            
-                            <div style="background: var(--info-bg); border-left: 4px solid var(--info); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
-                                <strong style="color: var(--info);">💡 Tip:</strong>
-                                <ul style="margin: 0.5rem 0 0 1.5rem; color: var(--text-secondary);">
-                                    <li>File backup berisi <strong>semua data</strong> yang sudah terjadwal</li>
-                                    <li>Simpan file di lokasi aman (USB/cloud storage)</li>
-                                    <li>Gunakan untuk migrasi antar PC development</li>
-                                </ul>
+                <div style="max-width: 100%; margin: 0 auto;">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <!-- Export Section -->
+                        <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <h3>📤 Export Backup</h3>
                             </div>
+                            <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
+                                <p style="margin-bottom: 1rem; line-height: 1.6;">
+                                    Export seluruh data aplikasi (mahasiswa, dosen, libur, jadwal, settings, users) 
+                                    ke file SQL untuk backup atau migrasi ke PC lain.
+                                </p>
+                                
+                                <div style="background: var(--info-bg); border-left: 4px solid var(--info); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; flex: 1;">
+                                    <strong style="color: var(--info);">💡 Tip:</strong>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; color: var(--text-secondary);">
+                                        <li>File backup berisi <strong>semua data</strong> yang sudah terjadwal</li>
+                                        <li>Simpan file di lokasi aman (USB/cloud storage)</li>
+                                        <li>Gunakan untuk migrasi antar PC development</li>
+                                    </ul>
+                                </div>
 
-                            <button id="btn-export-backup" class="btn-primary" style="width: 100%;">
-                                <span style="font-size: 1.1rem;">📥</span> Download Backup SQL
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Import Section -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>📥 Import Backup</h3>
-                        </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="margin-bottom: 1rem; line-height: 1.6;">
-                                Restore data dari file backup SQL. Semua data saat ini akan <strong>ditimpa</strong> 
-                                dengan data dari backup.
-                            </p>
-
-                            <div style="background: var(--warning-bg); border-left: 4px solid var(--warning); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
-                                <strong style="color: var(--warning);">⚠️ Peringatan:</strong>
-                                <ul style="margin: 0.5rem 0 0 1.5rem; color: var(--text-secondary);">
-                                    <li>Proses ini akan <strong>menghapus semua data</strong> yang ada</li>
-                                    <li>Pastikan file backup valid dan tidak corrupt</li>
-                                    <li>Backup data saat ini terlebih dahulu jika diperlukan</li>
-                                </ul>
+                                <button id="btn-export-backup" class="btn-primary" style="width: 100%; margin-top: auto;">
+                                    <span style="font-size: 1.1rem;">📥</span> Download Backup SQL
+                                </button>
                             </div>
+                        </div>
 
-                            <input type="file" id="backup-file-input" accept=".sql" style="display: none;">
-                            <button id="btn-import-backup" class="btn-secondary" style="width: 100%;">
-                                <span style="font-size: 1.1rem;">📤</span> Pilih File Backup (.sql)
-                            </button>
+                        <!-- Import Section -->
+                        <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+                            <div class="card-header">
+                                <h3>📥 Import Backup</h3>
+                            </div>
+                            <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
+                                <p style="margin-bottom: 1rem; line-height: 1.6;">
+                                    Restore data dari file backup SQL. Semua data saat ini akan <strong>ditimpa</strong> 
+                                    dengan data dari backup.
+                                </p>
 
-                            <div id="import-progress" style="display: none; margin-top: 1rem;">
-                                <div style="background: var(--bg); padding: 1rem; border-radius: 8px;">
-                                    <div style="display: flex; align-items: center; gap: 1rem;">
-                                        <div class="spinner" style="width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                                        <span id="import-status">Mengimport data...</span>
+                                <div style="background: var(--warning-bg); border-left: 4px solid var(--warning); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; flex: 1;">
+                                    <strong style="color: var(--warning);">⚠️ Peringatan:</strong>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; color: var(--text-secondary);">
+                                        <li>Proses ini akan <strong>menghapus semua data</strong> yang ada</li>
+                                        <li>Pastikan file backup valid dan tidak corrupt</li>
+                                        <li>Backup data saat ini terlebih dahulu jika diperlukan</li>
+                                    </ul>
+                                </div>
+
+                                <input type="file" id="backup-file-input" accept=".sql" style="display: none;">
+                                <button id="btn-import-backup" class="btn-secondary" style="width: 100%; margin-top: auto;">
+                                    <span style="font-size: 1.1rem;">📤</span> Pilih File Backup (.sql)
+                                </button>
+
+                                <div id="import-progress" style="display: none; margin-top: 1rem;">
+                                    <div style="background: var(--bg); padding: 1rem; border-radius: 8px;">
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            <div class="spinner" style="width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                            <span id="import-status">Mengimport data...</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -277,14 +290,13 @@ export const SettingsView = () => {
                     </div>
 
                     <!-- Info Section -->
-                    <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg); border-radius: 12px; border: 1px solid var(--border-subtle);">
-                        <h4 style="margin-bottom: 1rem; color: var(--primary);">📋 Workflow Migrasi</h4>
-                        <ol style="margin-left: 1.5rem; line-height: 1.8; color: var(--text-secondary);">
-                            <li><strong>PC Kantor:</strong> Export backup → Download file SQL</li>
-                            <li><strong>Transfer:</strong> Copy file ke USB/cloud storage</li>
-                            <li><strong>PC Rumah:</strong> Setup fresh database (<code>docker compose up</code>)</li>
-                            <li><strong>Import:</strong> Pilih file backup → Klik import</li>
-                            <li><strong>Selesai:</strong> Semua data langsung tersedia!</li>
+                    <div style="padding: 1rem 1.5rem; background: var(--bg); border-radius: 12px; border: 1px solid var(--border-subtle);">
+                        <h4 style="margin-bottom: 0.5rem; color: var(--primary); font-size: 1rem;">📋 Workflow Migrasi</h4>
+                        <ol style="margin-left: 1.5rem; line-height: 1.6; color: var(--text-secondary); display: flex; gap: 2rem; flex-wrap: wrap;">
+                            <li><strong>Export:</strong> Download SQL</li>
+                            <li><strong>Transfer:</strong> Copy ke lokasi tujuan</li>
+                            <li><strong>Import:</strong> Upload & Restore</li>
+                            <li><strong>Selesai!</strong></li>
                         </ol>
                     </div>
                 </div>
@@ -295,16 +307,16 @@ export const SettingsView = () => {
     // Render logic content if tab is logic
     if (appState.settingsTab === 'logic') {
         return `
-            <div class="container">
-                <header class="page-header">
+            <div class="container" style="max-width: 100%;">
+                <header class="page-header" style="margin-bottom: 1.5rem;">
                      <div class="header-info">
-                        <h1>Pengaturan</h1>
-                        <p class="subtitle">Konfigurasi jadwal dan logika sistem.</p>
+                        <h1>Logika Penjadwalan</h1>
+                        <p class="subtitle">Konfigurasi jadwal dan dokumentasi logika.</p>
                     </div>
                 </header>
                 ${renderTabs()}
-                <div style="margin-top: -2rem;">
-                    ${LogicView().replace('class="container"', 'class="inner-container"').replace(/padding: 3rem 2rem 6rem;/, 'padding: 1rem 0;')}
+                <div style="margin-top: -1rem;">
+                    ${LogicView().replace('class="container"', 'class=""').replace(/padding: 3rem 2rem 6rem;/, 'padding: 0;').replace(/max-width: 900px;/, 'max-width: 100%;')}
                 </div>
             </div>
         `;
@@ -314,7 +326,7 @@ export const SettingsView = () => {
     if (appState.settingsTab === 'about') {
         return `
             <div class="container">
-                <header class="page-header">
+                <header class="page-header" style="margin-bottom: 1.5rem;">
                      <div class="header-info">
                         <h1>Tentang Aplikasi</h1>
                         <p class="subtitle">Informasi pengembang dan teknologi yang digunakan.</p>
@@ -322,13 +334,15 @@ export const SettingsView = () => {
                 </header>
                 ${renderTabs()}
                 
-                <div class="card" style="max-width: 800px; margin: 0 auto; padding: 2rem;">
-                    <div style="text-align: center; margin-bottom: 2rem;">
-                        <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--primary);">Jadwal Pendadaran AI</h2>
-                        <p style="color: var(--text-muted);">Sistem Penjadwalan Cerdas Berbasis Web v1.0</p>
+                <div class="card" style="max-width: 900px; margin: 0 auto; padding: 2rem;">
+                    <div style="text-align: center; margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; gap: 1rem;">
+                        <div>
+                             <h2 style="font-size: 1.8rem; margin-bottom: 0; color: var(--primary);">Jadwal Pendadaran AI</h2>
+                             <p style="color: var(--text-muted); margin: 0;">Sistem Penjadwalan Cerdas Berbasis Web v1.0</p>
+                        </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                         <div>
                             <h3 style="margin-bottom: 1rem; border-bottom: 2px solid var(--primary-subtle); padding-bottom: 0.5rem;">💻 Tech Stack</h3>
                             <ul style="list-style: none; padding: 0;">
@@ -358,7 +372,7 @@ export const SettingsView = () => {
                         </div>
                     </div>
 
-                    <div style="text-align: center; padding-top: 1rem; border-top: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--text-muted);">
+                    <div style="text-align: center; padding-top: 1rem; border-top: 1px solid var(--border-subtle); font-size: 0.85rem; color: var(--text-muted); margin-top: 2rem;">
                         &copy; 2026 Jadwal Pendadaran AI. All rights reserved.
                     </div>
                 </div>
@@ -381,8 +395,8 @@ export const SettingsView = () => {
     }, 0);
 
     return `
-        <div class="container">
-            <header class="page-header">
+        <div class="container" style="max-width: 100%;">
+            <header class="page-header" style="margin-bottom: 1.5rem;">
                 <div class="header-info">
                     <h1>Pengaturan</h1>
                     <p class="subtitle">Konfigurasi jadwal, ruangan, dan waktu pelaksanaan.</p>
@@ -391,97 +405,108 @@ export const SettingsView = () => {
             
             ${renderTabs()}
 
-            <form id="settings-form">
+            <form id="settings-form" style="position: relative; height: calc(100vh - 250px); display: flex; flex-direction: column;">
                 
-                <!-- Rooms Configuration -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div class="card-header">
-                        <h3>🏫 Ruangan</h3>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Daftar Ruangan (Satu per baris)</label>
-                        <textarea id="setting-rooms" class="form-input" rows="8" style="font-family: monospace;">${ROOMS.join('\n')}</textarea>
-                        <p class="form-hint">Masukkan nama ruangan, satu per baris. Contoh: 6.3.A</p>
-                    </div>
-
-                    <div class="form-group" style="padding: 1rem; background: var(--bg); border-radius: 8px; margin-top: 1rem;">
-                        <label class="form-label" style="margin-bottom: 0.5rem;">Status Ruangan (Penjadwalan Otomatis)</label>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
-                            Centang ruangan yang ingin <strong>DINONAKTIFKAN</strong> (tidak dipakai saat generate jadwal).
-                        </p>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; max-height: 200px; overflow-y: auto;">
-                            ${ROOMS.map(room => `
-                                <label style="display: flex; align-items: center; gap: 8px; padding: 6px; background: #fff; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                                    <input type="checkbox" name="disabled_room" value="${room}" ${DISABLED_ROOMS.includes(room) ? 'checked' : ''}>
-                                    ${room}
-                                </label>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Times Configuration -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div class="card-header">
-                        <h3>⏰ Sesi Waktu</h3>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Daftar Sesi (Satu per baris)</label>
-                        <textarea id="setting-times" class="form-input" rows="5" style="font-family: monospace;">${TIMES.join('\n')}</textarea>
-                        <p class="form-hint">Masukkan jam mulai sesi. Contoh: 08:30</p>
-                    </div>
-                </div>
-
-                <!-- Dates Configuration -->
-                <div class="card" style="margin-bottom: 2rem;">
-                    <div class="card-header">
-                        <h3>📅 Tanggal Pelaksanaan</h3>
-                    </div>
+                <div style="display: grid; grid-template-columns: 280px 200px 1fr; gap: 1.5rem; flex: 1; min-height: 0;">
                     
-                    <div class="form-group" style="margin-bottom: 1.5rem; padding: 1.5rem; background: var(--bg); border: 1px solid var(--border-subtle); border-radius: 12px;">
-                        <label style="font-weight: 600; font-size: 0.95rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; color: var(--primary);">
-                            ✨ Generator Tanggal Otomatis
-                        </label>
-                        
-                        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
-                            <!-- Tanggal Mulai -->
-                            <div style="width: 180px;">
-                                <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--text-secondary);">Tanggal Mulai</label>
-                                <input type="date" id="gen-start-date" class="form-input" style="width: 100%;">
+                    <!-- COLUMN 1: ROOMS -->
+                    <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
+                        <div class="card-header" style="padding: 1rem;">
+                            <h3 style="font-size: 1rem;">🏫 Ruangan</h3>
+                        </div>
+                        <div style="padding: 1rem; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;">
+                            <div class="form-group" style="flex-shrink: 0;">
+                                <label class="form-label" style="font-size: 0.85rem;">Daftar Ruangan</label>
+                                <textarea id="setting-rooms" class="form-input" style="font-family: monospace; height: 150px; resize: vertical;">${ROOMS.join('\n')}</textarea>
+                                <p class="form-hint">Satu ruangan per baris</p>
                             </div>
 
-                            <!-- Jumlah Hari -->
-                            <div style="width: 100px;">
-                                <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--text-secondary);">Jumlah Hari</label>
-                                <input type="number" id="gen-days" class="form-input" value="10" min="1" max="30" style="width: 100%;">
-                            </div>
-
-                            <!-- Opsi Weekend -->
-                            <div style="display: flex; align-items: center; height: 42px; padding-left: 0.5rem;">
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; user-select: none;">
-                                    <input type="checkbox" id="gen-skip-weekend" checked style="width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer;">
-                                    <span>Lewati Sabtu/Minggu</span>
-                                </label>
-                            </div>
-
-                            <!-- Tombol Action -->
-                            <div style="flex: 0 0 auto; margin-left: auto;">
-                                <button type="button" id="btn-generate-dates" class="btn-primary" onclick="window.generateDateList()" style="height: 42px; padding: 0 20px; font-size: 0.85rem;">
-                                    Generate
-                                </button>
+                            <div style="padding: 0.8rem; background: var(--bg); border-radius: 8px; border: 1px solid var(--border-subtle);">
+                                <label class="form-label" style="margin-bottom: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">Nonaktifkan Ruangan</label>
+                                <div style="display: flex; flex-direction: column; gap: 6px;">
+                                    ${ROOMS.map(room => `
+                                        <label style="display: flex; align-items: center; gap: 8px; padding: 4px; cursor: pointer; font-size: 0.85rem; user-select: none;">
+                                            <input type="checkbox" name="disabled_room" value="${room}" ${DISABLED_ROOMS.includes(room) ? 'checked' : ''} style="accent-color: var(--danger);">
+                                            <span style="color: ${DISABLED_ROOMS.includes(room) ? 'var(--text-muted)' : 'var(--text-main)'}; text-decoration: ${DISABLED_ROOMS.includes(room) ? 'line-through' : 'none'};">${room}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Konfigurasi JSON Tanggal</label>
-                        <textarea id="setting-dates" class="form-input" rows="12" style="font-family: monospace;">${JSON.stringify(DATES, null, 4)}</textarea>
-                        <p class="form-hint">Format JSON: { value: 'YYYY-MM-DD', label: 'Hari', display: 'Tgl Bulan' }</p>
+                    <!-- COLUMN 2: TIMES -->
+                    <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
+                        <div class="card-header" style="padding: 1rem;">
+                            <h3 style="font-size: 1rem;">⏰ Sesi</h3>
+                        </div>
+                        <div style="padding: 1rem; flex: 1; overflow-y: auto;">
+                            <div class="form-group" style="height: 100%; display: flex; flex-direction: column;">
+                                <label class="form-label" style="font-size: 0.85rem;">Jam Mulai</label>
+                                <textarea id="setting-times" class="form-input" style="font-family: monospace; flex: 1; resize: none;">${TIMES.join('\n')}</textarea>
+                                <p class="form-hint" style="margin-top: 0.5rem;">Format: HH:MM</p>
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- COLUMN 3: DATES & GENERATOR -->
+                    <div class="card" style="display: flex; flex-direction: column; overflow: hidden;">
+                        <div class="card-header" style="padding: 1rem; background: var(--bg); border-bottom: 1px solid var(--border-subtle);">
+                            <h3 style="font-size: 1rem; color: var(--primary);">📅 Tanggal Pelaksanaan</h3>
+                        </div>
+                        
+                        <div style="padding: 1.5rem; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem;">
+                            
+                            <!-- Generator Section -->
+                            <div style="background: rgba(var(--primary-rgb), 0.05); border: 1px solid var(--primary-subtle); border-radius: 10px; padding: 1.2rem;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                                    <strong style="color: var(--primary); font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                                        ✨ Generator Otomatis
+                                    </strong>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 100px auto; gap: 1rem; align-items: end;">
+                                    
+                                    <div>
+                                        <label class="form-label" style="font-size: 0.8rem; margin-bottom: 4px;">Tanggal Mulai</label>
+                                        <input type="date" id="gen-start-date" class="form-input" style="height: 38px;">
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label" style="font-size: 0.8rem; margin-bottom: 4px;">Durasi (Hari)</label>
+                                        <input type="number" id="gen-days" class="form-input" value="10" min="1" style="height: 38px;">
+                                    </div>
+
+                                    <button type="button" id="btn-generate-dates" class="btn-primary" onclick="window.generateDateList()" style="height: 38px; padding: 0 1.5rem;">
+                                        Generate
+                                    </button>
+                                </div>
+                                
+                                <div style="margin-top: 0.8rem;">
+                                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-secondary);">
+                                        <input type="checkbox" id="gen-skip-weekend" checked style="accent-color: var(--primary);">
+                                        Lewati Sabtu & Minggu
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- JSON Editor -->
+                            <div class="form-group" style="flex: 1; display: flex; flex-direction: column; min-height: 200px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <label class="form-label" style="margin: 0; font-size: 0.85rem;">Editor JSON</label>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">read-only preview</span>
+                                </div>
+                                <textarea id="setting-dates" class="form-input" style="font-family: monospace; font-size: 0.85rem; line-height: 1.5; flex: 1; resize: none; background: var(--bg); color: var(--text-main);">${JSON.stringify(DATES, null, 4)}</textarea>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="form-actions" style="position: sticky; bottom: 20px; background: var(--card-bg); padding: 1rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; justify-content: flex-end; z-index: 100;">
-                    <button type="submit" class="btn-primary" style="min-width: 150px;">
+                <div class="form-actions" style="margin-top: 1.5rem; padding: 1rem; background: white; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; align-items: center; gap: 1rem; position: sticky; bottom: 0; z-index: 20;">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Perubahan akan diterapkan setelah reload.</span>
+                    <button type="submit" class="btn-primary" style="padding: 0.8rem 2rem; font-weight: 600; box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);">
                         Simpan Perubahan
                     </button>
                 </div>
@@ -489,6 +514,7 @@ export const SettingsView = () => {
             </form>
         </div>
     `;
+
 };
 
 // Handle tab switching

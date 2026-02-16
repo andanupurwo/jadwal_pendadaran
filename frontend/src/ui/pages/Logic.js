@@ -1,117 +1,117 @@
 import { APP_DATA } from '../../data/store.js';
 
 export const LogicView = () => `
-    <div class="container" style="max-width: 900px; margin: 0 auto; padding: 3rem 2rem 6rem; font-family: 'Inter', sans-serif; color: var(--text-main);">
+    <div class="inner-container" style="font-family: 'Inter', sans-serif; color: var(--text-main);">
         
-        <!-- HEADER -->
-        <div style="margin-bottom: 4rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 2rem;">
-            <h1 style="font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; color: var(--text-main);">Logika Penjadwalan</h1>
-            <p style="font-size: 1rem; color: var(--text-muted); line-height: 1.6;">Dokumentasi teknis alur kerja algoritma dan aturan batasan sistem.</p>
+        <!-- HEADER (Hidden in Settings tab, shown if standalone) -->
+        <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; display: none;">
+            <h1 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; color: var(--text-main);">Logika Penjadwalan</h1>
+            <p style="font-size: 0.9rem; color: var(--text-muted);">Dokumentasi teknis alur kerja algoritma.</p>
         </div>
 
         <!-- DOCUMENTATION CONTENT -->
         <div>
             
             <!-- SECTION 1: CORE WORKFLOW -->
-            <section style="margin-bottom: 3.5rem;">
-                <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                    <span style="background: var(--primary-subtle); color: var(--primary); width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800;">1</span>
+            <section style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary-subtle); color: var(--primary); width: 24px; height: 24px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800;">1</span>
                     Alur Kerja Utama
                 </h2>
-                <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">
-                    <p style="margin-bottom: 1.5rem;">Algoritma bekerja menggunakan pendekatan <em>Greedy Algorithm</em> dengan prioritas iterasi sebagai berikut:</p>
+                <div style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);">
                     
-                    <div style="background: white; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-sm);">
-                        <ol style="margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 1rem;">
-                            <li>
-                                <strong style="color: var(--text-main);">Prioritas Mahasiswa (Student-First)</strong>
-                                <div style="font-size: 0.9rem; margin-top: 4px;">Berbeda dengan sistem lama, sistem sekarang mengutamakan <strong>Mahasiswa</strong>. Mahasiswa dengan pembimbing yang paling sibuk (banyak Libur) akan dijadwalkan paling pertama untuk mengamankan slot sempit mereka.</div>
-                            </li>
-                            <li>
-                                <strong style="color: var(--text-main);">Pencarian Slot (Global Search)</strong>
-                                <div style="font-size: 0.9rem; margin-top: 4px;">Untuk setiap mahasiswa, sistem menyisir seluruh <strong>Tanggal, Jam, dan Ruangan</strong> secara mendalam sampai menemukan satu celah yang pas dengan syarat ketersediaan pembimbing dan penguji.</div>
-                            </li>
-                            <li>
-                                <strong style="color: var(--text-main);">Verifikasi Pembimbing & Proteksi</strong>
-                                <div style="font-size: 0.9rem; margin-top: 4px;">Sistem mengecek ketersediaan <strong>Pembimbing Utama</strong>. Jika pembimbing sibuk, slot dilewati. Sistem juga memproteksi pembimbing agar tidak "kecurian" jam tugas untuk menguji orang lain sebelum bimbingan mereka sendiri aman.</div>
-                            </li>
-                            <li>
-                                <strong style="color: var(--text-main);">Pencarian Tim Penguji</strong>
-                                <div style="font-size: 0.9rem; margin-top: 4px;">Sistem mencari 2 orang dosen penguji tambahan yang memenuhi syarat (Prodi sama, Available, dan Load terendah).</div>
-                            </li>
-                        </ol>
+                    <div style="background: white; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1rem; box-shadow: var(--shadow-sm);">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">1. Prioritas Mahasiswa</strong>
+                                <div style="font-size: 0.85rem;">Mahasiswa dengan pembimbing tersibuk dijadwalkan duluan (Student-First).</div>
+                            </div>
+                            <div>
+                                <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">2. Global Search</strong>
+                                <div style="font-size: 0.85rem;">Menyisir seluruh Tanggal, Jam, dan Ruangan untuk mencari slot kosong.</div>
+                            </div>
+                            <div>
+                                <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">3. Proteksi Pembimbing</strong>
+                                <div style="font-size: 0.85rem;">Mengamankan slot untuk bimbingan sendiri sebelum menguji orang lain.</div>
+                            </div>
+                            <div>
+                                <strong style="color: var(--text-main); display: block; margin-bottom: 4px;">4. Tim Penguji</strong>
+                                <div style="font-size: 0.85rem;">Mencari 2 dosen penguji lain dengan beban kerja terendah (fairness).</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
             <!-- SECTION 2: CONSTRAINTS -->
-             <section style="margin-bottom: 3.5rem;">
-                <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                    <span style="background: var(--primary-subtle); color: var(--primary); width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800;">2</span>
-                    Aturan & Batasan Wajib (Hard Constraints)
+             <section style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary-subtle); color: var(--primary); width: 24px; height: 24px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800;">2</span>
+                    Aturan & Batasan Wajib
                 </h2>
-                <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">
-                    <p style="margin-bottom: 1.5rem;">Jadwal yang valid harus mematuhi aturan berikut. Pelanggaran terhadap salah satu aturan akan menyebabkan slot tersebut <strong>dibatalkan</strong>.</p>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
-                        <!-- Constraint Item -->
-                         <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--primary); border-radius: 8px; padding: 1rem;">
-                            <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">🛡️ Proteksi Pembimbing</strong>
-                            <span style="font-size: 0.85rem;">Seorang dosen dilarang menjadi penguji untuk orang lain selama bimbingan mereka sendiri masih ada yang belum terjadwal (mengamankan jam terbang sendiri).</span>
-                        </div>
-                        <!-- Constraint Item -->
-                         <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--primary); border-radius: 8px; padding: 1rem;">
-                            <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">⚧️ Kesesuaian Gender (Opsional)</strong>
-                            <span style="font-size: 0.85rem;">Jika diatur di menu Dosen, sistem akan mencocokkan jenis kelamin mahasiswa dengan preferensi penguji (misal penguji wanita untuk mahasiswi).</span>
-                        </div>
-                        <!-- Constraint Item -->
-                        <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--danger); border-radius: 8px; padding: 1rem;">
-                            <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">🚫 Anti-Bentrok Waktu</strong>
-                            <span style="font-size: 0.85rem;">Dosen (baik Pembimbing maupun Penguji) tidak boleh memiliki jadwal lain di waktu yang persis sama.</span>
-                        </div>
-                        <!-- Constraint Item -->
-                        <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--danger); border-radius: 8px; padding: 1rem;">
-                            <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">🕌 Aturan Hari Jumat</strong>
-                            <span style="font-size: 0.85rem;">Khusus hari Jumat, sesi jam <strong>11:30</strong> secara otomatis <strong>DITIADAKAN</strong> oleh sistem untuk mengakomodasi waktu ibadah Sholat Jumat.</span>
-                        </div>
-                        <!-- Constraint Item -->
-                        <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--warning); border-radius: 8px; padding: 1rem;">
-                            <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">🎓 Kesesuaian Prodi (Strict)</strong>
-                            <span style="font-size: 0.85rem;">Penguji harus berasal dari <strong>Prodi yang sama persis</strong> dengan mahasiswa. Lintas prodi tidak diperbolehkan.</span>
-                        </div>
-                        <!-- Constraint Item -->
-                         <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 4px solid var(--success); border-radius: 8px; padding: 1rem;">
-                            <strong style="display: block; color: var(--text-main); margin-bottom: 4px; font-size: 0.9rem;">📅 Prioritas Data "Libur"</strong>
-                            <span style="font-size: 0.85rem;">Jika dosen mengisi data sibuk di menu Libur, sistem 100% menjamin mereka tidak akan diganggu di jam tersebut.</span>
-                        </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <!-- Constraint Item -->
+                     <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 3px solid var(--primary); border-radius: 8px; padding: 0.8rem;">
+                        <strong style="display: block; color: var(--text-main); margin-bottom: 2px; font-size: 0.85rem;">🛡️ Proteksi Pembimbing</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Dahulukan mahasiswa bimbingan sendiri sebelum menguji yang lain.</span>
+                    </div>
+                    <!-- Constraint Item -->
+                     <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 3px solid var(--primary); border-radius: 8px; padding: 0.8rem;">
+                        <strong style="display: block; color: var(--text-main); margin-bottom: 2px; font-size: 0.85rem;">⚧️ Kesesuaian Gender</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Mencocokkan gender dengan preferensi dosen (opsional).</span>
+                    </div>
+                    <!-- Constraint Item -->
+                    <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 3px solid var(--danger); border-radius: 8px; padding: 0.8rem;">
+                        <strong style="display: block; color: var(--text-main); margin-bottom: 2px; font-size: 0.85rem;">🚫 Anti-Bentrok Waktu</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Dosen tidak boleh memiliki 2 jadwal di waktu yang sama.</span>
+                    </div>
+                    <!-- Constraint Item -->
+                    <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 3px solid var(--danger); border-radius: 8px; padding: 0.8rem;">
+                        <strong style="display: block; color: var(--text-main); margin-bottom: 2px; font-size: 0.85rem;">🕌 Aturan Hari Jumat</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Sesi jam <strong>11:30</strong> ditiadakan untuk Sholat Jumat.</span>
+                    </div>
+                    <!-- Constraint Item -->
+                    <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 3px solid var(--warning); border-radius: 8px; padding: 0.8rem;">
+                        <strong style="display: block; color: var(--text-main); margin-bottom: 2px; font-size: 0.85rem;">🎓 Kesesuaian Prodi</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Penguji harus berasal dari <strong>Prodi yang sama</strong>.</span>
+                    </div>
+                     <!-- Constraint Item -->
+                     <div style="background: #fff; border: 1px solid var(--border-subtle); border-left: 3px solid var(--success); border-radius: 8px; padding: 0.8rem;">
+                        <strong style="display: block; color: var(--text-main); margin-bottom: 2px; font-size: 0.85rem;">📅 Data Libur/Sibuk</strong>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">Jadwal tidak akan menabrak data libur dosen.</span>
                     </div>
                 </div>
             </section>
 
             <!-- SECTION 3: FAIRNESS -->
              <section>
-                <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
-                    <span style="background: var(--primary-subtle); color: var(--primary); width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 800;">3</span>
-                    Pemerataan & Komposisi Tim
+                <h2 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary-subtle); color: var(--primary); width: 24px; height: 24px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 800;">3</span>
+                    Pemerataan & Komposisi
                 </h2>
-                <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary);">
-                    
-                     <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Komposisi Tim Penguji</h3>
-                     <p style="margin-bottom: 1rem;">Setiap slot Sidang/Pendadaran terdiri dari 3 orang:</p>
-                     <ul style="margin-bottom: 1.5rem; padding-left: 1.2rem;">
-                        <li><strong>Penguji 1 & 2</strong>: Dipilih oleh sistem secara acak-terstruktur.</li>
-                        <li><strong>Pembimbing</strong>: Otomatis dimasukkan sebagai anggota ke-3 dalam tim.</li>
-                     </ul>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+                    <div>
+                        <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Komposisi Tim</h3>
+                        <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6;">
+                            <li><strong>2 Penguji:</strong> Dipilih acak-terstruktur.</li>
+                            <li><strong>1 Pembimbing:</strong> Otomatis masuk tim.</li>
+                            <li>Total: 3 Dosen per sidang.</li>
+                        </ul>
+                    </div>
 
-                     <h3 style="font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Algoritma Pemerataan (Fairness)</h3>
-                     <div style="background: var(--bg); padding: 1.25rem; border-radius: 10px; border: 1px solid var(--border-subtle);">
-                        <code style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--primary); margin-bottom: 0.8rem; background: rgba(255,255,255,0.5); padding: 8px; border-radius: 6px;">
-                            candidates.sort((a, b) => count[a] - count[b])
-                        </code>
-                        <p style="margin: 0; font-size: 0.9rem;">
-                            Sistem mencatat berapa kali setiap dosen sudah dijadwalkan menguji. Saat memilih kandidat, sistem <strong>selalu memprioritaskan dosen dengan jumlah jam terbang TERENDAH</strong> terlebih dahulu. Ini menjamin distribusi beban kerja yang merata di akhir jadwal.
-                        </p>
-                     </div>
+                    <div>
+                        <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Algoritma Fairness</h3>
+                        <div style="background: var(--bg); padding: 0.8rem; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                            <code style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--primary); margin-bottom: 0.5rem;">
+                                candidates.sort((a,b) => count[a]-count[b])
+                            </code>
+                            <p style="margin: 0; font-size: 0.85rem; line-height: 1.4; color: var(--text-secondary);">
+                                Prioritas dosen dengan jam terbang <strong>terendah</strong>.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
 
