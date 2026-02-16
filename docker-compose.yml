@@ -8,10 +8,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # Mount backup file for initialization
-      - ./backend/src/database/backup_latest.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       # Changed to 5002 as requested
       - "5002:5432"
